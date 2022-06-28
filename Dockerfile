@@ -11,7 +11,7 @@ RUN apk add --no-cache --virtual .build-dependencies \
 RUN npm i -g playactor
 RUN mkdir -p ~/.config/playactor
 
-RUN mkdir /app/dist
+RUN mkdir -p app
 
 COPY . ./app
 
