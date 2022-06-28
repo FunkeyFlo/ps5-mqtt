@@ -1,5 +1,5 @@
 ---
-version: "0.1"
+version: "0.2"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -13,21 +13,19 @@ arch:
 host_network: true
 image: homeassistant/{arch}-addon-rpc_shutdown
 options:
-  computers:
-    - address: 192.168.0.1
-      alias: test-pc
-      credentials: user%password
-      delay: 0
-      message:
-        Home Assistant is shutting down this PC. This cannot be canceled. Please
-        save your work!
+  mqtt:
+    host:
+    port:
+    user:
+    pass:
+  ps5_credentials:
 schema:
-  computers:
-    - address: str
-      alias: match(^[\w-]*$)
-      credentials: match(^[^%]*(?:%[^%]*)?$)
-      delay: int(0,600)?
-      message: str?
+  ps5_credentials: str
+  mqtt:
+    host: str
+    port: str
+    user: str
+    pass: str
 startup: services
 stdin: true
 init: false
