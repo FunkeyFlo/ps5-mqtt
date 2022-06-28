@@ -1,0 +1,11 @@
+**/__tests__
+node_modules
+src
+.DS_Store
+nodemon.json
+jest.config
+.resources
+.vscode
+**/.md
+dist
+dev.js

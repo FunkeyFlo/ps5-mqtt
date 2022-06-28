@@ -1,0 +1,4 @@
+# https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
+name: PS5 MQTT Add-on
+url: 'https://github.com/FunkeyFlo/ps5-mqtt'
+maintainer: Funkey Flo <someone@gmail.com>
