@@ -1,4 +1,4 @@
-ARG BUILD_FROM
+ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:3.15
 FROM $BUILD_FROM
 
 ENV LANG C.UTF-8
@@ -16,7 +16,7 @@ RUN mkdir -p app
 COPY . ./app
 
 RUN cd /app && \
-    npm ci --no-audit --no-optional --no-update-notifier --unsafe-perm && \
+    npm install \
     npm run build
 
 ENTRYPOINT ["/run.sh"]
