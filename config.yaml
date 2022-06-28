@@ -1,5 +1,5 @@
 ---
-version: "0.2"
+version: "0.3"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -11,7 +11,6 @@ arch:
   - amd64
   - i386
 host_network: true
-image: homeassistant/{arch}-addon-rpc_shutdown
 options:
   mqtt:
     host:
