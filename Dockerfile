@@ -1,5 +1,4 @@
 ARG BUILD_FROM
-    # =ghcr.io/home-assistant/amd64-base:3.15
 FROM $BUILD_FROM
 
 ENV LANG C.UTF-8
@@ -19,5 +18,7 @@ COPY . ./app
 RUN cd /app && \
     npm install \
     npm run build
+
+RUN chmod a+x /app/run.sh
 
 ENTRYPOINT ["/app/run.sh"]

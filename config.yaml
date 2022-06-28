@@ -1,5 +1,5 @@
 ---
-version: "0.3.3"
+version: "0.3.4"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -10,21 +10,24 @@ arch:
   - aarch64
   - amd64
   - i386
+startup: application
+boot: auto
 host_network: true
+map:
+  - "share:rw"
+  - "config:ro"
 options:
+  ps5_credentials:
   mqtt:
     host:
     port:
     user:
     pass:
-  ps5_credentials:
 schema:
   ps5_credentials: str
   mqtt:
     host: str
-    port: str
+    port: port
     user: str
     pass: str
-startup: services
 stdin: true
-init: false
