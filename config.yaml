@@ -1,5 +1,5 @@
 ---
-version: "0.3.5"
+version: "0.3.6"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
