@@ -6,7 +6,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p .",
     "watch": "tsc --watch -p .",
     "start": "node dist/index.js"
   },
