@@ -5,10 +5,10 @@ import sh from "shelljs";
 import { setTransitioning, updateHomeAssistant } from "../action-creators";
 import type { ApplyToDeviceAction } from "../types";
 
-const debug = createDebugger("@ha/ps5/turnOffDevice");
+const debug = createDebugger("@ha:ps5:turnOffDevice");
 
 function* turnOffDevice(action: ApplyToDeviceAction) {
-    if (action.payload.on !== "OFF") {
+    if (action.payload.mode !== 'STANDBY') {
         return;
     }
 
@@ -24,7 +24,8 @@ function* turnOffDevice(action: ApplyToDeviceAction) {
     );
     debug(
         sh.exec(
-            `playactor standby --ip ${action.payload.device.address.address}`
+            `playactor standby --ip ${action.payload.device.address.address}`,
+            { silent: true }
         )
     );
 }

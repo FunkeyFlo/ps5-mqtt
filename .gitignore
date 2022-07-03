@@ -2,3 +2,4 @@ dist
 .resources
 **/.env
 **/node_modules
+NOTES.md

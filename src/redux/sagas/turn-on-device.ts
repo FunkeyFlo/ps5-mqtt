@@ -5,10 +5,10 @@ import sh from "shelljs";
 import { setTransitioning, updateHomeAssistant } from "../action-creators";
 import type { ApplyToDeviceAction } from "../types";
 
-const debug = createDebugger("@ha/ps5/turnOnDevice");
+const debug = createDebugger("@ha:ps5:turnOnDevice");
 
 function* turnOnDevice(action: ApplyToDeviceAction) {
-    if (action.payload.on !== "ON") {
+    if(action.payload.mode !== 'AWAKE') {
         return;
     }
 
@@ -23,7 +23,10 @@ function* turnOnDevice(action: ApplyToDeviceAction) {
         )
     );
     debug(
-        sh.exec(`playactor wake --ip ${action.payload.device.address.address}`)
+        sh.exec(
+            `playactor wake --ip ${action.payload.device.address.address}`, 
+            { silent: true }
+        )
     );
 }
 

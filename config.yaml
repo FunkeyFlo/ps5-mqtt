@@ -1,5 +1,5 @@
 ---
-version: "0.3.6"
+version: "0.4.0"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -17,12 +17,13 @@ map:
   - "share:rw"
   - "config:ro"
 options:
-  ps5_credentials:
+  ps5_credentials: "contents of your playactor credentials.json file..."
   mqtt:
     host:
     port:
     user:
     pass:
+  logger: "*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"
 schema:
   ps5_credentials: str
   mqtt:
@@ -30,4 +31,5 @@ schema:
     port: port
     user: str
     pass: str
+  logger: "str?"
 stdin: true

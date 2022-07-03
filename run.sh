@@ -5,6 +5,12 @@ export MQTT_PORT=$(bashio::config 'mqtt.port')
 export MQTT_USERNAME=$(bashio::config 'mqtt.user')
 export MQTT_PASSWORD=$(bashio::config 'mqtt.pass')
 
+export DEBUG="*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"
+
+if [ ! -z $(bashio::config 'logger') ]; then
+    DEBUG=$(bashio::config 'logger')
+fi
+
 echo Creating ps5 credentials file!
 node app/create-credentials.js "$(bashio::config 'ps5_credentials')"
 

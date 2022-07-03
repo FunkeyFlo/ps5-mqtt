@@ -12,6 +12,7 @@
   },
   "author": "",
   "dependencies": {
+    "@reduxjs/toolkit": "^1.8.3",
     "async-mqtt": "^2.6.2",
     "debug": "^4.3.4",
     "lodash": "^4.17.21",

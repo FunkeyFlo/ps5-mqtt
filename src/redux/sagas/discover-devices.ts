@@ -22,7 +22,7 @@ const useAsyncIterableWithSaga =
             }
         });
 
-function* discoverDevices(action: DiscoverDevicesAction) {
+function* discoverDevices(_action: DiscoverDevicesAction) {
     const discovery = new Discovery();
     const devices = yield call(
         useAsyncIterableWithSaga(
@@ -37,7 +37,7 @@ function* discoverDevices(action: DiscoverDevicesAction) {
         yield put(
             registerDeviceWithHomeAssistant(
                 merge({}, device, {
-                    homeAssistantId: device.name.replace(/-/g, "_"),
+                    homeAssistantId: device.name.replace(/-/g, "_") + "_power",
                 })
             )
         );

@@ -3,24 +3,24 @@ import { merge } from "lodash";
 import { put, select } from "redux-saga/effects";
 import sh from "shelljs";
 import { updateHomeAssistant } from "../action-creators";
-import { getDevices, getStateMappings } from "../selectors";
+import { getDevices } from "../selectors";
 import type { Device } from "../types";
 
-const debug = createDebugger("@ha/ps5/checkDevicesState");
+const debug = createDebugger("@ha:ps5:checkDevicesState");
 
 function* checkDevicesState() {
     const devices: Device[] = yield select(getDevices);
-    const stateMappings = yield select(getStateMappings);
     for (const device of devices) {
         const shellOutput = sh.exec(
-            `playactor check --host-name ${device.name}`
+            `playactor check --host-name ${device.name}`,
+            { silent: true }
         );
         try {
             const updatedDevice = JSON.parse(shellOutput.stdout);
             if (
                 device.transitioning &&
                 device.homeAssistantState !==
-                    stateMappings[updatedDevice.status]
+                updatedDevice.status
             ) {
                 debug(
                     "Device is transitioning",
@@ -38,6 +38,8 @@ function* checkDevicesState() {
                 )
             );
         } catch (e) {
+            // previously available device cannot be located
+            
             debug(e);
         }
     }

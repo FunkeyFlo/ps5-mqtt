@@ -14,11 +14,11 @@ function* addDevicesSaga() {
 }
 
 function* turnOnSaga() {
-    yield takeLatest("APPLY_TO_DEVICE", sagas.turnOnDevice);
+    yield takeLatest("CHANGE_POWER_MODE", sagas.turnOnDevice);
 }
 
 function* turnOffSaga() {
-    yield takeLatest("APPLY_TO_DEVICE", sagas.turnOffDevice);
+    yield takeLatest("CHANGE_POWER_MODE", sagas.turnOffDevice);
 }
 
 function* updateHomeAssistantSaga() {
@@ -33,7 +33,7 @@ function* pollPs5StatesSaga() {
     yield takeLatest("POLL_DEVICES", function* pollingRace() {
         yield race({
             task: call(sagas.pollDevices),
-            cancel: take("APPLY_TO_DEVICE"),
+            cancel: take("CHANGE_POWER_MODE"),
         });
     });
 }

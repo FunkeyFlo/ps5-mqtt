@@ -9,10 +9,12 @@ type Device = {
         address: string;
         port: number;
     };
+    systemVersion: string;
+    available: boolean;
 };
 
 type Ps5Status = "STANDBY" | "AWAKE";
-type SwitchStatus = "ON" | "OFF" | "NONE";
+type SwitchStatus = Ps5Status | "UNKNOWN";
 
 type DiscoverDevicesAction = {
     type: "DISCOVER_DEVICES";
@@ -35,11 +37,11 @@ type UpdateHomeAssistantAction = {
     };
 };
 
-type ApplyToDeviceAction = {
-    type: "APPLY_TO_DEVICE";
+type ChangePowerModeAction = {
+    type: "CHANGE_POWER_MODE";
     payload: {
         device: Device;
-        on: SwitchStatus;
+        mode: SwitchStatus;
     };
 };
 
@@ -67,7 +69,7 @@ type PollDiscoveryAction = {
 
 type AnyAction =
     | RegisterDeviceWithHomeAssistantAction
-    | ApplyToDeviceAction
+    | ChangePowerModeAction
     | AddDeviceAction
     | CheckDevicesStateAction
     | DiscoverDevicesAction
@@ -78,17 +80,14 @@ type AnyAction =
     | UpdateHomeAssistantAction;
 
 type State = {
-    device: {
-        devices: Record<string, Device>;
-        stateMapping: Record<Ps5Status, SwitchStatus>;
-    };
+    devices: Record<string, Device>;
 };
 
 export type {
     RegisterDeviceWithHomeAssistantAction,
     AnyAction,
     AddDeviceAction,
-    ApplyToDeviceAction,
+    ChangePowerModeAction as ApplyToDeviceAction,
     CheckDevicesStateAction,
     Device,
     DiscoverDevicesAction,

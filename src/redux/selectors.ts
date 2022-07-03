@@ -1,9 +1,6 @@
-import { Device, Ps5Status, State, SwitchStatus } from "./types"
+import type { Device, State } from "./types"
 
 const getDevices = (state: State): Device[] =>
-  Object.values(state.device.devices)
+  Object.values(state.devices)
 
-const getStateMappings = (state: State): Record<Ps5Status, SwitchStatus> =>
-  state.device.stateMapping
-
-export { getDevices, getStateMappings }
+export { getDevices }

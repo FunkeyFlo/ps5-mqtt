@@ -27,11 +27,11 @@ const addDevice = (device): AddDeviceAction => ({
     payload: device,
 });
 
-const applyToDevice = (device, onState: SwitchStatus): ApplyToDeviceAction => ({
-    type: "APPLY_TO_DEVICE",
+const changePowerMode = (device, onState: SwitchStatus): ApplyToDeviceAction => ({
+    type: "CHANGE_POWER_MODE",
     payload: {
         device,
-        on: onState,
+        mode: onState,
     },
 });
 
@@ -63,7 +63,7 @@ const updateHomeAssistant = (device: Device): UpdateHomeAssistantAction => ({
 export {
     addDevice,
     registerDeviceWithHomeAssistant,
-    applyToDevice,
+    changePowerMode as applyToDevice,
     checkDevicesState,
     setTransitioning,
     discoverDevices,
