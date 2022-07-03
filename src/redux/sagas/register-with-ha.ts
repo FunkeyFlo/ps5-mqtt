@@ -20,7 +20,7 @@ function* registerWithHomeAssistant(
         `homeassistant/switch/${action.payload.homeAssistantId}/config`,
         // https://www.home-assistant.io/integrations/switch.mqtt/
         JSON.stringify({
-            name: "Power",
+            name: action.payload.homeAssistantId,
             command_topic: `homeassistant/switch/${action.payload.homeAssistantId}/set`,
             state_topic: `homeassistant/switch/${action.payload.homeAssistantId}/state`,
             availability_topic: `homeassistant/switch/${action.payload.homeAssistantId}/availability`,
