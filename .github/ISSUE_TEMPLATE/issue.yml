@@ -1,0 +1,30 @@
+name: Issue
+description: Create an issue to help improve the add-on!
+body:
+  - type: textarea
+    id: issue
+    attributes:
+      label: Description of the issue
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Addon version
+      placeholder: '0.4.0'
+    validations:
+      required: true
+  - type: textarea
+    id: platform
+    attributes:
+      label: Platform
+      description: Details from Supervisor > System
+      placeholder: "Core: core-2021.2.2\nSupervisor: supervisor-2021.02.6\nOperating System: HassOS 5.4"
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Logs of the issue (if applicable)
+    validations:
+      required: false
