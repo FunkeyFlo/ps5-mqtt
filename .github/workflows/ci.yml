@@ -1,4 +1,7 @@
-name: CI
+name: CIenv:
+
+env:
+  MONITORED_FILES: "build.yaml config.yaml Dockerfile rootfs"
 
 on:
   push:
