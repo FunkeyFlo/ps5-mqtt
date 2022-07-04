@@ -9,7 +9,7 @@ Buy me a beer if you enjoy the integration! 🍺
 
 ## Config
 
-![example config](.images/config.png)
+![example config](/.images/config.png)
 
 Unfortunately, the feature for acquiring the required credentials to communicate with your Playstation device is not *yet* supported through the add-on itself.
 <br>
