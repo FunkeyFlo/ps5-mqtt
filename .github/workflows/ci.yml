@@ -76,8 +76,8 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Image name
-      run: echo "${{ steps.check.outputs.image }}"
+    - name: Image name: ${{ steps.check.outputs.image }}
+      run: echo "image name"
         
     - name: Build ${{ matrix.arch }} add-on
       if: steps.check.outputs.build_arch == 'true'
