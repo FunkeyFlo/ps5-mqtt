@@ -44,7 +44,7 @@ jobs:
         args: |
           ${{ env.BUILD_ARGS }} \
           --${{ matrix.arch }} \
-          --target /data/ps5-mqtt \
+          --target /data/ps5_mqtt \
           --image "${{ matrix.arch }}-ps5-mqtt" \
           --docker-hub "ghcr.io/${{ github.repository_owner }}" \
           --addon
