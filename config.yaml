@@ -33,3 +33,4 @@ schema:
     pass: str
   logger: "str?"
 stdin: true
+image: "ghcr.io/funkeyflo/{arch}-ps5-mqtt"
