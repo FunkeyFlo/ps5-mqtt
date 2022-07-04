@@ -75,6 +75,9 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Image name
+      run: echo "${{ steps.check.outputs.image }}"
         
     - name: Build ${{ matrix.arch }} add-on
       if: steps.check.outputs.build_arch == 'true'
