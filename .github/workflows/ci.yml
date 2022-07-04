@@ -38,7 +38,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Build ${{ matrix.addon }} add-on
+    - name: Build ${{ matrix.arch }} add-on
       uses: home-assistant/builder@2022.06.2
       with:
         args: |
