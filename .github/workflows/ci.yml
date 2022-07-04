@@ -75,9 +75,6 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Image name: ${{ steps.check.outputs.image }}
-      run: echo "image name"
         
     - name: Build ${{ matrix.arch }} add-on
       if: steps.check.outputs.build_arch == 'true'
@@ -87,6 +84,6 @@ jobs:
           ${{ env.BUILD_ARGS }} \
           --${{ matrix.arch }} \
           --target /data/${{ matrix.addon }} \
-          --image "${{ steps.check.outputs.image }}" \
+          --image "${{ arch }}-ps5-mqtt" \
           --docker-hub "ghcr.io/${{ github.repository_owner }}" \
           --addon
