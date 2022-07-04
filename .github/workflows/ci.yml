@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    name: Build add-on
+    strategy:
+      matrix:
+        arch: ["aarch64", "amd64", "armhf", "armv7", "i386"]
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3.0.2
+      
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        registry-url: https://registry.npmjs.org/
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build
+      run: npm run build
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build ${{ matrix.addon }} add-on
+      uses: home-assistant/builder@2022.06.2
+      with:
+        args: |
+          ${{ env.BUILD_ARGS }} \
+          --${{ matrix.arch }} \
+          --target ps5-mqtt \
+          --image "${{ arch }}-ps5-mqtt" \
+          --docker-hub "ghcr.io/${{ github.repository_owner }}" \
+          --addon
