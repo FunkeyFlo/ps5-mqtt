@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import createDebugger from "debug";
 import createSagaMiddleware from "redux-saga";
 import reducer, {
-    applyToDevice,
+    setPowerMode,
     getDevices,
     pollDevices,
     pollDiscovery,
@@ -45,7 +45,7 @@ async function run() {
                     return;
                 }
                 const data = payload.toString();
-                store.dispatch(applyToDevice(device, data as SwitchStatus));
+                store.dispatch(setPowerMode(device, data as SwitchStatus));
             }
             else if (availabilityTopicRegEx.test(topic)) {
                 const matches = setTopicRegEx.exec(topic);

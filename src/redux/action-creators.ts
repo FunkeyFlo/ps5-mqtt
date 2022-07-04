@@ -27,7 +27,7 @@ const addDevice = (device): AddDeviceAction => ({
     payload: device,
 });
 
-const changePowerMode = (device, onState: SwitchStatus): ApplyToDeviceAction => ({
+const setPowerMode = (device, onState: SwitchStatus): ApplyToDeviceAction => ({
     type: "CHANGE_POWER_MODE",
     payload: {
         device,
@@ -63,7 +63,7 @@ const updateHomeAssistant = (device: Device): UpdateHomeAssistantAction => ({
 export {
     addDevice,
     registerDeviceWithHomeAssistant,
-    changePowerMode as applyToDevice,
+    setPowerMode,
     checkDevicesState,
     setTransitioning,
     discoverDevices,
