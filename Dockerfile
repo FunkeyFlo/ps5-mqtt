@@ -16,7 +16,8 @@ RUN mkdir -p app
 COPY . ./app
 
 RUN cd /app && \
-    npm install
+    npm install && \
+    npm run build
 
 RUN chmod a+x /app/run.sh
 

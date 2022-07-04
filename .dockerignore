@@ -6,5 +6,5 @@ jest.config
 .resources
 .vscode
 **/.md
-src
+dist
 dev.js
