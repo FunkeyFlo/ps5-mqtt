@@ -31,6 +31,6 @@ schema:
     port: port
     user: str
     pass: str
-  logger: "str"
+  logger: "str?"
 stdin: true
-image: "ghcr.io/funkeyflo/{arch}-ps5-mqtt"
+# image: "ghcr.io/funkeyflo/{arch}-ps5-mqtt"
