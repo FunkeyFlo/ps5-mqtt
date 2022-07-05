@@ -35,6 +35,6 @@ schema:
     user: str
     pass: str
   logger: "str?"
-  device_check_interval: "int(1000, 60000)?"
+  device_check_interval: "int(1000, 60000)"
 stdin: true
 # image: "ghcr.io/funkeyflo/{arch}-ps5-mqtt"
