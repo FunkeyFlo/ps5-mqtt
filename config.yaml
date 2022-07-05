@@ -12,7 +12,7 @@ arch:
   - i386
 startup: application
 services: 
-  - mqtt:need
+  - "mqtt:need"
 boot: auto
 host_network: true
 map:
