@@ -1,4 +1,3 @@
----
 version: "0.4.3"
 slug: ps5_mqtt
 name: PS5 MQTT
@@ -24,7 +23,7 @@ options:
     user:
     pass:
   logger: "*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"
-  device_check_interval: "1000"
+  device_check_interval:
 schema:
   ps5_credentials: str
   mqtt:
@@ -33,6 +32,6 @@ schema:
     user: str
     pass: str
   logger: "str?"
-  device_check_interval: "int(1000, 60000)"
+  device_check_interval: int(1000, 60000)
 stdin: true
 # image: "ghcr.io/funkeyflo/{arch}-ps5-mqtt"
