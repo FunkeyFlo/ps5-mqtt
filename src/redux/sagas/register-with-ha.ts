@@ -1,5 +1,5 @@
 import type MQTT from "async-mqtt";
-import { call, put, select } from "redux-saga/effects";
+import { call, delay, put, select } from "redux-saga/effects";
 import { createMqtt } from "../../util/mqtt-client";
 import { addDevice, updateHomeAssistant } from "../action-creators";
 import { getDevices } from "../selectors";
@@ -20,12 +20,13 @@ function* registerWithHomeAssistant(
         `homeassistant/switch/${action.payload.homeAssistantId}/config`,
         // https://www.home-assistant.io/integrations/switch.mqtt/
         JSON.stringify({
-            name: action.payload.homeAssistantId,
+            name: action.payload.name + " Power",
             command_topic: `homeassistant/switch/${action.payload.homeAssistantId}/set`,
             state_topic: `homeassistant/switch/${action.payload.homeAssistantId}/state`,
             availability_topic: `homeassistant/switch/${action.payload.homeAssistantId}/availability`,
             device_class: "switch",
-            unique_id: action.payload.id + "_power",
+            object_id: action.payload.homeAssistantId,
+            unique_id: action.payload.homeAssistantId,
             state_on: "AWAKE",
             state_off: "STANDBY",
             payload_on: "AWAKE",
@@ -44,6 +45,9 @@ function* registerWithHomeAssistant(
         }),
         { qos: 1 }
     );
+
+    // give home assistant a chance to register the entities before sending the availability message.
+    yield delay(5000);
 
     yield call<
         (

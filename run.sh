@@ -4,6 +4,7 @@ export MQTT_HOST=$(bashio::config 'mqtt.host')
 export MQTT_PORT=$(bashio::config 'mqtt.port')
 export MQTT_USERNAME=$(bashio::config 'mqtt.user')
 export MQTT_PASSWORD=$(bashio::config 'mqtt.pass')
+export DEVICE_CHECK_INTERVAL=$(bashio::config 'device_check_interval')
 
 export DEBUG="*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"
 

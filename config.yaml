@@ -1,5 +1,5 @@
 ---
-version: "0.4.2"
+version: "0.4.3"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -11,6 +11,8 @@ arch:
   - amd64
   - i386
 startup: application
+services: 
+  - mqtt:need
 boot: auto
 host_network: true
 map:
@@ -24,6 +26,7 @@ options:
     user:
     pass:
   logger: "*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"
+  device_check_interval: 1000
 schema:
   ps5_credentials: str
   mqtt:
@@ -32,5 +35,6 @@ schema:
     user: str
     pass: str
   logger: "str?"
+  device_check_interval: "int(1000, 60000)?"
 stdin: true
 # image: "ghcr.io/funkeyflo/{arch}-ps5-mqtt"

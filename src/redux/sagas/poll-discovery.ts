@@ -1,8 +1,9 @@
-import createDebugger from "debug";
+
 import { delay, put } from "redux-saga/effects";
+import { createErrorLogger } from "../../util/error-logger";
 import { discoverDevices } from "../action-creators";
 
-const debug = createDebugger("@ha:ps5:pollDevicess");
+const debugError = createErrorLogger();
 
 function* pollDisovery() {
     while (true) {
@@ -10,7 +11,7 @@ function* pollDisovery() {
             yield put(discoverDevices());
             yield delay(300000);
         } catch (e) {
-            debug(e);
+            debugError(e);
         }
     }
 }

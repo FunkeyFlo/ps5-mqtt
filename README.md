@@ -7,22 +7,6 @@ Buy me a beer if you enjoy the integration! 🍺
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=VLDJUM2CMHMNG) 
 
-## Config
-
-![example config](/.images/config.png)
-
-Unfortunately, the feature for acquiring the required credentials to communicate with your Playstation device is not *yet* supported through the add-on itself.
-<br>
-So for now you will have to create the credentials using the [playactor cli](https://github.com/dhleong/playactor). To use the Playactor CLI you will have to install node.js. You can generate the credentials using the following command:
-
-```
-playactor login
-```
-
-If succesful, this will create a `credentials.json` file located at `~/.config/playactor/credentials.json`.
-
-Afterwards paste the contents of the credentials file in the add-on config.
-
 ## Features
 The following features have been implemented or are planned for future implementation.
 
@@ -32,6 +16,11 @@ The following features have been implemented or are planned for future implement
 | Discover Playstation 5 devices on local network | ✅           |
 | Web UI for managing devices                     | ❌           |
 | Web UI for acquiring credentials                | ❌           |
+
+## FAQ
+
+### Why doesn't this add-on support Playstation 4 devices?
+Because there already is a greate [Home Assistant integration](https://www.home-assistant.io/integrations/ps4/) that does this job already!
 
 ## Thanks & Credits
 The majority of the MQTT implementation was based on the work done by [andrew-codes](https://github.com/andrew-codes) and can be found in [this repository](https://github.com/andrew-codes/home-automation).

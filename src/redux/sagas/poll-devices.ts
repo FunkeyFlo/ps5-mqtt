@@ -1,17 +1,19 @@
-import createDebugger from "debug";
 import { delay, put } from "redux-saga/effects";
+import { createErrorLogger } from "../../util/error-logger";
 import { checkDevicesState } from "../action-creators";
 
-const debug = createDebugger("@ha:ps5:pollDevices");
-let callCount = 0;
+const { DEVICE_CHECK_INTERVAL } = process.env;
+const deviceCheckInterval = parseInt(DEVICE_CHECK_INTERVAL || "1000", 10);
+
+const debugError = createErrorLogger();
+
 function* pollDevices() {
     while (true) {
         try {
-            debug(callCount++);
             yield put(checkDevicesState());
-            yield delay(1000);
+            yield delay(deviceCheckInterval);
         } catch (e) {
-            debug(e);
+            debugError(e);
         }
     }
 }

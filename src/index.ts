@@ -2,17 +2,16 @@ import { configureStore } from "@reduxjs/toolkit";
 import createDebugger from "debug";
 import createSagaMiddleware from "redux-saga";
 import reducer, {
-    setPowerMode,
-    getDevices,
-    pollDevices,
-    pollDiscovery,
-    saga
+    discoverDevices, getDevices,
+    pollDevices, saga, setPowerMode
 } from "./redux";
 import { SwitchStatus } from "./redux/types";
+import { createErrorLogger } from "./util/error-logger";
 import { createMqtt } from "./util/mqtt-client";
 
 const debug = createDebugger("@ha:ps5");
 const debugState = createDebugger("@ha:state");
+const errorLogger = createErrorLogger();
 
 async function run() {
     debug("Started");
@@ -46,9 +45,8 @@ async function run() {
                 }
                 const data = payload.toString();
                 store.dispatch(setPowerMode(device, data as SwitchStatus));
-            }
-            else if (availabilityTopicRegEx.test(topic)) {
-                const matches = setTopicRegEx.exec(topic);
+            } else if (availabilityTopicRegEx.test(topic)) {
+                const matches = availabilityTopicRegEx.exec(topic);
                 if (!matches) {
                     return;
                 }
@@ -63,9 +61,9 @@ async function run() {
         });
 
         store.dispatch(pollDevices());
-        store.dispatch(pollDiscovery());
+        store.dispatch(discoverDevices());
     } catch (e) {
-        debug(e);
+        errorLogger(e);
     }
 }
 
