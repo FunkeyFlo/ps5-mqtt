@@ -24,7 +24,7 @@ options:
     user:
     pass:
   logger: "*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"
-  device_check_interval: 1000
+  device_check_interval: "1000"
 schema:
   ps5_credentials: str
   mqtt:
