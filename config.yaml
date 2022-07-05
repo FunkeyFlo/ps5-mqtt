@@ -11,8 +11,6 @@ arch:
   - amd64
   - i386
 startup: application
-services: 
-  - "mqtt:need"
 boot: auto
 host_network: true
 map:
