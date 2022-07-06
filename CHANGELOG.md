@@ -1,4 +1,4 @@
-## 0.4.3
+## 0.4.4
 - Changed config to ensure mqtt is ready before service starts.
 
 ## 0.4.3
