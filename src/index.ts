@@ -97,8 +97,8 @@ async function run() {
                 await mqtt.publish(
                     `ps5-mqtt/${deviceName}`,
                     JSON.stringify({
-                        power: ps5.status,
-                        device_status: ps5.available ? 'online' : 'offline'
+                        power: ps5?.status ?? 'UNKNOWN',
+                        device_status: ps5?.available ? 'online' : 'offline'
                     }),
                     { qos: 0, retain: true }
                 );
