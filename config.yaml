@@ -1,4 +1,4 @@
-version: "0.4.4"
+version: "0.5.0"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -26,6 +26,7 @@ options:
     pass:
   logger: "*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"
   device_check_interval:
+  device_discovery_interval:
 schema:
   ps5_credentials: str
   mqtt:
@@ -35,5 +36,5 @@ schema:
     pass: str
   logger: "str?"
   device_check_interval: int
+  device_discovery_interval: int
 stdin: true
-# image: "ghcr.io/funkeyflo/{arch}-ps5-mqtt"

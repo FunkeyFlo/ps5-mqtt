@@ -12,9 +12,10 @@ mqtt:
 logger: >-
   *,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*
 device_check_interval: 1000
+device_discovery_interval: 60000
 ```
 
-### ps5_credentials
+### `ps5_credentials`
 
 Unfortunately, the feature for acquiring the required credentials to communicate with your Playstation device is not *yet* supported through the add-on itself.
 <br>
@@ -28,11 +29,14 @@ If succesful, this will create a `credentials.json` file located at `~/.config/p
 
 Afterwards paste the contents of the credentials file in the add-on config.
 
-### mqtt
+### `mqtt`
 [MQTT](https://www.home-assistant.io/integrations/mqtt/) connection information.
 
-### logger
+### `logger`
 For logging the [debug](https://github.com/debug-js/debug) npm module is used. This allows you to filter your log by certain topics.
 
-### device_check_interval
+### `device_check_interval`
 Value in miliseconds that lets you change the frequency of scanning for PS5 state changes. 
+
+### `device_discovery_interval`
+Value in miliseconds that lest you change the frequency of discovering PS5 devices.

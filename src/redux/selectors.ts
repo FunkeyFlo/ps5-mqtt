@@ -1,6 +1,9 @@
 import type { Device, State } from "./types"
 
-const getDevices = (state: State): Device[] =>
-  Object.values(state.devices)
+const getDeviceList = (state: State): Device[] => {
+  return Object.values(state.devices);
+}
 
-export { getDevices }
+const getDeviceRegistry = (state: State): Record<string, Device> => state.devices;
+
+export { getDeviceList, getDeviceRegistry }

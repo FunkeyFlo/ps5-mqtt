@@ -1,17 +1,17 @@
-import { delay, put } from "redux-saga/effects";
+import { delay, getContext, put } from "redux-saga/effects";
+import { Settings, SETTINGS } from "../../services";
 import { createErrorLogger } from "../../util/error-logger";
 import { checkDevicesState } from "../action-creators";
-
-const { DEVICE_CHECK_INTERVAL } = process.env;
-const deviceCheckInterval = parseInt(DEVICE_CHECK_INTERVAL || "1000", 10);
 
 const debugError = createErrorLogger();
 
 function* pollDevices() {
+    const settings: Settings = yield getContext(SETTINGS);
+
     while (true) {
         try {
             yield put(checkDevicesState());
-            yield delay(deviceCheckInterval);
+            yield delay(settings.checkDevicesInterval);
         } catch (e) {
             debugError(e);
         }

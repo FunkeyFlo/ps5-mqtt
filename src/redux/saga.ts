@@ -10,8 +10,9 @@ function* pollDisoverySaga() {
 }
 
 function* addDevicesSaga() {
-    yield takeLatest("REGISTER_DEVICE", sagas.registerWithHomeAssistant);
+    yield takeLatest("REGISTER_DEVICE", sagas.registerDevice);
 }
+
 
 function* turnOnSaga() {
     yield takeLatest("CHANGE_POWER_MODE", sagas.turnOnDevice);

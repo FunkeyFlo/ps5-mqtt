@@ -12,9 +12,9 @@ function* delayForTransition(action: SetTransitioningAction) {
     debug("Resume polling")
     yield put(
       setTransitioning(merge({}, action.payload, { transitioning: false }))
-    )
+    );
   } else {
-    yield put(pollDevices())
+    yield put(pollDevices());
   }
 }
 
