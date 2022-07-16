@@ -1,19 +1,20 @@
-import { merge } from "lodash";
 import { Discovery } from "playactor/dist/discovery";
 import { DeviceType } from "playactor/dist/discovery/model";
-import { call, put } from "redux-saga/effects";
-import { registerDeviceWithHomeAssistant } from "../action-creators";
-import type { DiscoverDevicesAction } from "../types";
+import { call, put, select } from "redux-saga/effects";
+import { registerDevice } from "../action-creators";
+import { getDeviceRegistry } from "../selectors";
+import { Device } from "../types";
 
 const useAsyncIterableWithSaga =
-    (fn, ...args) =>
+    (fn: (...args: unknown[]) => AsyncIterable<unknown>, ...args) =>
         () =>
+            // eslint-disable-next-line no-async-promise-executor
             new Promise(async (resolve, reject) => {
                 const iterable = fn(...args);
-                const outputs: any[] = [];
+                const outputs: unknown[] = [];
                 try {
                     for await (const iterableAction of await iterable) {
-                        if (!!iterableAction) {
+                        if (iterableAction) {
                             outputs.push(iterableAction);
                         }
                     }
@@ -23,9 +24,9 @@ const useAsyncIterableWithSaga =
                 }
             });
 
-function* discoverDevices(_action: DiscoverDevicesAction) {
+function* discoverDevices() {
     const discovery = new Discovery({ deviceType: DeviceType.PS5 });
-    const devices = yield call(
+    const discoveredDevices: Device[] = yield call(
         useAsyncIterableWithSaga(
             discovery.discover.bind(discovery),
             {},
@@ -34,14 +35,16 @@ function* discoverDevices(_action: DiscoverDevicesAction) {
             }
         )
     );
-    for (const device of devices) {
-        yield put(
-            registerDeviceWithHomeAssistant(
-                merge({}, device, {
-                    homeAssistantId: device.name.replace(/-/g, "_") + "_power",
-                })
-            )
-        );
+
+    const trackedDevices = yield select(getDeviceRegistry);
+    for (const ps5 of discoveredDevices) {
+        if (trackedDevices[ps5.id] === undefined) {
+            yield put(
+                registerDevice(
+                    ps5
+                )
+            );
+        }
     }
 }
 

@@ -1,3 +1,12 @@
+## 0.5.0
+- Changed MQTT implementation to...
+  - ...reduce amount of messages being sent.
+  - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- Re-implemented device discovery
+  - Added `device_discovery_interval` option to change the frequency of discovering PS5 devices.
+  - Optimizations for discovered devices.
+- Various minor tweaks and improvements.
+
 ## 0.4.4
 - Changed config to ensure mqtt is ready before service starts.
 

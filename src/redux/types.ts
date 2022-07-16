@@ -1,17 +1,11 @@
-type Device = {
-    id: string;
-    name: string;
-    transitioning: boolean;
-    homeAssistantId: string;
-    homeAssistantState: SwitchStatus;
-    status: Ps5Status;
-    address: {
-        address: string;
-        port: number;
-    };
-    systemVersion: string;
+import { Playstation5 } from "../device";
+
+type Device = Playstation5 & DeviceState;
+
+type DeviceState = {
+    status: SwitchStatus;
     available: boolean;
-};
+}
 
 type Ps5Status = "STANDBY" | "AWAKE";
 type SwitchStatus = Ps5Status | "UNKNOWN";
@@ -25,7 +19,7 @@ type AddDeviceAction = {
     payload: Device;
 };
 
-type RegisterDeviceWithHomeAssistantAction = {
+type RegisterDeviceAction = {
     type: "REGISTER_DEVICE";
     payload: Device;
 };
@@ -59,6 +53,11 @@ type CheckDevicesStateAction = {
     type: "CHECK_DEVICES_STATE";
 };
 
+type PersistDevicesAction = {
+    type: "PERSIST_DEVICES";
+    payload: Record<string, Device>;
+};
+
 type PollDevicesAction = {
     type: "POLL_DEVICES";
 };
@@ -68,7 +67,8 @@ type PollDiscoveryAction = {
 };
 
 type AnyAction =
-    | RegisterDeviceWithHomeAssistantAction
+    | RegisterDeviceAction
+    | PersistDevicesAction
     | ChangePowerModeAction
     | AddDeviceAction
     | CheckDevicesStateAction
@@ -84,12 +84,14 @@ type State = {
 };
 
 export type {
-    RegisterDeviceWithHomeAssistantAction,
+    RegisterDeviceAction as RegisterDeviceAction,
     AnyAction,
     AddDeviceAction,
-    ChangePowerModeAction as ApplyToDeviceAction,
+    PersistDevicesAction,
+    ChangePowerModeAction,
     CheckDevicesStateAction,
     Device,
+    DeviceState,
     DiscoverDevicesAction,
     SetTransitioningAction,
     PollDevicesAction,

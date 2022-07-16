@@ -20,7 +20,7 @@ The following features have been implemented or are planned for future implement
 ## FAQ
 
 ### Why doesn't this add-on support Playstation 4 devices?
-Because there already is a greate [Home Assistant integration](https://www.home-assistant.io/integrations/ps4/) that does this job already!
+Because there is a great [Home Assistant integration](https://www.home-assistant.io/integrations/ps4/) that does this job already!
 
 ## Thanks & Credits
 The majority of the MQTT implementation was based on the work done by [andrew-codes](https://github.com/andrew-codes) and can be found in [this repository](https://github.com/andrew-codes/home-automation).

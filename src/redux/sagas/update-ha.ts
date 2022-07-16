@@ -1,22 +1,27 @@
 import type MQTT from "async-mqtt";
-import { call, select } from "redux-saga/effects";
-import { createMqtt } from "../../util/mqtt-client";
+import { call, getContext } from "redux-saga/effects";
+import { MQTT_CLIENT } from "../../services";
 import type { UpdateHomeAssistantAction } from "../types";
 
-function* updateHomeAssistant(action: UpdateHomeAssistantAction) {
-    const mqtt: MQTT.AsyncMqttClient = yield call(createMqtt);
+function* updateHomeAssistant({ payload: { device: ps5 } }: UpdateHomeAssistantAction) {
+    const mqtt: MQTT.AsyncClient = yield getContext(MQTT_CLIENT);
+
     yield call<
         (
             topic: string,
             message: string | Buffer,
-            { qos: number }
+            opts: MQTT.IClientPublishOptions
         ) => Promise<MQTT.IPublishPacket>
     >(
         mqtt.publish.bind(mqtt),
-        `homeassistant/switch/${action.payload.device.homeAssistantId}/state`,
-        action.payload.device.status,
-        { qos: 1 }
+        `ps5-mqtt/${ps5.name}`,
+        JSON.stringify({
+            power: ps5.status,
+            device_status: ps5.available ? 'online' : 'offline'
+        }),
+        { qos: 1, retain: true }
     );
 }
 
 export { updateHomeAssistant };
+

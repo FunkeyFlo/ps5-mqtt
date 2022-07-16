@@ -4,12 +4,12 @@ import { put } from "redux-saga/effects";
 import sh from "shelljs";
 import { createErrorLogger } from "../../util/error-logger";
 import { setTransitioning, updateHomeAssistant } from "../action-creators";
-import type { ApplyToDeviceAction } from "../types";
+import type { ChangePowerModeAction } from "../types";
 
 const debug = createDebugger("@ha:ps5:turnOffDevice");
 const debugError = createErrorLogger();
 
-function* turnOffDevice(action: ApplyToDeviceAction) {
+function* turnOffDevice(action: ChangePowerModeAction) {
     if (action.payload.mode !== 'STANDBY') {
         return;
     }
@@ -20,12 +20,16 @@ function* turnOffDevice(action: ApplyToDeviceAction) {
         )
     );
     try {
-        debug(
-            sh.exec(
-                `playactor standby --ip ${action.payload.device.address.address}`,
-                { silent: true }
-            )
-        );
+        const { stdout, stderr } = sh.exec(
+            `playactor standby --ip ${action.payload.device.address.address} --timeout 5000 --connect-timeout 5000`,
+            { silent: true, timeout: 5000 }
+        )
+
+        if (stderr) {
+            throw stderr;
+        }
+        debug(stdout);
+
         yield put(
             updateHomeAssistant(
                 merge({}, action.payload.device, { status: "STANDBY" })

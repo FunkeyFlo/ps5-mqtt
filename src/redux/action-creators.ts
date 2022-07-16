@@ -1,10 +1,10 @@
 import type {
-    RegisterDeviceWithHomeAssistantAction,
+    RegisterDeviceAction,
     Device,
     DiscoverDevicesAction,
     UpdateHomeAssistantAction,
     SwitchStatus,
-    ApplyToDeviceAction,
+    ChangePowerModeAction,
     CheckDevicesStateAction,
     PollDevicesAction,
     PollDiscoveryAction,
@@ -16,18 +16,19 @@ const discoverDevices = (): DiscoverDevicesAction => ({
     type: "DISCOVER_DEVICES",
 });
 
-const registerDeviceWithHomeAssistant = (
-    device
-): RegisterDeviceWithHomeAssistantAction => ({
+const registerDevice = (
+    device: Device
+): RegisterDeviceAction => ({
     type: "REGISTER_DEVICE",
     payload: device,
 });
-const addDevice = (device): AddDeviceAction => ({
+
+const addDevice = (device: Device): AddDeviceAction => ({
     type: "ADD_DEVICE",
     payload: device,
 });
 
-const setPowerMode = (device, onState: SwitchStatus): ApplyToDeviceAction => ({
+const setPowerMode = (device, onState: SwitchStatus): ChangePowerModeAction => ({
     type: "CHANGE_POWER_MODE",
     payload: {
         device,
@@ -62,7 +63,7 @@ const updateHomeAssistant = (device: Device): UpdateHomeAssistantAction => ({
 
 export {
     addDevice,
-    registerDeviceWithHomeAssistant,
+    registerDevice,
     setPowerMode,
     checkDevicesState,
     setTransitioning,
