@@ -1,3 +1,6 @@
+## 0.5.2
+- Fixed issue where MQTT traffic could cause a loop, starving the MQTT broker.
+
 ## 0.5.0
 - Changed MQTT implementation to...
   - ...reduce amount of messages being sent.

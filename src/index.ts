@@ -64,7 +64,6 @@ async function run() {
         sagaMiddleware.run(saga);
 
         const cmdTopicRegEx = /^ps5-mqtt\/([^/]*)\/set\/(.*)$/;
-        const deviceTopicRegEx = /^ps5-mqtt\/([^/]*)$/;
 
         mqtt.on("message", async (topic, payload) => {
             debugMqtt("MQTT Message received", topic);
@@ -83,25 +82,6 @@ async function run() {
                     const data = payload.toString();
                     store.dispatch(setPowerMode(ps5, data as SwitchStatus));
                 }
-            }
-            else if (deviceTopicRegEx.test(topic)) {
-                const matches = deviceTopicRegEx.exec(topic);
-                if (!matches) {
-                    return;
-                }
-                const deviceName = matches[1];
-                const devices = getDeviceList(store.getState());
-                const ps5 = devices.find(
-                    (device) => device.name === deviceName
-                );
-                await mqtt.publish(
-                    `ps5-mqtt/${deviceName}`,
-                    JSON.stringify({
-                        power: ps5?.status ?? 'UNKNOWN',
-                        device_status: ps5?.available ? 'online' : 'offline'
-                    }),
-                    { qos: 0, retain: true }
-                );
             }
         });
 
