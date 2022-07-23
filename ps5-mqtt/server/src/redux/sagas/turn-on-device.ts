@@ -22,8 +22,8 @@ function* turnOnDevice(action: ChangePowerModeAction) {
     try {
         const { stdout, stderr } = sh.exec(
             `playactor wake --ip ${action.payload.device.address.address}`
-            + ` --timeout 15000 --connect-timeout 10000`,
-            { silent: true, timeout: 15000 }
+            + ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth`,
+            { silent: true, timeout: 5000 }
         );
 
         if (stderr) {

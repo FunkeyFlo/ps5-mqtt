@@ -16,7 +16,7 @@ function* checkDevicesState() {
         try {
             const shellOutput = sh.exec(
                 `playactor check --host-name ${device.name} --machine-friendly --ps5`
-                + ` --timeout 15000 --connect-timeout 10000`,
+                + ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth`,
                 { silent: true, timeout: 15000 }
             );
             const updatedDevice: Device = JSON.parse(shellOutput.stdout);

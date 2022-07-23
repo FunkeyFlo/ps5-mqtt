@@ -21,7 +21,8 @@ function* turnOffDevice(action: ChangePowerModeAction) {
     );
     try {
         const { stdout, stderr } = sh.exec(
-            `playactor standby --ip ${action.payload.device.address.address} --timeout 5000 --connect-timeout 5000`,
+            `playactor standby --ip ${action.payload.device.address.address} `
+            + `--timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth`,
             { silent: true, timeout: 5000 }
         )
 

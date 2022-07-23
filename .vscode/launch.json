@@ -11,10 +11,11 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\dev.js",
+            "envFile": "${workspaceFolder}/ps5-mqtt/.env",
+            "program": "${workspaceFolder}/ps5-mqtt/dev.js",
             "outFiles": [
-                "${workspaceFolder}/dist/**/*.js",
-                "${workspaceFolder}/dev.js"
+                "${workspaceFolder}/ps5-mqtt/server/dist/**/*.js",
+                "${workspaceFolder}/ps5-mqtt/dev.js"
             ]
         }
     ]

@@ -9,17 +9,20 @@ import reducer, {
 import { SwitchStatus } from "./redux/types";
 import { MQTT_CLIENT, Settings, SETTINGS } from "./services";
 import { createErrorLogger } from "./util/error-logger";
+import { setupWebserver } from "./web-server";
 
 const debug = createDebugger("@ha:ps5");
 const debugMqtt = createDebugger("@ha:ps5:mqtt");
 const debugState = createDebugger("@ha:state");
-const errorLogger = createErrorLogger();
+const logError = createErrorLogger();
 
 const {
     MQTT_HOST,
     MQTT_PASSWORD,
     MQTT_PORT,
     MQTT_USERNAME,
+
+    FRONTEND_PORT,
 
     DEVICE_CHECK_INTERVAL,
     DEVICE_DISCOVERY_INTERVAL,
@@ -39,7 +42,7 @@ async function run() {
     debug("Started");
 
     debug("Establishing MQTT Connection...")
-    const mqtt = await createMqtt();
+    const mqtt: MQTT.AsyncMqttClient = await createMqtt();
     debug("Connected to MQTT Broker!")
 
     try {
@@ -90,8 +93,10 @@ async function run() {
         store.dispatch(pollDiscovery());
         store.dispatch(pollDevices());
     } catch (e) {
-        errorLogger(e);
+        logError(e);
     }
+
+    setupWebserver(FRONTEND_PORT ?? 3000)
 }
 
 if (require.main === module) {
