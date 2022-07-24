@@ -16,7 +16,7 @@ The following features have been implemented or are planned for future implement
 | ----------------------------------------------- | ----------- |
 | Power; Wake/Standby (rest mode)                 | ✅           |
 | Discover Playstation 5 devices on local network | ✅           |
-| Web UI for acquiring credentials                | ✅           |
+| [Web UI for acquiring credentials](https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v600-2)                | ✅           |
 | Web UI for managing devices                     | ❌           |
 
 ## FAQ
