@@ -1,8 +1,8 @@
-version: "0.6.0"
+version: "0.6.2"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
-url: https://github.com/FunkeyFlo/ps5-mqtt/tree/main/ps5-mqtt
+url: https://github.com/FunkeyFlo/ps5-mqtt
 arch:
   - armhf
   - armv7
