@@ -13,7 +13,7 @@ RUN mkdir -p ~/.config/playactor
 
 RUN mkdir -p app
 
-COPY . ./app
+COPY ./ps5-mqtt ./app
 
 RUN cd /app && \
     npm install && \
