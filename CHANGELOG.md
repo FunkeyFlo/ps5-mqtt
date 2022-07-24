@@ -1,4 +1,4 @@
-## 0.6.0
+## 0.6.2
 - Added a Web UI to acquire credentials through the Add-on itself.
 - Credentials file will now be written to the file `/config/ps5-mqtt/credentials.json`.
 - ⚠ **Deprecation Warning**
