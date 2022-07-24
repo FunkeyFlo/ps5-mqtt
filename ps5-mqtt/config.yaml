@@ -1,4 +1,4 @@
-version: "0.5.2"
+version: "0.6.0"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -14,27 +14,30 @@ services:
   - "mqtt:need"
 boot: auto
 host_network: true
+webui: '[PROTO:ssl]://[HOST]:[PORT:8645]'
+ports:
+  8645/tcp: 8645
+ports_description:
+  8645/tcp: PS5 MQTT Web Interface
 map:
-  - "share:rw"
-  - "config:ro"
+  - "config:rw"
 options:
-  ps5_credentials: "contents of your playactor credentials.json file..."
   mqtt:
     host:
     port:
     user:
     pass:
-  logger: "*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"
-  device_check_interval:
-  device_discovery_interval:
+  logger: "@ha:ps5:*"
+  device_check_interval: 5000
+  device_discovery_interval: 60000
 schema:
-  ps5_credentials: str
+  ps5_credentials: str?
   mqtt:
     host: str
     port: port
     user: str
     pass: str
-  logger: "str?"
+  logger: str?
   device_check_interval: int
   device_discovery_interval: int
 stdin: true

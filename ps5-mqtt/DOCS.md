@@ -2,8 +2,6 @@
 
 ## Example Configuration
 ```yaml
-ps5_credentials: >-
-  {"78C88...":{"app-type":"r","auth-type":"R","client-type":"vr","model":"w","user-credential":"36329...","accountId":"4....","registration":{"AP-Bssid":"313...","AP-Name":"PS5","PS5-Mac":"78c881...","PS5-RegistKey":"6438386....","PS5-Nickname":"PS5-087","RP-KeyType":"2","RP-Key":"008664a2c57b2045...."}}}
 mqtt:
   host: 192.168.0.2
   port: '1883'
@@ -11,15 +9,18 @@ mqtt:
   pass: somepassword
 logger: >-
   *,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*
-device_check_interval: 1000
+device_check_interval: 5000
 device_discovery_interval: 60000
 ```
 
-### `ps5_credentials`
-
-Unfortunately, the feature for acquiring the required credentials to communicate with your Playstation device is not *yet* supported through the add-on itself.
+### ⚠ *DEPRECATED* `ps5_credentials` 
+*This configuration option was deprecated in release 0.6.0 and will be removed with the next minor version release. For future releases use the Web UI to authenticate with your PS5.*
 <br>
-So for now you will have to create the credentials using the [playactor cli](https://github.com/dhleong/playactor). To use the Playactor CLI you will have to install node.js. You can generate the credentials using the following command:
+*Or if you **really** want to bring your own credentials put them in the file `/config/ps5-mqtt/credentials.json`*
+
+~~Unfortunately, the feature for acquiring the required credentials to communicate with your Playstation device is not *yet* supported through the add-on itself.
+<br>
+So for now you will have to create the credentials using the [playactor cli](https://github.com/dhleong/playactor). To use the Playactor CLI you will have to install node.js. You can generate the credentials using the following command:~~
 
 ```
 playactor login
@@ -27,7 +28,7 @@ playactor login
 
 If succesful, this will create a `credentials.json` file located at `~/.config/playactor/credentials.json`.
 
-Afterwards paste the contents of the credentials file in the add-on config.
+~~Afterwards paste the contents of the credentials file in the add-on config.~~
 
 ### `mqtt`
 [MQTT](https://www.home-assistant.io/integrations/mqtt/) connection information.

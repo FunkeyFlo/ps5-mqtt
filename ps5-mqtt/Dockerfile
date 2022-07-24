@@ -21,4 +21,6 @@ RUN cd /app && \
 
 RUN chmod a+x /app/run.sh
 
+EXPOSE 8645
+
 ENTRYPOINT ["/app/run.sh"]

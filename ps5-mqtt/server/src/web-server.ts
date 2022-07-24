@@ -19,7 +19,7 @@ const logError = createErrorLogger();
 
 let app: Express | undefined = undefined;
 
-export function setupWebserver(port: number | string): Express {
+export function setupWebserver(port: number | string, credentialStoragePath: string): Express {
     if (app !== undefined) {
         throw Error('web server is already running');
     }
@@ -32,15 +32,15 @@ export function setupWebserver(port: number | string): Express {
 
     app.get('/api/discover', async (req, res) => {
         try {
-            const x = new Discovery({
+            const discovery = new Discovery({
                 deviceType: DeviceType.PS5,
                 timeoutMillis: 5000
             });
 
             const devices: IDiscoveredDevice[] = [];
 
-            for await (const d of x.discover()) {
-                devices.push(d);
+            for await (const device of discovery.discover()) {
+                devices.push(device);
             }
 
             res.send({
@@ -58,17 +58,21 @@ export function setupWebserver(port: number | string): Express {
             const { device } = req.body as { device: IDiscoveredDevice }
             debug(`connecting to device: '${device.id}'`);
 
-            await handleDeviceAuthentication(device, {
-                onPerformLogin: async (url) => {
-                    success = true;
-                    res.status(200).send(url);
-                    return undefined;
-                },
-                onPrompt: async (pt) => {
-                    debugPa(pt);
-                    return '';
-                },
-            });
+            await handleDeviceAuthentication(
+                device,
+                credentialStoragePath,
+                {
+                    onPerformLogin: async (url) => {
+                        success = true;
+                        res.status(200).send(url);
+                        return undefined;
+                    },
+                    onPrompt: async (pt) => {
+                        debugPa(pt);
+                        return '';
+                    },
+                }
+            );
         } catch (e) {
             if (!success) {
                 logError(e);
@@ -82,15 +86,19 @@ export function setupWebserver(port: number | string): Express {
             const { device, url, pin } = req.body as { device: IDiscoveredDevice, url: string, pin: string }
             debug(`connecting to device: '${device.id}'`);
 
-            await handleDeviceAuthentication(device, {
-                onPerformLogin: async () => {
-                    return url;
-                },
-                onPrompt: async (pt) => {
-                    debugPa(pt);
-                    return pin;
-                },
-            })
+            await handleDeviceAuthentication(
+                device,
+                credentialStoragePath,
+                {
+                    onPerformLogin: async () => {
+                        return url;
+                    },
+                    onPrompt: async (pt) => {
+                        debugPa(pt);
+                        return pin;
+                    },
+                }
+            );
 
             res.status(201).send();
         } catch (e) {
@@ -106,7 +114,7 @@ export function setupWebserver(port: number | string): Express {
     return app;
 }
 
-async function handleDeviceAuthentication(device: IDiscoveredDevice, handlers: {
+async function handleDeviceAuthentication(device: IDiscoveredDevice, credentialStoragePath: string, handlers: {
     onPerformLogin?: (url: string) => Promise<string>,
     onPrompt?: (promptText: string) => Promise<string>
 } = {}): Promise<void> {
@@ -131,7 +139,7 @@ async function handleDeviceAuthentication(device: IDiscoveredDevice, handlers: {
     const cm = new CredentialManager(
         credentialRequester,
         new WriteOnlyStorage(
-            new DiskCredentialsStorage()
+            new DiskCredentialsStorage(credentialStoragePath)
         )
     );
 

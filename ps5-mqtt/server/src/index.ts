@@ -1,6 +1,9 @@
+
 import { configureStore } from "@reduxjs/toolkit";
 import MQTT from 'async-mqtt';
 import createDebugger from "debug";
+import os from 'os';
+import path from 'path';
 import createSagaMiddleware from "redux-saga";
 import reducer, {
     getDeviceList,
@@ -24,9 +27,15 @@ const {
 
     FRONTEND_PORT,
 
+    CREDENTIAL_STORAGE_PATH,
+
     DEVICE_CHECK_INTERVAL,
     DEVICE_DISCOVERY_INTERVAL,
 } = process.env;
+
+const credentialStoragePath = CREDENTIAL_STORAGE_PATH
+    ? CREDENTIAL_STORAGE_PATH
+    : path.join(os.homedir(), '.config', 'playactor', 'credentials.json');
 
 const createMqtt = async (): Promise<MQTT.AsyncMqttClient> => {
     return await MQTT.connectAsync(`mqtt://${MQTT_HOST}`, {
@@ -54,6 +63,7 @@ async function run() {
                         parseInt(DEVICE_CHECK_INTERVAL || "1000", 10),
                     discoverDevicesInterval:
                         parseInt(DEVICE_DISCOVERY_INTERVAL || "60000", 10),
+                    credentialStoragePath,
                 }
             }
         });
@@ -96,7 +106,7 @@ async function run() {
         logError(e);
     }
 
-    setupWebserver(FRONTEND_PORT ?? 3000)
+    setupWebserver(FRONTEND_PORT ?? 3000, credentialStoragePath)
 }
 
 if (require.main === module) {

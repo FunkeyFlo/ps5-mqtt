@@ -1,7 +1,8 @@
 import createDebugger from "debug";
 import { merge } from "lodash";
-import { put, select } from "redux-saga/effects";
+import { getContext, put, select } from "redux-saga/effects";
 import sh from "shelljs";
+import { Settings, SETTINGS } from "../../services";
 import { createErrorLogger } from "../../util/error-logger";
 import { updateHomeAssistant } from "../action-creators";
 import { getDeviceList } from "../selectors";
@@ -11,12 +12,15 @@ const debug = createDebugger("@ha:ps5:checkDevicesState");
 const errorLogger = createErrorLogger();
 
 function* checkDevicesState() {
+    const { credentialStoragePath }: Settings = yield getContext(SETTINGS);
+
     const devices: Device[] = yield select(getDeviceList);
     for (const device of devices) {
         try {
             const shellOutput = sh.exec(
                 `playactor check --host-name ${device.name} --machine-friendly --ps5`
-                + ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth`,
+                + ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth`
+                + ` -c ${credentialStoragePath}`,
                 { silent: true, timeout: 15000 }
             );
             const updatedDevice: Device = JSON.parse(shellOutput.stdout);

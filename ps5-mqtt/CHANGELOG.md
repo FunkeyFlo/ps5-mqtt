@@ -1,3 +1,9 @@
+## 0.6.0
+- Added a Web UI to acquire credentials through the Add-on itself.
+- Credentials file will now be written to the file `/config/ps5-mqtt/credentials.json`.
+- ⚠ **Deprecation Warning**
+  - The `ps5_credentials` option is deprecated and will be removed with the next *[minor](https://semver.org/)* release. Check the [docs](/ps5-mqtt/DOCS.md) for migration options.
+
 ## 0.5.2
 - Fixed issue where MQTT traffic could cause a loop, starving the MQTT broker.
 

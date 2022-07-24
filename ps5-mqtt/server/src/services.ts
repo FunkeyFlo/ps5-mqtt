@@ -4,4 +4,5 @@ export const SETTINGS = 'SETTINGS';
 export interface Settings {
     checkDevicesInterval: number;
     discoverDevicesInterval: number;
+    credentialStoragePath: string;
 }
