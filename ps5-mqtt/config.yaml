@@ -1,0 +1,43 @@
+version: "0.6.0"
+slug: ps5_mqtt
+name: PS5 MQTT
+description: Control Sony PlayStation 5 devices via MQTT
+url: https://github.com/FunkeyFlo/ps5-mqtt
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+startup: application
+services:
+  - "mqtt:need"
+boot: auto
+host_network: true
+webui: '[PROTO:ssl]://[HOST]:[PORT:8645]'
+ports:
+  8645/tcp: 8645
+ports_description:
+  8645/tcp: PS5 MQTT Web Interface
+map:
+  - "config:rw"
+options:
+  mqtt:
+    host:
+    port:
+    user:
+    pass:
+  logger: "@ha:ps5:*"
+  device_check_interval: 5000
+  device_discovery_interval: 60000
+schema:
+  ps5_credentials: str?
+  mqtt:
+    host: str
+    port: port
+    user: str
+    pass: str
+  logger: str?
+  device_check_interval: int
+  device_discovery_interval: int
+stdin: true
