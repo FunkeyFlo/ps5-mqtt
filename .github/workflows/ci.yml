@@ -68,7 +68,7 @@ jobs:
         
     - name: Install dependencies
       working-directory: ./ps5-mqtt
-      run: npm install
+      run: npm ci
       
     - name: Build
       working-directory: ./ps5-mqtt
