@@ -82,7 +82,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Build ${{ matrix.arch }} add-on
-      if: steps.check.outputs.build_arch == 'true'
+      # if: steps.check.outputs.build_arch == 'true'
       uses: home-assistant/builder@2022.07.0
       with:
         args: |
