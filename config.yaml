@@ -1,4 +1,4 @@
-version: "0.6.2"
+version: "0.6.2-dev"
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -41,3 +41,4 @@ schema:
   device_check_interval: int
   device_discovery_interval: int
 stdin: true
+image: "ghcr.io/FunkeyFlo/{arch}-ps5-mqtt"
