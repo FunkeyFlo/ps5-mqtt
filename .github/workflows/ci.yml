@@ -63,6 +63,7 @@ jobs:
       with:
         node-version: 16
         registry-url: https://registry.npmjs.org/
+        cache-dependency-path: ./ps5-mqtt/package-lock.json
         cache: 'npm'
         
     - name: Install dependencies
