@@ -5,7 +5,9 @@ env:
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - "main"
+      - "ci-docker-images"
   pull_request:
     branches: [ "main" ]
 
@@ -64,9 +66,11 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      working-directory: ./ps5-mqtt
+      run: npm
       
     - name: Build
+      working-directory: ./ps5-mqtt
       run: npm run build
 
     - name: Login to GitHub Container Registry
