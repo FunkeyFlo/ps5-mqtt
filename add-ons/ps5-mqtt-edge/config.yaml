@@ -1,4 +1,4 @@
-version: "edge"
+version: edge
 slug: ps5_mqtt_edge
 name: PS5 MQTT - Edge
 description: Development build of the PS5 MQTT add-on
@@ -41,4 +41,4 @@ schema:
   device_check_interval: int
   device_discovery_interval: int
 stdin: true
-image: "ghcr.io/FunkeyFlo/ps5-mqtt-edge/{arch}"
+image: "ghcr.io/funkeyflo/ps5-mqtt-edge/{arch}"
