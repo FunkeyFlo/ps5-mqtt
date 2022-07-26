@@ -5,6 +5,7 @@ on:
     branches: 
       - "ci-docker-images"
       - "dev"
+      - "main"
   pull_request:
     branches: [ "dev" ]
 
@@ -51,5 +52,5 @@ jobs:
           --${{ matrix.arch }} \
           --target /data/ \
           --image "ps5-mqtt-edge/${{ matrix.arch }}" \
-          --docker-hub "ghcr.io/${{ github.repository_owner }}" \
+          --docker-hub "ghcr.io/funkeyflo" \
           --addon
