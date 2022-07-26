@@ -51,6 +51,7 @@ jobs:
           ${{ env.BUILD_ARGS }} \
           --${{ matrix.arch }} \
           --target /data/ \
+          --version edge \
           --image "ps5-mqtt-edge/${{ matrix.arch }}" \
-          --docker-hub "ghcr.io/funkeyflo" \
+          --docker-hub "ghcr.io/${{ github.repository_owner }}" \
           --addon

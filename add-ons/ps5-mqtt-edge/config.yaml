@@ -1,4 +1,4 @@
-version: edge
+version: "edge"
 slug: ps5_mqtt_edge
 name: PS5 MQTT - Edge
 description: Development build of the PS5 MQTT add-on
