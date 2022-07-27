@@ -78,7 +78,7 @@ jobs:
 
     - name: Build ${{ matrix.arch }} add-on - Stable
       uses: home-assistant/builder@2022.07.0
-      if: github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/v')
+      if: github.ref == 'refs/heads/main'
       with:
         args: |
           ${{ env.BUILD_ARGS }} \
