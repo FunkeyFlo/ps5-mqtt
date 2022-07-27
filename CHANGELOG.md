@@ -1,3 +1,6 @@
+## 0.6.3
+- Switched to images instead of locally built Dockerfiles [#3](https://github.com/FunkeyFlo/ps5-mqtt/issues/3).
+
 ## 0.6.2
 - Added a Web UI to acquire credentials through the Add-on itself.
 - Credentials file will now be written to the file `/config/ps5-mqtt/credentials.json`.
