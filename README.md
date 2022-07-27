@@ -1,5 +1,5 @@
 # PS5 MQTT
-[![](https://dcbadge.vercel.app/api/server/BnmvYHvz5N&style=flat)](https://discord.gg/BnmvYHvz5N)
+[![flat](https://dcbadge.vercel.app/api/server/BnmvYHvz5N?style=flat&compact=true)](https://discord.gg/BnmvYHvz5N)
 
 Integrate your Sony Playstation 5 devices with Home Assistant using MQTT.
 
