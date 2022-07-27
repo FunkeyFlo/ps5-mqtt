@@ -21,6 +21,9 @@ The following features have been implemented or are planned for future implement
 
 ## FAQ
 
+### The log is showing 403 errors when I try to turn my ps5 on or off!
+Double check that you've enabled all required remote play features [as described in the remote play documentation](https://remoteplay.dl.playstation.net/remoteplay/lang/en/ps5_mobile.html#section3).
+
 ### Why doesn't this add-on support Playstation 4 devices?
 Because there is a great [Home Assistant integration](https://www.home-assistant.io/integrations/ps4/) that does this job already!
 
