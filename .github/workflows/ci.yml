@@ -1,5 +1,9 @@
 name: CI
-
+    
+env:
+  MONITORED_FILES_ADDONS: "build.yaml config.yaml"
+  MONITORED_FILES_COMMON: "Dockerfile ps5-mqtt"
+  
 on:
   push:
     branches: 
@@ -10,8 +14,61 @@ on:
     branches: [ "dev" ]
 
 jobs:
-  build:
+  init:
     runs-on: ubuntu-latest
+    name: Initialize builds
+    outputs:
+      changed_addons: ${{ steps.changed_addons.outputs.addons }}
+      changed: ${{ steps.changed_addons.outputs.changed }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3.0.2
+
+      - name: Get changed files
+        id: changed_files
+        uses: jitterbit/get-changed-files@v1
+
+      - name: Find add-on directories
+        id: addons
+        uses: home-assistant/actions/helpers/find-addons@master
+
+      - name: Get changed add-ons
+        id: changed_addons
+        run: |
+          declare -a changed_addons
+          if
+            for file in ${{ env.MONITORED_FILES_COMMON }}; do
+              if [[ "${{ steps.changed_files.outputs.all }}" =~ $file ]]; then
+                echo "::set-output name=changed::true";
+              fi
+            done
+          else
+            for addon in ${{ steps.addons.outputs.addons }}; do
+              if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon ]]; then
+                for file in ${{ env.MONITORED_FILES_ADDONS }}; do
+                    if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon/$file ]]; then
+                      if [[ ! "${changed_addons[@]}" =~ $addon ]]; then
+                        changed_addons+=("\"${addon}\",");
+                      fi
+                    fi
+                done
+              fi
+            done
+            
+            changed=$(echo ${changed_addons[@]} | rev | cut -c 2- | rev)
+            if [[ -n ${changed} ]]; then
+              echo "Changed add-ons: $changed";
+              echo "::set-output name=changed::true";
+              echo "::set-output name=addons::[$changed]";
+            else
+              echo "No add-on had any monitored files changed (${{ env.MONITORED_FILES_ADDONS }})";
+            fi
+          fi
+
+  build:
+    needs: init
+    runs-on: ubuntu-latest
+    if: needs.init.outputs.changed == 'true'
     name: Build add-on
     strategy:
       matrix:
@@ -44,7 +101,6 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Build ${{ matrix.arch }} add-on
-      # if: steps.check.outputs.build_arch == 'true'
       uses: home-assistant/builder@2022.07.0
       with:
         args: |
