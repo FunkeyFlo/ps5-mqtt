@@ -11,12 +11,11 @@ To update the edge version of the add-on, you will need to uninstall and re-inst
 ⚠️ Make sure to backup your config as the procedure will not save this for you.
 
 ### Steps
-
-Backup config from: Settings → Add-ons → PS5 MQTT Edge → Configuration → ⋮ → Edit in YAML, copy the Options somewhere safe
-Uninstall: Settings → Add-ons → PS5 MQTT Edge → Uninstall
-Refresh repo: Settings → Add-ons → Add-ons store → ⋮ → Check for updates
-Install: Settings → Add-ons → Add-ons store → PS5 MQTT Edge → Install
-Restore config to: Settings → Add-ons → PS5 MQTT Edge → Configuration → ⋮ → Edit in YAML, paste your config from step 1.
+1. Backup config from: Settings → Add-ons → PS5 MQTT Edge → Configuration → ⋮ → Edit in YAML, copy the Options somewhere safe
+2. Uninstall: Settings → Add-ons → PS5 MQTT Edge → Uninstall
+3. Refresh repo: Settings → Add-ons → Add-ons store → ⋮ → Check for updates
+4. Install: Settings → Add-ons → Add-ons store → PS5 MQTT Edge → Install
+5. Restore config to: Settings → Add-ons → PS5 MQTT Edge → Configuration → ⋮ → Edit in YAML, paste your config from step 1.
 
 ## Support the project!
 If you enjoy the project please consider donating to sponsor further development! 💕
