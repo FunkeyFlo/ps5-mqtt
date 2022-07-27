@@ -36,13 +36,16 @@ jobs:
         id: changed_addons
         run: |
           declare -a changed_addons
-          if
-            for file in ${{ env.MONITORED_FILES_COMMON }}; do
-              if [[ "${{ steps.changed_files.outputs.all }}" =~ $file ]]; then
-                echo "::set-output name=changed::true";
-              fi
-            done
-          else
+          common_file_changed=false
+          
+          for file in ${{ env.MONITORED_FILES_COMMON }}; do
+            if [[ "${{ steps.changed_files.outputs.all }}" =~ $file ]]; then
+              common_file_changed=true
+              echo "::set-output name=changed::true";
+            fi
+          done
+          
+          if [[ ! ${common_file_changed} ]]; then
             for addon in ${{ steps.addons.outputs.addons }}; do
               if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon ]]; then
                 for file in ${{ env.MONITORED_FILES_ADDONS }}; do
