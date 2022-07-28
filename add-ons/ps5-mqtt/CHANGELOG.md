@@ -1,6 +1,9 @@
 ## 0.6.3
 - Switched to images instead of locally built Dockerfiles [#3](https://github.com/FunkeyFlo/ps5-mqtt/issues/3).
 
+### **⚠ IMPORTANT FOR USERS UPGRADING FROM `v0.6.2` ⚠**
+Because the add-on switched from locally built Dockerfiles to pre-built images you *have* to **uninstall** and **re-install** the add-on to upgrade! ⚠ Be sure to backup your configuration first because Home Assistant *will not* save it for you!
+
 ## 0.6.2
 - Added a Web UI to acquire credentials through the Add-on itself.
 - Credentials file will now be written to the file `/config/ps5-mqtt/credentials.json`.
