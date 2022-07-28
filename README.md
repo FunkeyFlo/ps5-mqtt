@@ -1,10 +1,27 @@
-# PS5 MQTT
-Integrate your Sony Playstation 5 devices with Home Assistant using MQTT.
 
-[![GitHub Release][releases-shield]][releases]
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)][paypal]
-![Project Maintenance][maintenance-shield]
-[![License][license-shield]](LICENSE.md)
+<div align="center">
+    <img src="./add-ons/ps5-mqtt/logo.png" />
+    <br>
+    <br>
+    <div style="display: flex;">
+        <a href="https://github.com/FunkeyFlo/ps5-mqtt/releases">
+            <img src="https://img.shields.io/github/release/FunkeyFlo/ps5-mqtt.svg">
+        </a>
+        <a href="https://www.paypal.com/donate/?hosted_button_id=VLDJUM2CMHMNG">
+            <img src="https://img.shields.io/badge/Donate-PayPal-green.svg">
+        </a>
+        <a href="#">
+            <img src="https://img.shields.io/maintenance/yes/2022.svg">
+        </a>
+        <a href="https://github.com/FunkeyFlo/ps5-mqtt/LICENSE.md">
+            <img src="https://img.shields.io/github/license/hassio-addons/addon-ssh.svg">
+        </a>
+    </div>
+    <h1>PS5 MQTT</h1>
+</div>
+
+
+Integrate your Sony Playstation 5 devices with Home Assistant using MQTT.
 
 ![Supports aarch64 Architecture][aarch64-shield]
 ![Supports amd64 Architecture][amd64-shield]
@@ -52,11 +69,5 @@ The majority of the MQTT implementation was based on the work done by [andrew-co
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
 
-[releases-shield]: https://img.shields.io/github/release/FunkeyFlo/ps5-mqtt.svg
-[releases]: https://github.com/FunkeyFlo/ps5-mqtt/releases
-
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2022.svg
-[license-shield]: https://img.shields.io/github/license/hassio-addons/addon-ssh.svg
 [credentials-ui]: https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v600-2
-[paypal]: https://www.paypal.com/donate/?hosted_button_id=VLDJUM2CMHMNG
 [discord]: https://discord.gg/BnmvYHvz5N
