@@ -1,25 +1,36 @@
 # PS5 MQTT
-[![flat](https://dcbadge.vercel.app/api/server/BnmvYHvz5N?style=flat)](https://discord.gg/BnmvYHvz5N)
-
 Integrate your Sony Playstation 5 devices with Home Assistant using MQTT.
 
+[![GitHub Release][releases-shield]][releases]
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)][paypal]
+![Project Maintenance][maintenance-shield]
+[![License][license-shield]](LICENSE.md)
+
+![Supports aarch64 Architecture][aarch64-shield]
+![Supports amd64 Architecture][amd64-shield]
+![Supports armhf Architecture][armhf-shield]
+![Supports armv7 Architecture][armv7-shield]
+![Supports i386 Architecture][i386-shield]
+
+[![flat](https://dcbadge.vercel.app/api/server/BnmvYHvz5N?style=flat)][discord]
+
 [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FFunkeyFlo%2Fps5-mqtt)
-
-If you enjoy the project please consider donating to sponsor further development! 💕
-
-<a href="https://www.buymeacoffee.com/funkeyflo" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=VLDJUM2CMHMNG)
 
 ## Features
 The following features have been implemented or are planned for future implementation.
 
-| Feature                                         | Implemented |
-| ----------------------------------------------- | ----------- |
-| Power; Wake/Standby (rest mode)                 | ✅           |
-| Discover Playstation 5 devices on local network | ✅           |
-| [Web UI for acquiring credentials](https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v600-2)                | ✅           |
-| Web UI for managing devices                     | ❌           |
+| Feature                                            | Implemented |
+| -------------------------------------------------- | ----------- |
+| Power; Wake/Standby (rest mode)                    | ✔           |
+| Discover Playstation 5 devices on local network    | ✔           |
+| [Web UI for acquiring credentials][credentials-ui] | ✔           |
+| Web UI for managing devices                        | ❌           |
+
+
+## Support the project!
+If you enjoy the project please consider donating to sponsor further development! 💕
+
+<a href="https://www.buymeacoffee.com/funkeyflo" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## FAQ
 
@@ -34,3 +45,18 @@ Because there is a great [Home Assistant integration](https://www.home-assistant
 
 ## Thanks & Credits
 The majority of the MQTT implementation was based on the work done by [andrew-codes](https://github.com/andrew-codes) and can be found in [this repository](https://github.com/andrew-codes/home-automation).
+
+[aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+[amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[armhf-shield]: https://img.shields.io/badge/armhf-yes-green.svg
+[armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
+[i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
+
+[releases-shield]: https://img.shields.io/github/release/FunkeyFlo/ps5-mqtt.svg
+[releases]: https://github.com/FunkeyFlo/ps5-mqtt/releases
+
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2022.svg
+[license-shield]: https://img.shields.io/github/license/hassio-addons/addon-ssh.svg
+[credentials-ui]: https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v600-2
+[paypal]: https://www.paypal.com/donate/?hosted_button_id=VLDJUM2CMHMNG
+[discord]: https://discord.gg/BnmvYHvz5N

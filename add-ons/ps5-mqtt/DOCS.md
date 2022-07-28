@@ -2,13 +2,15 @@
 
 ## Example Configuration
 ```yaml
+# !! This is NOT for connecting to your PS5, but for connecting to an MQTT broker !!
 mqtt:
   host: 192.168.0.2
   port: '1883'
   user: mqttuser
   pass: somepassword
-logger: >-
-  *,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*
+
+logger: "@ha:ps5:*"
+
 device_check_interval: 5000
 device_discovery_interval: 60000
 ```
@@ -31,7 +33,7 @@ If succesful, this will create a `credentials.json` file located at `~/.config/p
 ~~Afterwards paste the contents of the credentials file in the add-on config.~~
 
 ### `mqtt`
-[MQTT](https://www.home-assistant.io/integrations/mqtt/) connection information.
+MQTT connection information. Set up [an MQTT broker](https://www.home-assistant.io/integrations/mqtt/) if you haven't done so yet! 
 
 ### `logger`
 For logging the [debug](https://github.com/debug-js/debug) npm module is used. This allows you to filter your log by certain topics.
