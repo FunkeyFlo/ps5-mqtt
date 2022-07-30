@@ -13,7 +13,7 @@ on:
 
 jobs:
   information:
-    name: Gather add-on information
+    name: ℹ Gather add-on information
     runs-on: ubuntu-latest
     outputs:
       description: ${{ steps.information.outputs.description }}
@@ -22,6 +22,11 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v3
+      - name: ⏭ Copy add-on files
+        run: |
+          cp add-ons/common/Dockerfile add-ons/ps5-mqtt-edge
+          cp add-ons/common/build.yaml add-ons/ps5-mqtt-edge
+          cp add-ons/common/.dockerignore add-ons/ps5-mqtt-edge
       - name: 🚀 Run add-on information action
         id: information
         uses: frenck/action-addon-information@v1.4
@@ -37,7 +42,7 @@ jobs:
         arch: ["aarch64", "amd64", "armhf", "armv7", "i386"]
 
     steps:
-    - name: Check out repository
+    - name: ⤵ Check out repository
       uses: actions/checkout@v3.0.2
       
     - uses: actions/setup-node@v3
@@ -47,32 +52,30 @@ jobs:
         cache-dependency-path: ./ps5-mqtt/package-lock.json
         cache: 'npm'
         
-    - name: Install dependencies
+    - name: ⏬ Install dependencies
       working-directory: ./ps5-mqtt
       run: npm ci
       
-    - name: Build
+    - name: 👨‍🏭 Build App
       working-directory: ./ps5-mqtt
       run: npm run build
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2.0.0
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build
-      if: github.ref == 'refs/heads/dev'
+    - name: ⏭ Copy App Files
       run: |
         cp -R ps5-mqtt add-ons/ps5-mqtt-edge
         cp add-ons/common/Dockerfile add-ons/ps5-mqtt-edge
         cp add-ons/common/build.yaml add-ons/ps5-mqtt-edge
         cp add-ons/common/.dockerignore add-ons/ps5-mqtt-edge
+
+    - name: 🔐 Login to GitHub Container Registry
+      uses: docker/login-action@v2.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Build ${{ matrix.arch }} add-on - Edge
+    - name: 🏭 Build ${{ matrix.arch }} add-on - Edge
       uses: home-assistant/builder@2022.07.0
-      if: github.ref == 'refs/heads/dev'
       with:
         args: |
           ${{ env.BUILD_ARGS }} \
