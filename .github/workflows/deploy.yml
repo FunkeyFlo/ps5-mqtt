@@ -111,7 +111,7 @@ jobs:
         args: |
           ${{ env.BUILD_ARGS }} \
           --${{ matrix.arch }} \
-          --target /data/add-ons/${{ github.repository_owner }}" \
+          --target /data/add-ons/${{ github.information.outputs.target }}" \
           --version ${{ needs.information.outputs.version }} \
           --image "ps5-mqtt/${{ matrix.arch }}" \
           --docker-hub "ghcr.io/${{ github.repository_owner }}" \
