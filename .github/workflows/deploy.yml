@@ -131,14 +131,20 @@ jobs:
       name: ${{ needs.information.outputs.environment }}
     runs-on: ubuntu-latest
     steps:
+      - name: ⤵ Checkout repo
+        uses: actions/checkout@v3
+
       - name: ✍ Update add-on config
         uses: fjogeleit/yaml-update-action@main
         with:
           valueFile: 'add-ons/ps5-mqtt/config.yaml'
-          propertyPath: 'file.version'
+          propertyPath: 'version'
           value: ${{ needs.information.outputs.version }}
           commitChange: true
-          message: '🎉 Release version ${{needs.information.outputs.version}}'
+          message: >
+            🎉 Release version ${{needs.information.outputs.version}}
+          
+            [skip-ci]
           branch: main
           targetBranch: main
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -146,5 +152,3 @@ jobs:
           commitUserEmail: 'florentijncornet@gmail.com'
           createPR: false
           updateFile: true
-    #  TODO: update repository
-    # https://github.com/hassio-addons/repository-updater
