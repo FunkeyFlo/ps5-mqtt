@@ -1,19 +1,16 @@
-import { grommet } from "grommet";
+import { grommet, ThemeType } from "grommet";
 import { deepMerge } from "grommet/utils";
 
-const theme = deepMerge(grommet, {
+const theme = deepMerge(grommet, <ThemeType>{
     global: {
         colors: {
             active: "light-5",
-            placeholder: "dark-1"
-        },
-        elevation: {
-            light: {
-                small: "0 0 1px 0 rgba(0, 0, 0, 0.40), 0 1px 2px 0 rgba(0,0,0,0.40)",
-                medium: "0 0 2px 0 rgba(0,0,0,0.40), 0 2px 4px 0 rgba(0,0,0,0.40)",
-                large: "0 0 1px 0 rgba(0,0,0,0.40), 0 4px 8px 0 rgba(0,0,0,0.40)",
-                xlarge: "0 0 1px 0 rgba(0,0,0,0.40), 0 8px 16px 0 rgba(0,0,0,0.40)"
-            }
+            "light-1": {
+                dark: grommet.global.colors["dark-1"],
+                light: grommet.global.colors["light-1"],
+            },
+            "dark-extra": "#1a1a1a",
+            "dark-0": "#2a2a2a"
         },
         font: {
             size: "16px",
@@ -25,7 +22,12 @@ const theme = deepMerge(grommet, {
         size: {
             avatar: "36px",
             sidebar: "60px"
-        }
+        },
+        elevation: {
+            dark: {
+                small: "0px 2px 2px #1a1a1a"
+            }
+        },
     },
     icon: {
         size: {
@@ -41,6 +43,29 @@ const theme = deepMerge(grommet, {
             size: "20px",
             height: "24px"
         }
+    },
+    card: {
+        header: {
+            background: {
+                color: {
+                    dark: "dark-0",
+                    light: "light-1"
+                }
+            }
+        },
+        footer: {
+            background: {
+                color: {
+                    dark: "dark-0",
+                    light: "light-1"
+                }
+            }
+        }
+    },
+    layer: {
+        background: {
+            dark: "dark-1"
+        },
     },
 });
 
