@@ -25,6 +25,8 @@ jobs:
       - name: 🚀 Run add-on information action
         id: information
         uses: frenck/action-addon-information@v1.4
+        with:
+          path: "./add-ons/ps5-mqtt-edge"
 
   build:
     needs: information
