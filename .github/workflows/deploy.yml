@@ -1,0 +1,146 @@
+---
+name: Deploy
+
+# yamllint disable-line rule:truthy
+on:
+  release:
+    types:
+      - published
+  workflow_run:
+    workflows: [ "CI" ]
+    branches: [ main ]
+    types:
+      - completed
+
+jobs:
+  information:
+    if: |
+      github.event_name == 'release'
+      || (
+        github.event_name == 'workflow_run'
+        && github.event.workflow_run.conclusion == 'success'
+      )
+    name: ℹ️ Gather add-on information
+    runs-on: ubuntu-latest
+    outputs:
+      description: ${{ steps.information.outputs.description }}
+      environment: ${{ steps.release.outputs.environment }}
+      name: ${{ steps.information.outputs.name }}
+      target: ${{ steps.prepare.outputs.target }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v3
+      - name: 🎯 Determine target add-on
+        id: prepare
+        run: |
+          target="ps5-mqtt-edge"
+          if [[ "${{ github.event_name }}" = "release" ]]; then
+            target="ps5-mqtt"
+          fi
+          echo "::set-output name=target::${target}"
+      - name: ⏭ Copy add-on files
+        run: |
+          cp add-ons/common/Dockerfile add-ons/${{ steps.prepare.outputs.target }}
+          cp add-ons/common/build.yaml add-ons/${{ steps.prepare.outputs.target }}
+          cp add-ons/common/.dockerignore add-ons/${{ steps.prepare.outputs.target }}
+      - name: 🚀 Run add-on information action
+        id: information
+        uses: frenck/action-addon-information@v1.4
+        with:
+          path: "./add-ons/${{ steps.prepare.outputs.target }}"
+      - name: ℹ️ Gather version and environment
+        id: release
+        run: |
+          sha="${{ github.sha }}"
+          environment="edge"
+          version="${sha:0:7}"
+          if [[ "${{ github.event_name }}" = "release" ]]; then
+            version="${{ github.event.release.tag_name }}"
+            version="${version,,}"
+            version="${version#v}"
+            environment="stable"
+          fi
+          echo "::set-output name=environment::${environment}"
+          echo "::set-output name=version::${version}"
+
+  deploy:
+    name: 👷 Build & Deploy ${{ matrix.architecture }}
+    needs: information
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: ["aarch64", "amd64", "armhf", "armv7", "i386"]
+
+    steps:
+    - name: ⤵ Check out repository
+      uses: actions/checkout@v3.0.2
+      
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        registry-url: https://registry.npmjs.org/
+        cache-dependency-path: ./ps5-mqtt/package-lock.json
+        cache: 'npm'
+        
+    - name: ⏬ Install dependencies
+      working-directory: ./ps5-mqtt
+      run: npm ci
+      
+    - name: 👨‍🏭 Build App
+      working-directory: ./ps5-mqtt
+      run: npm run build
+
+    - name: ⏭ Copy App Files
+      run: |
+        cp -R ps5-mqtt add-ons/${{ needs.information.outputs.target }}
+        cp add-ons/common/Dockerfile add-ons/${{ needs.information.outputs.target }}
+        cp add-ons/common/build.yaml add-ons/${{ needs.information.outputs.target }}
+        cp add-ons/common/.dockerignore add-ons/${{ needs.information.outputs.target }}
+
+    - name: 🔐 Login to GitHub Container Registry
+      uses: docker/login-action@v2.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🏭 Build & Publish add-on ${{ needs.information.outputs.target }}-${{ matrix.arch }}
+      uses: home-assistant/builder@2022.07.0
+      with:
+        args: |
+          ${{ env.BUILD_ARGS }} \
+          --${{ matrix.arch }} \
+          --target /data/add-ons/${{ github.repository_owner }}" \
+          --version ${{ needs.information.outputs.version }} \
+          --image "ps5-mqtt/${{ matrix.arch }}" \
+          --docker-hub "ghcr.io/${{ github.repository_owner }}" \
+          --addon
+
+  update-repository:
+    name: ⤴ Update repository
+    if: needs.information.outputs.environment == 'stable'
+    needs:
+      - information
+      - deploy
+    environment:
+      name: ${{ needs.information.outputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ✍ Update add-on config
+        uses: fjogeleit/yaml-update-action@main
+        with:
+          valueFile: 'add-ons/ps5-mqtt/config.yaml'
+          propertyPath: 'file.version'
+          value: ${{ needs.information.outputs.version }}
+          commitChange: true
+          message: '🎉 Release version ${{needs.information.outputs.version}}'
+          branch: main
+          targetBranch: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commitUserName: ${{ github.repository_owner }}
+          commitUserEmail: 'florentijncornet@gmail.com'
+          createPR: false
+          updateFile: true
+    #  TODO: update repository
+    # https://github.com/hassio-addons/repository-updater

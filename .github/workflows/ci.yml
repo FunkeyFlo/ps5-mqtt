@@ -4,12 +4,18 @@ name: CI
 # yamllint disable-line rule:truthy
 on:
   push:
+    paths:
+      - 'ps5-mqtt/**'
+      - '!ps5-mqtt/**/*.md'
+      - 'add-ons/**'
+      - '!add-ons/**/*.md'
+      - '!add-ons/**/*.png'
+      - '.github/workflows/ci.yml'
   pull_request:
     types:
       - opened
       - reopened
       - synchronize
-  workflow_dispatch:
 
 jobs:
   information:
@@ -18,7 +24,6 @@ jobs:
     outputs:
       description: ${{ steps.information.outputs.description }}
       name: ${{ steps.information.outputs.name }}
-      target: ${{ steps.information.outputs.target }}
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v3
@@ -36,7 +41,7 @@ jobs:
   build:
     needs: information
     runs-on: ubuntu-latest
-    name: Build add-on
+    name: 🏭 Build add-on
     strategy:
       matrix:
         arch: ["aarch64", "amd64", "armhf", "armv7", "i386"]
@@ -82,6 +87,8 @@ jobs:
           --${{ matrix.arch }} \
           --target /data/add-ons/ps5-mqtt-edge \
           --version edge \
+          --no-latest \
           --image "ps5-mqtt/${{ matrix.arch }}" \
           --docker-hub "ghcr.io/${{ github.repository_owner }}" \
+          --test \
           --addon
