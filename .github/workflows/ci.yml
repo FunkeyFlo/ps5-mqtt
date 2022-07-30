@@ -11,12 +11,12 @@ on:
       - '!add-ons/**/*.md'
       - '!add-ons/**/*.png'
       - '.github/workflows/ci.yml'
-      - '.github/workflows/deploy.yml'
   pull_request:
     types:
       - opened
       - reopened
       - synchronize
+  workflow_dispatch:
 
 jobs:
   information:

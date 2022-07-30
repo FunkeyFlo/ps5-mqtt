@@ -11,6 +11,7 @@ on:
     branches: [ main ]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   information:
@@ -111,7 +112,7 @@ jobs:
         args: |
           ${{ env.BUILD_ARGS }} \
           --${{ matrix.arch }} \
-          --target /data/add-ons/${{ github.information.outputs.target }}" \
+          --target /data/add-ons/${{ needs.information.outputs.target }}" \
           --version ${{ needs.information.outputs.version }} \
           --image "ps5-mqtt/${{ matrix.arch }}" \
           --docker-hub "ghcr.io/${{ github.repository_owner }}" \
