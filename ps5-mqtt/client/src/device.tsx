@@ -5,7 +5,7 @@ import { Authenticate } from './authenticate';
 import { AppContext } from './context';
 import type { IDevice } from './types';
 
-export const Device: React.FC<{device: IDevice}> = ({device}) => {
+export const Device: React.FC<{ device: IDevice }> = ({ device }) => {
     const { api } = React.useContext(AppContext);
     const [authUrl, setAuthUrl] = React.useState<string>("");
 
@@ -15,37 +15,36 @@ export const Device: React.FC<{device: IDevice}> = ({device}) => {
 
     return (
         <>
-            <Grommet.Card background="light-1" animation={[
+            <Grommet.Card animation={[
                 { type: 'zoomIn', duration: 500, size: 'large' },
                 { type: 'fadeIn', duration: 500, size: 'large' },
             ]}>
-                <Grommet.CardHeader pad="medium" background={"light-2"}>
+                <Grommet.CardHeader pad="medium">
                     <Grommet.Heading level="2" margin={{ vertical: 'none' }}>{device.name}</Grommet.Heading>
                 </Grommet.CardHeader>
-                <Grommet.CardBody pad={{bottom: "medium"}} height="large">
+                <Grommet.CardBody pad={{ bottom: "medium" }} height="large">
                     <Grommet.DataTable columns={[
-                        { property: 'key', primary: true, header: "Property" }, 
+                        { property: 'key', primary: true, header: "Property" },
                         { property: 'value', header: "Value" }
                     ]} data={Object.keys(device).filter(k => k !== 'extras').sort().map(key => ({
                         key,
                         value: typeof device[key] === 'object' ? JSON.stringify(device[key]) : device[key]
                     }))} step={10} />
                 </Grommet.CardBody>
-                <Grommet.CardFooter pad={{horizontal: "small"}} background="light-2">
-                    <Grommet.Button icon={<GrommetIcons.Connect size="medium" color="plain" />} 
+                <Grommet.CardFooter pad={{ horizontal: "small" }}>
+                    <Grommet.Button icon={<GrommetIcons.Connect size="medium" />}
                         onClick={async () => {
                             const url = await api.acquireAuthenticationLink(device);
-                            if(url !== undefined) {
+                            if (url !== undefined) {
                                 setAuthUrl(url);
                             }
-                        }} 
-                        size="large"
+                        }}
                         hoverIndicator
                         tip={"Authenticate"}
                     />
                 </Grommet.CardFooter>
             </Grommet.Card>
-            
+
             {!!authUrl && (
                 <Grommet.Layer
                     onEsc={onAuthExit}

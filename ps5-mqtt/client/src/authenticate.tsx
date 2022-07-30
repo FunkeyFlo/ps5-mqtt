@@ -31,9 +31,17 @@ export const Authenticate: React.FC<{
                     setValid(validationResults.valid);
                 }}
             >
-                <Grommet.Paragraph margin="none">
-                    Follow the steps in <Grommet.Anchor target="_blank" href={url} label="this page" />.
-                    Once authentication is successfull, paste the URL in your browser in the field below.
+                <ol style={{ margin: 0, paddingLeft: 17 + 'px' }}>
+                    <li>Authenticate with PSN by following the steps in <Grommet.Anchor target="_blank" href={url} label="this page" />.</li>
+                    <li>Once successfull authentication the page will read <i>redirect</i>, <b>this is OK!</b></li>
+                    <li>Copy the URL of the <b>redirect</b> page from your browser and paste in the field below.</li>
+                </ol>
+
+                <Grommet.Paragraph>
+                    Having trouble? <Grommet.Anchor target="_blank"
+                        href="https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v060-3"
+                        label="Watch this video"
+                    />.
                 </Grommet.Paragraph>
 
                 <Grommet.FormField label="URL" name="url"
@@ -51,7 +59,8 @@ export const Authenticate: React.FC<{
                             }
                         },
                     ]}>
-                    <Grommet.TextInput type="url" id="url" name="url" placeholder="Paste browser URL acquired through link"
+                    <Grommet.TextInput type="url" id="url" name="url"
+                        placeholder="Paste browser URL acquired through link"
                         icon={<GrommetIcons.Link />}
                     />
                 </Grommet.FormField>
@@ -75,9 +84,7 @@ export const Authenticate: React.FC<{
                         name="pin"
                         id="pin"
                         placeholder="Remote Play PIN Code"
-                        // value={pin}
                         icon={<GrommetIcons.Key />}
-                    // onChange={({ target: { value } }) => setPin(value ?? "")}
                     />
                 </Grommet.FormField>
 
