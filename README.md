@@ -51,8 +51,8 @@ If you enjoy the project please consider donating to sponsor further development
 
 ## FAQ
 
-### I'm trying to update to version `0.6.3` but the installation is failing!
-Version `0.6.3` saw a switch from locally built Dockerfiles to pre-built images. Supervisor seems to not handle this upgrade properly. Instead you'll have to uninstall the add-on first and then re-install. You can follow the steps described in the [edge version documentation](https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt-edge#updating-the-edge-add-on) for this.
+### I'm trying to update from version `0.6.2` but the installation is failing!
+Version >=`0.6.3` saw a switch from locally built Dockerfiles to pre-built images. Supervisor seems to not handle this upgrade properly. Instead you'll have to uninstall the add-on first and then re-install. You can follow the steps described in the [edge version documentation](https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt-edge#updating-the-edge-add-on) for this.
 
 ### The log is showing 403 errors when I try to turn my ps5 on or off!
 Double check that you've enabled all required remote play features [as described in the remote play documentation](https://remoteplay.dl.playstation.net/remoteplay/lang/en/ps5_mobile.html#section3).
