@@ -41,4 +41,4 @@ schema:
   device_check_interval: int
   device_discovery_interval: int
 stdin: true
-image: "ghcr.io/funkeyflo/ps5-mqtt-edge/{arch}"
+image: "ghcr.io/funkeyflo/ps5-mqtt/{arch}"

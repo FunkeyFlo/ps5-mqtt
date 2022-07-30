@@ -1,20 +1,33 @@
+---
 name: CI
-    
-# env:
-#   MONITORED_FILES_ADDONS: "build.yaml config.yaml"
-#   MONITORED_FILES_COMMON: "Dockerfile ps5-mqtt"
-  
+
+# yamllint disable-line rule:truthy
 on:
   push:
-    branches: 
-      - "dev"
-      - "main"
   pull_request:
-    branches: [ "dev" ]
-
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
 
 jobs:
+  information:
+    name: Gather add-on information
+    runs-on: ubuntu-latest
+    outputs:
+      description: ${{ steps.information.outputs.description }}
+      name: ${{ steps.information.outputs.name }}
+      target: ${{ steps.information.outputs.target }}
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v3
+      - name: 🚀 Run add-on information action
+        id: information
+        uses: frenck/action-addon-information@v1.4
+
   build:
+    needs: information
     runs-on: ubuntu-latest
     name: Build add-on
     strategy:
@@ -64,26 +77,6 @@ jobs:
           --${{ matrix.arch }} \
           --target /data/add-ons/ps5-mqtt-edge \
           --version edge \
-          --image "ps5-mqtt-edge/${{ matrix.arch }}" \
-          --docker-hub "ghcr.io/${{ github.repository_owner }}" \
-          --addon
-
-    - name: Build
-      if: github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/v')
-      run: |
-        cp -R ps5-mqtt add-ons/ps5-mqtt
-        cp add-ons/common/Dockerfile add-ons/ps5-mqtt
-        cp add-ons/common/build.yaml add-ons/ps5-mqtt
-        cp add-ons/common/.dockerignore add-ons/ps5-mqtt
-
-    - name: Build ${{ matrix.arch }} add-on - Stable
-      uses: home-assistant/builder@2022.07.0
-      if: github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/v')
-      with:
-        args: |
-          ${{ env.BUILD_ARGS }} \
-          --${{ matrix.arch }} \
-          --target /data/add-ons/ps5-mqtt \
           --image "ps5-mqtt/${{ matrix.arch }}" \
           --docker-hub "ghcr.io/${{ github.repository_owner }}" \
           --addon
