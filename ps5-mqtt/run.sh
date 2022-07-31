@@ -1,9 +1,16 @@
 #!/usr/bin/env bashio
 
-export MQTT_HOST=$(bashio::config 'mqtt.host')
-export MQTT_PORT=$(bashio::config 'mqtt.port')
-export MQTT_USERNAME=$(bashio::config 'mqtt.user')
-export MQTT_PASSWORD=$(bashio::config 'mqtt.pass')
+if bashio::config.is_empty 'mqtt' && bashio::var.has_value "$(bashio::services 'mqtt')"; then
+    export MQTT_HOST="$(bashio::services 'mqtt' 'host')"
+    export MQTT_PORT="$(bashio::services 'mqtt' 'port')"
+    export MQTT_USERNAME="$(bashio::services 'mqtt' 'username')"
+    export MQTT_PASSWORD="$(bashio::services 'mqtt' 'password')"
+else 
+    export MQTT_HOST=$(bashio::config 'mqtt.host')
+    export MQTT_PORT=$(bashio::config 'mqtt.port')
+    export MQTT_USERNAME=$(bashio::config 'mqtt.user')
+    export MQTT_PASSWORD=$(bashio::config 'mqtt.pass')
+fi
 
 export DEVICE_CHECK_INTERVAL=$(bashio::config 'device_check_interval')
 export DEVICE_DISCOVERY_INTERVAL=$(bashio::config 'device_discovery_interval')

@@ -23,20 +23,16 @@ map:
   - "config:rw"
 options:
   mqtt:
-    host:
-    port:
-    user:
-    pass:
   logger: "@ha:ps5:*"
   device_check_interval: 5000
   device_discovery_interval: 60000
 schema:
   ps5_credentials: str?
   mqtt:
-    host: str
-    port: port
-    user: str
-    pass: str
+    host: str?
+    port: port?
+    user: str?
+    pass: str?
   logger: str?
   device_check_interval: int
   device_discovery_interval: int
