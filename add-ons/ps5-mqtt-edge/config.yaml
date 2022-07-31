@@ -22,7 +22,7 @@ ports_description:
 map:
   - "config:rw"
 options:
-  mqtt:
+  mqtt: {}
   logger: "@ha:ps5:*"
   device_check_interval: 5000
   device_discovery_interval: 60000
