@@ -16,7 +16,7 @@ boot: auto
 host_network: true
 webui: '[PROTO:ssl]://[HOST]:[PORT:8645]'
 ports:
-  8645/tcp: 8645
+  8645/tcp: null
 ports_description:
   8645/tcp: PS5 MQTT Web Interface
 map:
