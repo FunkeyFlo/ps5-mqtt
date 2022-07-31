@@ -71,6 +71,8 @@ jobs:
     name: 👷 Build & Deploy ${{ matrix.arch }}
     needs: information
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.information.outputs.environment }}
     strategy:
       matrix:
         arch: ["aarch64", "amd64", "armhf", "armv7", "i386"]
