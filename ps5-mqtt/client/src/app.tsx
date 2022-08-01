@@ -75,10 +75,10 @@ export const Loader = () => {
 
     return (
         <Grommet.Box align="center" direction="row" gap="medium" pad="large">
-            <RoundSpinner url="/img/PlayStationCross.svg" />
-            <RoundSpinner url="/img/PlayStationCircle.svg" delay={baseDelay * 1} />
-            <RoundSpinner url="/img/PlayStationTriangle.svg" delay={baseDelay * 2} />
-            <RoundSpinner url="/img/PlayStationSquare.svg" delay={baseDelay * 3} />
+            <RoundSpinner url="img/PlayStationCross.svg" />
+            <RoundSpinner url="img/PlayStationCircle.svg" delay={baseDelay * 1} />
+            <RoundSpinner url="img/PlayStationTriangle.svg" delay={baseDelay * 2} />
+            <RoundSpinner url="img/PlayStationSquare.svg" delay={baseDelay * 3} />
         </Grommet.Box>
     )
 };

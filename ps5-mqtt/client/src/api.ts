@@ -6,7 +6,7 @@ export default class Api {
 
     async connectToDevice(device: IDevice, pin: string, url: string): Promise<string> {
         try {
-            const res = await fetch('/api/connect', {
+            const res = await fetch('api/connect', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -29,7 +29,7 @@ export default class Api {
 
     async acquireAuthenticationLink(device: IDevice): Promise<string | undefined> {
         try {
-            const res = await fetch('/api/acquire-authentication-link', {
+            const res = await fetch('api/acquire-authentication-link', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -50,7 +50,7 @@ export default class Api {
 
     async getStats(): Promise<Stats | undefined> {
         try {
-            const res = await fetch('/api/stats', {
+            const res = await fetch('api/stats', {
                 method: 'GET'
             });
             return await res.json();
@@ -62,7 +62,7 @@ export default class Api {
 
     async getDevices(): Promise<IDevice[] | undefined> {
         try {
-            const res = await fetch('/api/discover', {
+            const res = await fetch('api/discover', {
                 method: 'GET'
             });
             return (await res.json() as DiscoveryResponse)?.devices;
