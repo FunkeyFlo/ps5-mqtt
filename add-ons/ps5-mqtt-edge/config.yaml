@@ -15,6 +15,9 @@ services:
 boot: auto
 host_network: true
 webui: '[PROTO:ssl]://[HOST]:[PORT:8645]'
+ingress: true
+ingress_port: 8645
+panel_icon: 'mdi:sony-playstation'
 ports:
   8645/tcp: null
 ports_description:
