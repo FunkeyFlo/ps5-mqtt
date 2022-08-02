@@ -6,7 +6,7 @@ import os from 'os';
 import path from 'path';
 import createSagaMiddleware from "redux-saga";
 import reducer, {
-    getDeviceList,
+    getDeviceRegistry,
     pollDevices, pollDiscovery, saga, setPowerMode
 } from "./redux";
 import { SwitchStatus } from "./redux/types";
@@ -86,11 +86,9 @@ async function run() {
                 if (!matches) {
                     return;
                 }
-                const [, deviceName, deviceProperty] = matches;
-                const devices = getDeviceList(store.getState());
-                const ps5 = devices.find(
-                    (device) => device.name === deviceName
-                );
+                const [, deviceId, deviceProperty] = matches;
+                const devices = getDeviceRegistry(store.getState());
+                const ps5 = devices[deviceId];
                 if (ps5 !== undefined && deviceProperty === 'power') {
                     const data = payload.toString();
                     store.dispatch(setPowerMode(ps5, data as SwitchStatus));

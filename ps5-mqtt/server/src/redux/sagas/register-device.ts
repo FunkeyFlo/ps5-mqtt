@@ -23,13 +23,13 @@ function* registerDevice(
         JSON.stringify(<HaMqtt.Config.MqttEntity>{
             availability: [
                 {
-                    topic: `ps5-mqtt/${ps5.name}`,
+                    topic: `ps5-mqtt/${ps5.id}`,
                     value_template: "{{ value_json.device_status }}"
                 }
             ],
             name: ps5.name + " power",
-            command_topic: `ps5-mqtt/${ps5.name}/set/power`,
-            state_topic: `ps5-mqtt/${ps5.name}`,
+            command_topic: `ps5-mqtt/${ps5.id}/set/power`,
+            state_topic: `ps5-mqtt/${ps5.id}`,
             unique_id: `${ps5.id}_switch_power`,
             state_on: "AWAKE",
             state_off: "STANDBY",
