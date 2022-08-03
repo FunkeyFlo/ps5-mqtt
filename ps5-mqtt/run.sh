@@ -16,6 +16,9 @@ export DEVICE_CHECK_INTERVAL=$(bashio::config 'device_check_interval')
 export DEVICE_DISCOVERY_INTERVAL=$(bashio::config 'device_discovery_interval')
 
 export FRONTEND_PORT=8645
+if [ ! -z $(bashio::addon.ingress_port) ]; then
+    FRONTEND_PORT=$(bashio::addon.ingress_port)
+fi
 
 export CREDENTIAL_STORAGE_PATH="/config/ps5-mqtt/credentials.json"
 
