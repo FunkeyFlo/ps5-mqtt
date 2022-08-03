@@ -28,9 +28,5 @@ if [ ! -z $(bashio::config 'logger') ]; then
     DEBUG=$(bashio::config 'logger')
 fi
 
-if [ -n "$(bashio::config 'ps5_credentials')" ]; then
-    node app/create-credentials.js "$(bashio::config 'ps5_credentials')"
-fi
-
 echo Starting PS5-MQTT...
 node app/server/dist/index.js
