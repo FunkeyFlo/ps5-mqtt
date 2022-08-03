@@ -14,7 +14,7 @@ function* updateHomeAssistant({ payload: { device: ps5 } }: UpdateHomeAssistantA
         ) => Promise<MQTT.IPublishPacket>
     >(
         mqtt.publish.bind(mqtt),
-        `ps5-mqtt/${ps5.name}`,
+        `ps5-mqtt/${ps5.id}`,
         JSON.stringify({
             power: ps5.status,
             device_status: ps5.available ? 'online' : 'offline'

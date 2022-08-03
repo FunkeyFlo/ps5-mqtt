@@ -41,7 +41,13 @@ function* discoverDevices() {
         if (trackedDevices[ps5.id] === undefined) {
             yield put(
                 registerDevice(
-                    ps5
+                    {
+                        ...ps5, 
+                        normalizedName: 
+                            ps5.name.replace(/[^a-zA-Z\d\s-_:]/g, '')
+                                    .replace(/[\s-]/g, '_')
+                                    .toLowerCase()
+                    }
                 )
             );
         }

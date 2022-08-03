@@ -1,6 +1,8 @@
 import { Playstation5 } from "../device";
 
-type Device = Playstation5 & DeviceState;
+type Device = Playstation5 & DeviceState & {
+    normalizedName: string
+};
 
 type DeviceState = {
     status: SwitchStatus;

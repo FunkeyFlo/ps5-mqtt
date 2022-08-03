@@ -30,7 +30,7 @@ function* registerDevice(
             name: ps5.name + " power",
             command_topic: `ps5-mqtt/${ps5.id}/set/power`,
             state_topic: `ps5-mqtt/${ps5.id}`,
-            unique_id: `${ps5.id}_switch_power`,
+            unique_id: `${ps5.normalizedName}_switch_power`,
             state_on: "AWAKE",
             state_off: "STANDBY",
             payload_on: "AWAKE",
