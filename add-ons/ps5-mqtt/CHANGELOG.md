@@ -1,10 +1,20 @@
+## 0.7.0 - 2022-08-03
+
+### What’s changed
+
+- 🔧 #21: fixed failing device state checks when PS5 name contained **non**-alphanumeric or '-' and '_' characters.
+- 🔐 improved add-on security (rating) by adding ingress support.
+- 💔 removed `ps5_credentials` option from add-on configuration.
+
 ## 0.6.4 - 2022-07-30
 
 ### What’s changed
 
 - client improvements @FunkeyFlo (#19)
 - - added dark/light theme option to client UI 🌗
+- 
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
+- 
 - 
 
 ## 0.6.3
@@ -22,6 +32,7 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - ⚠ **Deprecation Warning**
 - - The `ps5_credentials` option is deprecated and will be removed with the next *[minor](https://semver.org/)* release. Check the [docs](/ps5-mqtt/DOCS.md) for migration options.
 - 
+- 
 
 ## 0.5.2
 
@@ -31,11 +42,15 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 
 - Changed MQTT implementation to...
 - - ...reduce amount of messages being sent.
+- 
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- 
 - 
 - Re-implemented device discovery
 - - Added `device_discovery_interval` option to change the frequency of discovering PS5 devices.
+- 
 - - Optimizations for discovered devices.
+- 
 - 
 - Various minor tweaks and improvements.
 
