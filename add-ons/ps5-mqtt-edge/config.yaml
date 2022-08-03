@@ -29,7 +29,6 @@ options:
   device_check_interval: 5000
   device_discovery_interval: 60000
 schema:
-  ps5_credentials: str?
   mqtt:
     host: str?
     port: port?
