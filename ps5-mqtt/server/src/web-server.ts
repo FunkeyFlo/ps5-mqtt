@@ -11,6 +11,7 @@ import { CredentialManager } from 'playactor/dist/credentials';
 import { DiskCredentialsStorage } from 'playactor/dist/credentials/disk-storage';
 import { OauthCredentialRequester } from 'playactor/dist/credentials/oauth/requester';
 import { WriteOnlyStorage } from 'playactor/dist/credentials/write-only-storage';
+import { Settings } from './services';
 import { createErrorLogger } from './util/error-logger';
 
 const debug = createDebugger("@ha:ps5:webserver");
@@ -19,7 +20,13 @@ const logError = createErrorLogger();
 
 let app: Express | undefined = undefined;
 
-export function setupWebserver(port: number | string, credentialStoragePath: string): Express {
+export function setupWebserver(
+    port: number | string, 
+    {
+        allowPs4Devices, 
+        credentialStoragePath
+    }: Settings
+): Express {
     if (app !== undefined) {
         throw Error('web server is already running');
     }
@@ -33,14 +40,16 @@ export function setupWebserver(port: number | string, credentialStoragePath: str
     app.get('/api/discover', async (req, res) => {
         try {
             const discovery = new Discovery({
-                deviceType: DeviceType.PS5,
                 timeoutMillis: 5000
             });
 
             const devices: IDiscoveredDevice[] = [];
 
             for await (const device of discovery.discover()) {
-                devices.push(device);
+                // filter out PS4's if setting says so
+                if(!(!allowPs4Devices && device.type === DeviceType.PS4)) {
+                    devices.push(device)
+                }
             }
 
             res.send({

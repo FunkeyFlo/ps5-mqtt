@@ -1,6 +1,7 @@
 import { Discovery } from "playactor/dist/discovery";
 import { DeviceType } from "playactor/dist/discovery/model";
-import { call, put, select } from "redux-saga/effects";
+import { call, getContext, put, select } from "redux-saga/effects";
+import { SETTINGS, Settings } from "../../services";
 import { registerDevice } from "../action-creators";
 import { getDeviceRegistry } from "../selectors";
 import { Device } from "../types";
@@ -25,8 +26,10 @@ const useAsyncIterableWithSaga =
             });
 
 function* discoverDevices() {
-    const discovery = new Discovery({ deviceType: DeviceType.PS5 });
-    const discoveredDevices: Device[] = yield call(
+    const { allowPs4Devices }: Settings = yield getContext(SETTINGS);
+    
+    const discovery = new Discovery();
+    let discoveredDevices: Device[] = yield call(
         useAsyncIterableWithSaga(
             discovery.discover.bind(discovery),
             {},
@@ -36,15 +39,19 @@ function* discoverDevices() {
         )
     );
 
+    if(!allowPs4Devices) {
+        discoveredDevices = discoveredDevices.filter(d => d.type === DeviceType.PS5);
+    }
+
     const trackedDevices = yield select(getDeviceRegistry);
-    for (const ps5 of discoveredDevices) {
-        if (trackedDevices[ps5.id] === undefined) {
+    for (const device of discoveredDevices) {
+        if (trackedDevices[device.id] === undefined) {
             yield put(
                 registerDevice(
                     {
-                        ...ps5, 
+                        ...device, 
                         normalizedName: 
-                            ps5.name.replace(/[^a-zA-Z\d\s-_:]/g, '')
+                            device.name.replace(/[^a-zA-Z\d\s-_:]/g, '')
                                     .replace(/[\s-]/g, '_')
                                     .toLowerCase()
                     }

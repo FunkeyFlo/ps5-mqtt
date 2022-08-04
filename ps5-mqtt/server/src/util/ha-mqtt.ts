@@ -1,4 +1,5 @@
-import { Playstation5 } from "../device";
+import { DeviceType } from "playactor/dist/discovery/model";
+import { Playstation } from "../device";
 
 export module HaMqtt {
 
@@ -31,10 +32,10 @@ export module HaMqtt {
 
     }
 
-    export function getMqttDeviceConfig(device: Playstation5): Config.MqttDevice {
+    export function getMqttDeviceConfig(device: Playstation): Config.MqttDevice {
         return {
             manufacturer: "Sony",
-            model: "Playstation 5",
+            model: "Playstation " + (device.type === DeviceType.PS5 ? '5' : '4'),
             name: device.name,
             identifiers: [ device.id ],
             connections: [

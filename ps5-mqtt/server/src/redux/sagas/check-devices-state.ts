@@ -15,34 +15,34 @@ function* checkDevicesState() {
     const { credentialStoragePath }: Settings = yield getContext(SETTINGS);
 
     const devices: Device[] = yield select(getDeviceList);
-    for (const ps5 of devices) {
+    for (const device of devices) {
         try {
             const shellOutput = sh.exec(
-                `playactor check --host-name "${ps5.name}" --machine-friendly --ps5`
+                `playactor check --host-name "${device.name}" --machine-friendly`
                 + ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth`
                 + ` -c ${credentialStoragePath}`,
                 { silent: true, timeout: 15000 }
             );
             const updatedDevice: Device = JSON.parse(shellOutput.stdout);
             if (
-                ps5.transitioning
+                device.transitioning
             ) {
                 debug(
                     "Device is transitioning",
-                    ps5.transitioning,
+                    device.transitioning,
                     updatedDevice.status
                 );
                 break;
             }
 
             // only send updates if ps5 is truly changing states or when ps5 has become available
-            if (ps5.status !== updatedDevice.status || !ps5.available) {
+            if (device.status !== updatedDevice.status || !device.available) {
                 debug("Update HA");
                 yield put(
                     updateHomeAssistant(
                         merge(
                             {},
-                            ps5,
+                            device,
                             <DeviceState>{
                                 status: updatedDevice.status,
                                 available: true
@@ -57,7 +57,7 @@ function* checkDevicesState() {
                 updateHomeAssistant(
                     merge(
                         {},
-                        ps5,
+                        device,
                         <DeviceState>{
                             status: "UNKNOWN",
                             available: false

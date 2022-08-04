@@ -6,6 +6,7 @@ mqtt: {}                            # optional MQTT connection info
 logger: @ha:ps5:*                   # will capture all events logged by PS5-MQTT
 device_check_interval: 5000         # recommended interval
 device_discovery_interval: 60000    # recommended interval
+include_ps4_devices: false          # only enable if you only require awake/standby functionality
 ```
 
 ### `mqtt` *optional*
@@ -28,3 +29,8 @@ Value in miliseconds that lets you change the frequency of scanning for PS5 stat
 
 ### `device_discovery_interval`
 Value in miliseconds that lest you change the frequency of discovering PS5 devices.
+
+### `include_ps4_devices`
+If enabled (`true`) the add-on will also discover / allow the registration of Playstation 4 devices.
+
+*NOTE: Playstation 4 devices **will only support Standy/Awake functionality**! If you want more functionality use the [HA integration for PS4](https://www.home-assistant.io/integrations/ps4/) instead!*

@@ -5,4 +5,5 @@ export interface Settings {
     checkDevicesInterval: number;
     discoverDevicesInterval: number;
     credentialStoragePath: string;
+    allowPs4Devices: boolean;
 }

@@ -29,6 +29,8 @@ const {
 
     CREDENTIAL_STORAGE_PATH,
 
+    INCLUDE_PS4_DEVICES, 
+
     DEVICE_CHECK_INTERVAL,
     DEVICE_DISCOVERY_INTERVAL,
 } = process.env;
@@ -54,17 +56,20 @@ async function run() {
     const mqtt: MQTT.AsyncMqttClient = await createMqtt();
     debug("Connected to MQTT Broker!")
 
+    const settings: Settings = {
+        checkDevicesInterval:
+            parseInt(DEVICE_CHECK_INTERVAL || "1000", 10),
+        discoverDevicesInterval:
+            parseInt(DEVICE_DISCOVERY_INTERVAL || "60000", 10),
+        credentialStoragePath,
+        allowPs4Devices: INCLUDE_PS4_DEVICES === 'true'
+    };
+
     try {
         const sagaMiddleware = createSagaMiddleware({
             context: {
                 [MQTT_CLIENT]: mqtt,
-                [SETTINGS]: <Settings>{
-                    checkDevicesInterval:
-                        parseInt(DEVICE_CHECK_INTERVAL || "1000", 10),
-                    discoverDevicesInterval:
-                        parseInt(DEVICE_DISCOVERY_INTERVAL || "60000", 10),
-                    credentialStoragePath,
-                }
+                [SETTINGS]: settings,
             }
         });
         const store = configureStore({
@@ -88,10 +93,10 @@ async function run() {
                 }
                 const [, deviceId, deviceProperty] = matches;
                 const devices = getDeviceRegistry(store.getState());
-                const ps5 = devices[deviceId];
-                if (ps5 !== undefined && deviceProperty === 'power') {
+                const device = devices[deviceId];
+                if (device !== undefined && deviceProperty === 'power') {
                     const data = payload.toString();
-                    store.dispatch(setPowerMode(ps5, data as SwitchStatus));
+                    store.dispatch(setPowerMode(device, data as SwitchStatus));
                 }
             }
         });
@@ -104,7 +109,7 @@ async function run() {
         logError(e);
     }
 
-    setupWebserver(FRONTEND_PORT ?? 3000, credentialStoragePath)
+    setupWebserver(FRONTEND_PORT ?? 3000, settings)
 }
 
 if (require.main === module) {

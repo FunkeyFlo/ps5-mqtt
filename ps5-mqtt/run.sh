@@ -15,6 +15,8 @@ fi
 export DEVICE_CHECK_INTERVAL=$(bashio::config 'device_check_interval')
 export DEVICE_DISCOVERY_INTERVAL=$(bashio::config 'device_discovery_interval')
 
+export INCLUDE_PS4_DEVICES=$(bashio::config 'include_ps4_devices')
+
 export FRONTEND_PORT=8645
 if [ ! -z $(bashio::addon.ingress_port) ]; then
     FRONTEND_PORT=$(bashio::addon.ingress_port)

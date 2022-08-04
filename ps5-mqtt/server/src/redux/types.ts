@@ -1,6 +1,6 @@
-import { Playstation5 } from "../device";
+import { Playstation } from "../device";
 
-type Device = Playstation5 & DeviceState & {
+type Device = Playstation & DeviceState & {
     normalizedName: string
 };
 
