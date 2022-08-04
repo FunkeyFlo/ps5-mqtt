@@ -1,3 +1,9 @@
+## 0.7.1 - 2022-08-04
+
+### What’s changed
+
+- 💪 #22: PS4 devices were *unintentionally* being discovered as [@bryeartem](https://github.com/bryeartem) correctly pointed out. He also mentioned that, in his case, the add-on detects state changes in the PS4 quicker than the HA integration. So instead of 'fixing' the issue I decided to add an extra option (`include_ps4_devices`) to the config. Turning the option on will discover PS4 devices as well as PS5's. The option is disabled by default.
+
 ## 0.7.0 - 2022-08-03
 
 ### What’s changed
@@ -13,7 +19,9 @@
 - client improvements @FunkeyFlo (#19)
 - - added dark/light theme option to client UI 🌗
 - 
+- 
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
+- 
 - 
 - 
 
@@ -33,6 +41,7 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - - The `ps5_credentials` option is deprecated and will be removed with the next *[minor](https://semver.org/)* release. Check the [docs](/ps5-mqtt/DOCS.md) for migration options.
 - 
 - 
+- 
 
 ## 0.5.2
 
@@ -43,13 +52,17 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - Changed MQTT implementation to...
 - - ...reduce amount of messages being sent.
 - 
+- 
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- 
 - 
 - 
 - Re-implemented device discovery
 - - Added `device_discovery_interval` option to change the frequency of discovering PS5 devices.
 - 
+- 
 - - Optimizations for discovered devices.
+- 
 - 
 - 
 - Various minor tweaks and improvements.

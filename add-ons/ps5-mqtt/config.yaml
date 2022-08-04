@@ -1,4 +1,4 @@
-version: 0.7.0
+version: 0.7.1
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
@@ -11,21 +11,21 @@ arch:
   - i386
 startup: application
 services:
-  - "mqtt:need"
+  - mqtt:need
 boot: auto
 host_network: true
 ingress: true
 ingress_port: 0
-panel_icon: 'mdi:sony-playstation'
+panel_icon: mdi:sony-playstation
 ports:
   8645/tcp: null
 ports_description:
   8645/tcp: PS5 MQTT Web Interface
 map:
-  - "config:rw"
+  - config:rw
 options:
   mqtt: {}
-  logger: "@ha:ps5:*"
+  logger: '@ha:ps5:*'
   device_check_interval: 5000
   device_discovery_interval: 60000
 schema:
@@ -38,4 +38,4 @@ schema:
   device_check_interval: int
   device_discovery_interval: int
 stdin: true
-image: "ghcr.io/funkeyflo/ps5-mqtt/{arch}"
+image: ghcr.io/funkeyflo/ps5-mqtt/{arch}
