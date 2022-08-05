@@ -57,8 +57,8 @@ Version >=`0.6.3` saw a switch from locally built Dockerfiles to pre-built image
 ### The log is showing 403 errors when I try to turn my ps5 on or off!
 Double check that you've enabled all required remote play features [as described in the remote play documentation](https://remoteplay.dl.playstation.net/remoteplay/lang/en/ps5_mobile.html#section3).
 
-### Why doesn't this add-on support Playstation 4 devices?
-Because there is a great [Home Assistant integration](https://www.home-assistant.io/integrations/ps4/) that does this job already!
+### Why does this add-on only support Playstation 4 Awake/Standby?
+There already is a great [Home Assistant integration](https://www.home-assistant.io/integrations/ps4/) that supports more functionality for PS4 devices like starting games. However, users have reported that this add-on detects Awake/Standby changes faster than the existing integration. So if you want you can use this add-on next to the existing integration or instead of it, if you are only interested in Standby/Awake.
 
 ## Thanks & Credits
 The majority of the MQTT implementation was based on the work done by [andrew-codes](https://github.com/andrew-codes) and can be found in [this repository](https://github.com/andrew-codes/home-automation).
