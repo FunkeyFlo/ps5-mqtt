@@ -110,8 +110,23 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: 🏭 Build & Publish add-on ${{ needs.information.outputs.target }}-${{ matrix.arch }}
+    - name: 🏭 [EDGE] Build & Publish add-on ${{ needs.information.outputs.target }}-${{ matrix.arch }}
       uses: home-assistant/builder@2022.07.0
+      if: needs.information.outputs.environment == 'edge'
+      with:
+        args: |
+          ${{ env.BUILD_ARGS }} \
+          --${{ matrix.arch }} \
+          --target /data/add-ons/${{ needs.information.outputs.target }} \
+          --version ${{ needs.information.outputs.version }} \
+          --image "ps5-mqtt/${{ matrix.arch }}" \
+          --docker-hub "ghcr.io/${{ github.repository_owner }}" \
+          --no-latest \
+          --addon
+          
+    - name: 🏭 [STABLE] Build & Publish add-on ${{ needs.information.outputs.target }}-${{ matrix.arch }}
+      uses: home-assistant/builder@2022.07.0
+      if: needs.information.outputs.environment == 'stable'
       with:
         args: |
           ${{ env.BUILD_ARGS }} \
