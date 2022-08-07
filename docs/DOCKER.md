@@ -19,7 +19,7 @@ This allows you to circumvent the default startup command, which depends on [bas
 ```
 .  
 │
-├─── customizations             # we will need a separate directory to use as a volume
+├─── config                     # we will need a separate directory to use as a volume
 │    │
 │    └─── run.sh                # custom startup script
 │   
@@ -40,9 +40,9 @@ services:
   ps5-mqtt:
     container_name: PS5-MQTT                            # choose whatever name you like
     image: ghcr.io/funkeyflo/ps5-mqtt/amd64:0.7.1       # do not use 'latest' as this might result in using a 'edge' (beta) version
-    entrypoint: /customizations/run.sh                  # the file that will be executed at startup
+    entrypoint: /config/run.sh                          # the file that will be executed at startup
     volumes:                                            # we will use this volume to get our custom startup script into the container
-      - ./customizations:/customizations                
+      - ./config:/config
     network_mode: host                                  # changing/omiting this option WILL BREAK the app.
     environment:
       - MQTT_HOST=192.168.0.132                         # (ip)address of your mqtt broker
@@ -55,7 +55,7 @@ services:
 
       - FRONTEND_PORT=8645
 
-      - CREDENTIAL_STORAGE_PATH=/config/ps5-mqtt/credentials.json
+      - CREDENTIAL_STORAGE_PATH=/config/credentials.json
       - DEBUG=@ha:ps5:*
 ```
 
