@@ -3,3 +3,4 @@ dist
 **/.env
 **/node_modules
 NOTES.md
+.docker-test

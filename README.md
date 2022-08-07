@@ -43,6 +43,8 @@ The following features have been implemented or are planned for future implement
 | [Web UI for acquiring credentials][credentials-ui] | ✔           |
 | Web UI for managing devices                        | ❌           |
 
+## Using the add-on with Home Assistant Core (`Docker`)
+This bit of [documentation][ha-core-docs] should get you on your way! 😻
 
 ## Support the project!
 If you enjoy the project please consider donating to sponsor further development! 💕
@@ -52,17 +54,18 @@ If you enjoy the project please consider donating to sponsor further development
 ## FAQ
 
 ### I'm trying to update from version `0.6.2` but the installation is failing!
-Version >=`0.6.3` saw a switch from locally built Dockerfiles to pre-built images. Supervisor seems to not handle this upgrade properly. Instead you'll have to uninstall the add-on first and then re-install. You can follow the steps described in the [edge version documentation](https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt-edge#updating-the-edge-add-on) for this.
+Version >=`0.6.3` saw a switch from locally built Dockerfiles to pre-built images. Supervisor seems to not handle this upgrade properly. Instead you'll have to uninstall the add-on first and then re-install. You can follow the steps described in the [edge version documentation][edge-docs] for this.
 
 ### The log is showing 403 errors when I try to turn my ps5 on or off!
-Double check that you've enabled all required remote play features [as described in the remote play documentation](https://remoteplay.dl.playstation.net/remoteplay/lang/en/ps5_mobile.html#section3).
+Double check that you've enabled all required remote play features [as described in the remote play documentation][ps5-rp].
 
 ### Why does this add-on only support Playstation 4 Awake/Standby?
-There already is a great [Home Assistant integration](https://www.home-assistant.io/integrations/ps4/) that supports more functionality for PS4 devices like starting games. However, users have reported that this add-on detects Awake/Standby changes faster than the existing integration. So if you want you can use this add-on next to the existing integration or instead of it, if you are only interested in Standby/Awake.
+There already is a great [Home Assistant integration][ha-ps4] that supports more functionality for PS4 devices like starting games. However, users have reported that this add-on detects Awake/Standby changes faster than the existing integration. So if you want you can use this add-on next to the existing integration or instead of it, if you are only interested in Standby/Awake.
 
 ## Thanks & Credits
-The majority of the MQTT implementation was based on the work done by [andrew-codes](https://github.com/andrew-codes) and can be found in [this repository](https://github.com/andrew-codes/home-automation).
+The majority of the MQTT implementation was based on the work done by [andrew-codes][ac-user] and can be found in [this repository][ac-repo].
 
+<!-- links -->
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [armhf-shield]: https://img.shields.io/badge/armhf-yes-green.svg
@@ -71,3 +74,11 @@ The majority of the MQTT implementation was based on the work done by [andrew-co
 
 [credentials-ui]: https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v600-2
 [discord]: https://discord.gg/BnmvYHvz5N
+[ha-core-docs]: ./docs/DOCKER.md
+[edge-docs]: https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt-edge#updating-the-edge-add-on
+
+[ac-repo]: https://github.com/andrew-codes/home-automation
+[ac-user]: https://github.com/andrew-codes
+
+[ha-ps4]: https://www.home-assistant.io/integrations/ps4/
+[ps5-rp]: https://remoteplay.dl.playstation.net/remoteplay/lang/en/ps5_mobile.html#section3
