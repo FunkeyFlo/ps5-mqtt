@@ -64,7 +64,7 @@ services:
 
 
 ### 2. Create a startup file
-The only thing we have to do here is to simply point the app to the server executable using `node.js`.
+The only thing left to do is to simply point the app to the server executable using `node.js`. We'll do this by creating a shell script called `run.sh` as mentioned before with the following contents.
 
 ```sh
 #!/bin/sh
