@@ -40,6 +40,7 @@ const {
     PSN_ACCOUNTS,
 } = process.env;
 
+// Parse BASHIO input as JSON object array
 const accountsInfo = JSON.parse(PSN_ACCOUNTS);
 
 const credentialStoragePath = CREDENTIAL_STORAGE_PATH
