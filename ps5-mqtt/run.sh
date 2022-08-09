@@ -22,6 +22,8 @@ if [ ! -z $(bashio::addon.ingress_port) ]; then
     FRONTEND_PORT=$(bashio::addon.ingress_port)
 fi
 
+export PSN_ACCOUNTS='$(bashio::config.psn_accounts)'
+
 export CREDENTIAL_STORAGE_PATH="/config/ps5-mqtt/credentials.json"
 
 export DEBUG="*,-mqttjs*,-mqtt-packet*,-playactor:*,-@ha:state*,-@ha:ps5:poll*,-@ha:ps5:check*"

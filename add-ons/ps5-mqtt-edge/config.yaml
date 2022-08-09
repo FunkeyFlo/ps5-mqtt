@@ -29,12 +29,16 @@ options:
   device_check_interval: 5000
   device_discovery_interval: 60000
   include_ps4_devices: false
+  psn_accounts:
 schema:
   mqtt:
     host: str?
     port: port?
     user: str?
     pass: str?
+  psn_accounts:
+    - username: str?
+      npsso: str
   logger: str?
   device_check_interval: int
   device_discovery_interval: int

@@ -1,3 +1,4 @@
+import { merge } from "lodash";
 import { Discovery } from "playactor/dist/discovery";
 import { DeviceType } from "playactor/dist/discovery/model";
 import { call, getContext, put, select } from "redux-saga/effects";
@@ -48,13 +49,14 @@ function* discoverDevices() {
         if (trackedDevices[device.id] === undefined) {
             yield put(
                 registerDevice(
-                    {
-                        ...device, 
+                    merge({}, device, <Partial<Device>>{
+                        available: true, 
                         normalizedName: 
                             device.name.replace(/[^a-zA-Z\d\s-_:]/g, '')
                                     .replace(/[\s-]/g, '_')
-                                    .toLowerCase()
-                    }
+                                    .toLowerCase(),
+                        activity: undefined
+                    })
                 )
             );
         }

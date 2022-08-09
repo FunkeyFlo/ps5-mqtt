@@ -1,3 +1,4 @@
+import { PsnAccount } from "../psn-account";
 import type {
     RegisterDeviceAction,
     Device,
@@ -10,6 +11,9 @@ import type {
     PollDiscoveryAction,
     AddDeviceAction,
     SetTransitioningAction,
+    CheckPsnPresenceAction,
+    PollPsnPresenceAction,
+    UpdateAccountAction,
 } from "./types";
 
 const discoverDevices = (): DiscoverDevicesAction => ({
@@ -40,6 +44,10 @@ const checkDevicesState = (): CheckDevicesStateAction => ({
     type: "CHECK_DEVICES_STATE",
 });
 
+const checkPsnPresence = (): CheckPsnPresenceAction => ({
+    type: "CHECK_PSN_PRESENCE",
+});
+
 const setTransitioning = (device: {
     id: string;
     transitioning: boolean;
@@ -56,10 +64,19 @@ const pollDiscovery = (): PollDiscoveryAction => ({
     type: "POLL_DISCOVERY",
 });
 
+const pollPsnPresence = (): PollPsnPresenceAction => ({
+    type: "POLL_PSN_PRESENCE",
+});
+
 const updateHomeAssistant = (device: Device): UpdateHomeAssistantAction => ({
     type: "UPDATE_HOME_ASSISTANT",
-    payload: { device },
+    payload: device,
 });
+
+const updateAccount = (account: PsnAccount): UpdateAccountAction => ({
+    type: 'UPDATE_PSN_ACCOUNT',
+    payload: account,
+})
 
 export {
     addDevice,
@@ -71,4 +88,7 @@ export {
     pollDevices,
     pollDiscovery,
     updateHomeAssistant,
+    checkPsnPresence,
+    pollPsnPresence,
+    updateAccount,
 };

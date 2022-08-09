@@ -14,20 +14,29 @@ export module HaMqtt {
             sw_version?: string;
         }
 
-        export interface MqttEntity {
-            name: string,
+        export interface MqttSwitchEntity extends MqttEntity {
             command_topic: string;
-            state_topic?: string;
-            availability_topic?: string;
             device_class?: string;
-            object_id?: string;
-            unique_id?: string;
             state_on?: string;
             state_off?: string;
             payload_on?: string;
             payload_off?: string;
-            icon: string;
+        }
+
+        export interface MqttSensorEntity extends MqttEntity {
+            device_class?: string;
+        }
+
+        interface MqttEntity {
+            name: string,
+            state_topic?: string;
+            object_id?: string;
+            unique_id?: string;
+            icon?: string;
+            availability_topic?: string;
             device?: MqttDevice;
+            enabled_by_default?: boolean;
+            json_attributes_topic?: string;
         }
 
     }

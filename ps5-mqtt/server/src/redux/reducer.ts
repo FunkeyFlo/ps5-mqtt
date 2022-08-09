@@ -3,6 +3,7 @@ import type { AnyAction, Device, State } from "./types";
 
 const defaultState: State = {
     devices: {},
+    accounts: {}
 };
 
 const reducer = (state = defaultState, action: AnyAction) => {
@@ -18,9 +19,9 @@ const reducer = (state = defaultState, action: AnyAction) => {
         case "UPDATE_HOME_ASSISTANT": {
             return merge({}, state, {
                 devices: {
-                    [action.payload.device.id]: <Partial<Device>>{
-                        status: action.payload.device.status,
-                        available: action.payload.device.available,
+                    [action.payload.id]: <Partial<Device>>{
+                        status: action.payload.status,
+                        available: action.payload.available,
                     },
                 },
             });
@@ -32,6 +33,14 @@ const reducer = (state = defaultState, action: AnyAction) => {
                     [action.payload.id]: {
                         transitioning: action.payload.transitioning,
                     },
+                },
+            });
+        }
+
+        case "UPDATE_PSN_ACCOUNT": {
+            return merge({}, state, {
+                accounts: {
+                    [action.payload.accountId]: action.payload,
                 },
             });
         }
