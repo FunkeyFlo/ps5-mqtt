@@ -28,6 +28,7 @@ options:
   logger: "@ha:ps5:*"
   device_check_interval: 5000
   device_discovery_interval: 60000
+  account_check_interval: 5000
   include_ps4_devices: false
   psn_accounts: []
 schema:
@@ -42,6 +43,7 @@ schema:
   logger: str?
   device_check_interval: int
   device_discovery_interval: int
+  account_check_interval: int
   include_ps4_devices: bool
 stdin: true
 image: "ghcr.io/funkeyflo/ps5-mqtt/{arch}"
