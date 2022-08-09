@@ -1,5 +1,5 @@
 import { merge } from "lodash";
-import type { AnyAction, Device, State } from "./types";
+import type { AnyAction, State } from "./types";
 
 const defaultState: State = {
     devices: {},
@@ -17,14 +17,9 @@ const reducer = (state = defaultState, action: AnyAction) => {
         }
 
         case "UPDATE_HOME_ASSISTANT": {
-            return merge({}, state, {
-                devices: {
-                    [action.payload.id]: <Partial<Device>>{
-                        status: action.payload.status,
-                        available: action.payload.available,
-                    },
-                },
-            });
+            const newState = merge({}, state);
+            newState.devices[action.payload.id] = action.payload;
+            return newState;
         }
 
         case "TRANSITIONING": {

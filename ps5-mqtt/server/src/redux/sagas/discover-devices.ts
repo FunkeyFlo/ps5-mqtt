@@ -48,16 +48,15 @@ function* discoverDevices() {
     for (const device of discoveredDevices) {
         if (trackedDevices[device.id] === undefined) {
             yield put(
-                registerDevice(
-                    merge({}, device, <Partial<Device>>{
-                        available: true, 
-                        normalizedName: 
-                            device.name.replace(/[^a-zA-Z\d\s-_:]/g, '')
-                                    .replace(/[\s-]/g, '_')
-                                    .toLowerCase(),
-                        activity: undefined
-                    })
-                )
+                registerDevice({
+                    ...device,
+                    available: true, 
+                    normalizedName: 
+                        device.name.replace(/[^a-zA-Z\d\s-_:]/g, '')
+                                .replace(/[\s-]/g, '_')
+                                .toLowerCase(),
+                    activity: undefined,
+                })
             );
         }
     }

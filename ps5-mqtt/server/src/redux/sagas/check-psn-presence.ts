@@ -1,4 +1,4 @@
-import { merge, isEqual } from "lodash";
+import { merge } from "lodash";
 import { call, put, select } from "redux-saga/effects";
 import { PsnAccount } from "../../psn-account";
 import { createErrorLogger } from "../../util/error-logger";
@@ -21,9 +21,7 @@ function* checkPsnPresence() {
             );
 
             yield put(
-                updateAccount(
-                    merge({}, updatedAccount)
-                )
+                updateAccount(updatedAccount)
             );
         }
     } catch (e) {

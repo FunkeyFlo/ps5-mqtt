@@ -39,31 +39,25 @@ function* checkDevicesState() {
             if (device.status !== updatedDevice.status || !device.available) {
                 debug("Update HA");
                 yield put(
-                    updateHomeAssistant(
-                        merge(
-                            {},
-                            device,
-                            <DeviceState>{
-                                status: updatedDevice.status,
-                                available: true
-                            }
-                        )
-                    )
+                    updateHomeAssistant({
+                        ...device,
+                        status: updatedDevice.status,
+                        activity: updatedDevice.status !== 'AWAKE' 
+                            ? undefined 
+                            : updatedDevice.activity,
+                        available: true,
+                    })
                 );
             }
         } catch (e) {
             // previously available ps5 cannot be located
             yield put(
-                updateHomeAssistant(
-                    merge(
-                        {},
-                        device,
-                        <DeviceState>{
-                            status: "UNKNOWN",
-                            available: false
-                        }
-                    )
-                )
+                updateHomeAssistant({
+                    ...device,
+                    status: "UNKNOWN",
+                    available: false,
+                    activity: undefined,
+                })
             );
 
             errorLogger(e);

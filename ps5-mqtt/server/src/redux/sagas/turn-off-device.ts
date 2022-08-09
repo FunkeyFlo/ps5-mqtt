@@ -5,7 +5,7 @@ import sh from "shelljs";
 import { Settings, SETTINGS } from "../../services";
 import { createErrorLogger } from "../../util/error-logger";
 import { setTransitioning, updateHomeAssistant } from "../action-creators";
-import type { ChangePowerModeAction } from "../types";
+import type { ChangePowerModeAction, Device } from "../types";
 
 const debug = createDebugger("@ha:ps5:turnOffDevice");
 const debugError = createErrorLogger();
@@ -36,9 +36,11 @@ function* turnOffDevice(action: ChangePowerModeAction) {
         debug(stdout);
 
         yield put(
-            updateHomeAssistant(
-                merge({}, action.payload.device, { status: "STANDBY" })
-            )
+            updateHomeAssistant({
+                ...action.payload.device, 
+                status: "STANDBY", 
+                activity: undefined // also clear the activity when a device turns off
+            })
         );
     } catch (e) {
         debugError(e);
