@@ -22,6 +22,22 @@ if [ ! -z $(bashio::addon.ingress_port) ]; then
     FRONTEND_PORT=$(bashio::addon.ingress_port)
 fi
 
+if [ ! -z $(bashio::config 'psn_accounts')]; then
+    export PSN_ACCOUNTS="["
+
+    for computer in $(bashio::config 'psn_accounts|keys'); do
+        USERNAME=$(bashio::config "psn_accounts[${computer}].username")
+        NPSSO=$(bashio::config "psn_accounts[${computer}].npsso")
+        
+        PSN_ACCOUNTS+='{"username":"$USERNAME","npsso":"$NPSSO"},'
+    done
+
+    PSN_ACCOUNTS=${PSN_ACCOUNTS::-1}
+    PSN_ACCOUNTS+="]"
+else
+    export PSN_ACCOUNTS="[]"
+fi
+
 export PSN_ACCOUNTS=$(bashio::config 'psn_accounts')
 
 export CREDENTIAL_STORAGE_PATH="/config/ps5-mqtt/credentials.json"
