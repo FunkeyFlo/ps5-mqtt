@@ -6,15 +6,17 @@ mqtt: {}                            # [optional] MQTT connection info
 
 logger: @ha:ps5:*                   # Will capture all events logged by PS5-MQTT
 
-device_check_interval: 5000         # Recommended interval
+device_check_interval: 5000         # Recommended interval for checking device state
 
-device_discovery_interval: 60000    # Recommended interval
+device_discovery_interval: 60000    # Recommended interval for discovering 'new' devices
 
 include_ps4_devices: false          # Only enable if you only require awake/standby functionality
 
 psn_accounts:                       # [optional] Add PSN accounts to match online activity to your devices
   - username: MyPsnUser            
     npsso: '!secret my_npsso'       # NPSSO token (expires after two months 😢)
+
+account_check_interval: 5000        # Recommended interval for checking account state (don't go lower than 3000!)
 ```
 
 ### `mqtt` *optional*
@@ -37,6 +39,11 @@ Value in miliseconds that lets you change the frequency of scanning for PS5 stat
 
 ### `device_discovery_interval`
 Value in miliseconds that lest you change the frequency of discovering PS5 devices.
+
+### `account_check_interval`
+Value in miliseconds that lets you change the frequency of checking the online status of a PSN account.
+
+*Be carefult! the PSN API's have a rate limit of 300 requests per 15 minutes. So don't go lower than 3000ms!*
 
 ### `include_ps4_devices` *optional*
 If enabled (`true`) the add-on will also discover / allow the registration of Playstation 4 devices.

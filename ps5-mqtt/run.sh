@@ -14,6 +14,7 @@ fi
 
 export DEVICE_CHECK_INTERVAL=$(bashio::config 'device_check_interval')
 export DEVICE_DISCOVERY_INTERVAL=$(bashio::config 'device_discovery_interval')
+export ACCOUNT_CHECK_INTERVAL=$(bashio::config 'account_check_interval')
 
 export INCLUDE_PS4_DEVICES=$(bashio::config 'include_ps4_devices')
 

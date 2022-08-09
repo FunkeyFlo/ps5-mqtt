@@ -36,6 +36,7 @@ const {
 
     DEVICE_CHECK_INTERVAL,
     DEVICE_DISCOVERY_INTERVAL,
+    ACCOUNT_CHECK_INTERVAL,
 
     PSN_ACCOUNTS,
 } = process.env;
@@ -75,10 +76,14 @@ async function run() {
     debug("Connected to MQTT Broker!")
 
     const settings: Settings = {
+        // polling intervals
         checkDevicesInterval:
             parseInt(DEVICE_CHECK_INTERVAL || "5000", 10),
+        checkAccountInterval:
+            parseInt(ACCOUNT_CHECK_INTERVAL || "5000", 10),
         discoverDevicesInterval:
             parseInt(DEVICE_DISCOVERY_INTERVAL || "60000", 10),
+
         credentialStoragePath,
         allowPs4Devices: INCLUDE_PS4_DEVICES === 'true',
     };

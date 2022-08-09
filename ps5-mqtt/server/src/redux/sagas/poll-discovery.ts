@@ -7,12 +7,12 @@ import { discoverDevices } from "../action-creators";
 const debugError = createErrorLogger();
 
 function* pollDisovery() {
-    const settings: Settings = yield getContext(SETTINGS);
+    const { discoverDevicesInterval }: Settings = yield getContext(SETTINGS);
 
     while (true) {
         try {
             yield put(discoverDevices());
-            yield delay(settings.discoverDevicesInterval);
+            yield delay(discoverDevicesInterval);
         } catch (e) {
             debugError(e);
         }
