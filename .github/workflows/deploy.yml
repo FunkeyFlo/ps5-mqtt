@@ -8,7 +8,6 @@ on:
       - released
   workflow_run:
     workflows: [ "CI" ]
-    branches: [ main ]
     types:
       - completed
   workflow_dispatch:
