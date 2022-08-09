@@ -18,6 +18,7 @@ import { createErrorLogger } from "./util/error-logger";
 import { setupWebserver } from "./web-server";
 
 const debug = createDebugger("@ha:ps5");
+const debugConfig = createDebugger("@ha:ps5:config");
 const debugMqtt = createDebugger("@ha:ps5:mqtt");
 const debugState = createDebugger("@ha:state");
 const logError = createErrorLogger();
@@ -40,7 +41,9 @@ const {
     PSN_ACCOUNTS,
 } = process.env;
 
-// Parse BASHIO input as JSON object array
+
+debugConfig('psn_accounts config:', PSN_ACCOUNTS);
+
 const accountsInfo = JSON.parse(PSN_ACCOUNTS);
 
 const credentialStoragePath = CREDENTIAL_STORAGE_PATH
