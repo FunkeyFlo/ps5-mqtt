@@ -29,7 +29,7 @@ if [ ! -z $(bashio::config 'psn_accounts') ]; then
         USERNAME=$(bashio::config "psn_accounts[${computer}].username")
         NPSSO=$(bashio::config "psn_accounts[${computer}].npsso")
         
-        PSN_ACCOUNTS+='{"username":"$USERNAME","npsso":"$NPSSO"},'
+        PSN_ACCOUNTS+="{\"username\":\"$USERNAME\",\"npsso\":\"$NPSSO\"},"
     done
 
     PSN_ACCOUNTS=${PSN_ACCOUNTS::-1}
