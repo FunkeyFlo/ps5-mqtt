@@ -20,14 +20,11 @@ function* checkPsnPresence() {
                 account
             );
 
-            // only update account if it has truly changed
-            if(!isEqual(account, updatedAccount)) {   
-                yield put(
-                    updateAccount(
-                        merge({}, updatedAccount)
-                    )
-                );
-            }
+            yield put(
+                updateAccount(
+                    merge({}, updatedAccount)
+                )
+            );
         }
     } catch (e) {
         errorLogger(e);

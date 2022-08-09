@@ -1,5 +1,8 @@
 import * as psnApi from 'psn-api';
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
+import createDebugger from 'debug';
+
+const debug = createDebugger('@ha:ps5:psn-api');
 
 export module PsnAccount {
     export interface AccountActivity {
@@ -116,6 +119,9 @@ async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<
             launchPlatform: activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
         }
     } else {
+        if(response.status >= 400 && response.status < 600) {
+            debug(`Unable to retrieve PSN information. API response: "${response.status}:${response.statusText}"`)
+        }
         return undefined;
     }
 }
