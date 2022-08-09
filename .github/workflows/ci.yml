@@ -82,6 +82,7 @@ jobs:
         
     - name: 🏭 Build ${{ matrix.arch }} add-on - Edge
       uses: home-assistant/builder@2022.07.0
+      if: github.actor != github.repository_owner
       with:
         args: |
           ${{ env.BUILD_ARGS }} \
@@ -92,4 +93,18 @@ jobs:
           --image "ps5-mqtt/${{ matrix.arch }}" \
           --docker-hub "ghcr.io/${{ github.repository_owner }}" \
           --test \
+          --addon
+
+    - name: 🏭 Build & Deploy ${{ matrix.arch }} add-on - Edge
+      uses: home-assistant/builder@2022.07.0
+      if: github.actor == github.repository_owner
+      with:
+        args: |
+          ${{ env.BUILD_ARGS }} \
+          --${{ matrix.arch }} \
+          --target /data/add-ons/ps5-mqtt-edge \
+          --version edge \
+          --no-latest \
+          --image "ps5-mqtt/${{ matrix.arch }}" \
+          --docker-hub "ghcr.io/${{ github.repository_owner }}" \
           --addon
