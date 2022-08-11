@@ -51,6 +51,10 @@ If you enjoy the project please consider donating to sponsor further development
 
 <a href="https://www.buymeacoffee.com/funkeyflo" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
+## Example usage
+![image](https://user-images.githubusercontent.com/4623715/184224674-97c167f6-44bc-463a-a573-3a47b5eaefc8.png)
+![image](https://user-images.githubusercontent.com/4623715/184225211-9be41ffc-7a19-4ab1-9242-7eac7053285d.png)
+
 ## FAQ
 
 ### I'm trying to update from version `0.6.2` but the installation is failing!
