@@ -41,7 +41,7 @@ The following features have been implemented or are planned for future implement
 | Power; Wake/Standby (rest mode)                    | ✔           |
 | Discover Playstation 5 devices on local network    | ✔           |
 | [Web UI for acquiring credentials][credentials-ui] | ✔           |
-| Web UI for managing devices                        | ❌           |
+| Match [PSN account activity][1.0.0] to device      | ✔           |
 
 ## Using the add-on with Home Assistant Core (`Docker`)
 This bit of [documentation][ha-core-docs] should get you on your way! 😻
@@ -82,3 +82,4 @@ The majority of the MQTT implementation was based on the work done by [andrew-co
 
 [ha-ps4]: https://www.home-assistant.io/integrations/ps4/
 [ps5-rp]: https://remoteplay.dl.playstation.net/remoteplay/lang/en/ps5_mobile.html#section3
+[1.0.0]: https://github.com/FunkeyFlo/ps5-mqtt/releases/tag/v1.0.0
