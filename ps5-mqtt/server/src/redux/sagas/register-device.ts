@@ -6,9 +6,11 @@ import { addDevice, updateHomeAssistant } from "../action-creators";
 import type { RegisterDeviceAction } from "../types";
 
 function* registerDevice(
-    { payload: ps5 }: RegisterDeviceAction
+    { payload: device }: RegisterDeviceAction
 ) {
     const mqtt: MQTT.AsyncClient = yield getContext(MQTT_CLIENT);
+
+    const deviceConfig = HaMqtt.getMqttDeviceConfig(device);
 
     yield call<
         (
@@ -18,19 +20,19 @@ function* registerDevice(
         ) => Promise<MQTT.IPublishPacket>
     >(
         mqtt.publish.bind(mqtt),
-        `homeassistant/switch/${ps5.id}/power/config`,
+        `homeassistant/switch/${device.id}/power/config`,
         // https://www.home-assistant.io/integrations/switch.mqtt/
-        JSON.stringify(<HaMqtt.Config.MqttEntity>{
+        JSON.stringify(<HaMqtt.Config.MqttSwitchEntity>{
             availability: [
                 {
-                    topic: `ps5-mqtt/${ps5.id}`,
+                    topic: `ps5-mqtt/${device.id}`,
                     value_template: "{{ value_json.device_status }}"
                 }
             ],
-            name: ps5.name + " power",
-            command_topic: `ps5-mqtt/${ps5.id}/set/power`,
-            state_topic: `ps5-mqtt/${ps5.id}`,
-            unique_id: `${ps5.normalizedName}_switch_power`,
+            name: device.name + " power",
+            command_topic: `ps5-mqtt/${device.id}/set/power`,
+            state_topic: `ps5-mqtt/${device.id}`,
+            unique_id: `${device.id}_power_ps5mqtt`,
             state_on: "AWAKE",
             state_off: "STANDBY",
             payload_on: "AWAKE",
@@ -38,14 +40,41 @@ function* registerDevice(
             optimistic: false,
             value_template: "{{ value_json.power }}",
             icon: "mdi:sony-playstation",
-            device: HaMqtt.getMqttDeviceConfig(ps5)
+            device: deviceConfig
         }),
         { qos: 1, retain: true }
     );
 
-    yield put(addDevice(ps5));
+    yield call<
+        (
+            topic: string,
+            message: string | Buffer,
+            { qos: number, retain: boolean }
+        ) => Promise<MQTT.IPublishPacket>
+    >(
+        mqtt.publish.bind(mqtt),
+        `homeassistant/sensor/${device.id}/activity/config`,
+        JSON.stringify(<HaMqtt.Config.MqttSensorEntity>{
+            availability: [
+                {
+                    topic: `ps5-mqtt/${device.id}`,
+                    value_template: "{{ value_json.device_status }}"
+                }
+            ],
+            unique_id: `${device.id}_activity_ps5mqtt`,
+            state_topic: `ps5-mqtt/${device.id}`,
+            name: device.name + " activity",
+            device: deviceConfig,
+            enabled_by_default: true,
+            json_attributes_topic: `ps5-mqtt/${device.id}`,
+            value_template: "{{ value_json.activity }}"
+        }),
+        { qos: 1, retain: true }
+    )
 
-    yield put(updateHomeAssistant(ps5));
+    yield put(addDevice(device));
+
+    yield put(updateHomeAssistant(device));
 }
 
 export { registerDevice };

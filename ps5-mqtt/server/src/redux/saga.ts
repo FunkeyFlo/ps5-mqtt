@@ -9,10 +9,13 @@ function* pollDisoverySaga() {
     yield takeLatest("POLL_DISCOVERY", sagas.pollDisovery);
 }
 
+function* pollPsnPresenceSaga() {
+    yield takeLatest("POLL_PSN_PRESENCE", sagas.pollPsnPresence);
+}
+
 function* addDevicesSaga() {
     yield takeLatest("REGISTER_DEVICE", sagas.registerDevice);
 }
-
 
 function* turnOnSaga() {
     yield takeLatest("CHANGE_POWER_MODE", sagas.turnOnDevice);
@@ -28,6 +31,14 @@ function* updateHomeAssistantSaga() {
 
 function* checkDevicesStateSaga() {
     yield takeLatest("CHECK_DEVICES_STATE", sagas.checkDevicesState);
+}
+
+function* checkPsnPresenceSaga() {
+    yield takeLatest("CHECK_PSN_PRESENCE", sagas.checkPsnPresence);
+}
+
+function* updateAccountSaga() {
+    yield takeLatest("UPDATE_PSN_ACCOUNT", sagas.updateAccount);
 }
 
 function* pollPs5StatesSaga() {
@@ -53,8 +64,11 @@ function* saga() {
             turnOffSaga,
             updateHomeAssistantSaga,
             checkDevicesStateSaga,
+            checkPsnPresenceSaga,
             pollPs5StatesSaga,
             pollDisoverySaga,
+            pollPsnPresenceSaga,
+            updateAccountSaga,
         ].map((saga) => fork(saga))
     );
 }

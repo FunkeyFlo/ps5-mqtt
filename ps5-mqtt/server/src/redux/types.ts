@@ -1,4 +1,5 @@
 import { Playstation } from "../device";
+import { PsnAccount } from "../psn-account";
 
 type Device = Playstation & DeviceState & {
     normalizedName: string
@@ -7,6 +8,10 @@ type Device = Playstation & DeviceState & {
 type DeviceState = {
     status: SwitchStatus;
     available: boolean;
+
+    activity: PsnAccount.AccountActivity & {
+        activePlayers: string[];
+    };
 }
 
 type Ps5Status = "STANDBY" | "AWAKE";
@@ -28,9 +33,7 @@ type RegisterDeviceAction = {
 
 type UpdateHomeAssistantAction = {
     type: "UPDATE_HOME_ASSISTANT";
-    payload: {
-        device: Device;
-    };
+    payload: Device;
 };
 
 type ChangePowerModeAction = {
@@ -55,6 +58,10 @@ type CheckDevicesStateAction = {
     type: "CHECK_DEVICES_STATE";
 };
 
+type CheckPsnPresenceAction = {
+    type: "CHECK_PSN_PRESENCE";
+};
+
 type PersistDevicesAction = {
     type: "PERSIST_DEVICES";
     payload: Record<string, Device>;
@@ -68,6 +75,15 @@ type PollDiscoveryAction = {
     type: "POLL_DISCOVERY";
 };
 
+type PollPsnPresenceAction = {
+    type: "POLL_PSN_PRESENCE";
+};
+
+type UpdateAccountAction = {
+    type: "UPDATE_PSN_ACCOUNT";
+    payload: PsnAccount;
+}
+
 type AnyAction =
     | RegisterDeviceAction
     | PersistDevicesAction
@@ -79,14 +95,19 @@ type AnyAction =
     | PollDiscoveryAction
     | SetTransitioningAction
     | UpdateDeviceAction
-    | UpdateHomeAssistantAction;
+    | UpdateHomeAssistantAction
+    | CheckPsnPresenceAction
+    | PollPsnPresenceAction
+    | UpdateAccountAction
+    ;
 
 type State = {
     devices: Record<string, Device>;
+    accounts: Record<string, PsnAccount>;
 };
 
 export type {
-    RegisterDeviceAction as RegisterDeviceAction,
+    RegisterDeviceAction,
     AnyAction,
     AddDeviceAction,
     PersistDevicesAction,
@@ -103,4 +124,7 @@ export type {
     UpdateHomeAssistantAction,
     UpdateDeviceAction,
     SwitchStatus,
+    UpdateAccountAction,
+    CheckPsnPresenceAction,
+    PollPsnPresenceAction,
 };

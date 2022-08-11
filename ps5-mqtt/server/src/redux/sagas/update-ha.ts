@@ -3,7 +3,7 @@ import { call, getContext } from "redux-saga/effects";
 import { MQTT_CLIENT } from "../../services";
 import type { UpdateHomeAssistantAction } from "../types";
 
-function* updateHomeAssistant({ payload: { device } }: UpdateHomeAssistantAction) {
+function* updateHomeAssistant({ payload: device }: UpdateHomeAssistantAction) {
     const mqtt: MQTT.AsyncClient = yield getContext(MQTT_CLIENT);
 
     yield call<
@@ -17,11 +17,18 @@ function* updateHomeAssistant({ payload: { device } }: UpdateHomeAssistantAction
         `ps5-mqtt/${device.id}`,
         JSON.stringify({
             power: device.status,
-            device_status: device.available ? 'online' : 'offline'
+            device_status: device.available ? 'online' : 'offline',
+            activity: device.status === 'AWAKE' 
+                ? (device.activity !== undefined ? 'playing' : 'idle')
+                : 'none',
+            players: device.activity?.activePlayers,
+            title_id: device.activity?.titleId,
+            entity_picture: device.activity?.titleImage,
+            title_image: device.activity?.titleImage,
+            title_name: device.activity?.titleName,
         }),
         { qos: 1, retain: true }
     );
 }
 
 export { updateHomeAssistant };
-

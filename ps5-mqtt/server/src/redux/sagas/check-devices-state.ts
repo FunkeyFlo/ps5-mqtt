@@ -1,12 +1,11 @@
 import createDebugger from "debug";
-import { merge } from "lodash";
 import { getContext, put, select } from "redux-saga/effects";
 import sh from "shelljs";
 import { Settings, SETTINGS } from "../../services";
 import { createErrorLogger } from "../../util/error-logger";
 import { updateHomeAssistant } from "../action-creators";
 import { getDeviceList } from "../selectors";
-import type { Device, DeviceState } from "../types";
+import type { Device } from "../types";
 
 const debug = createDebugger("@ha:ps5:checkDevicesState");
 const errorLogger = createErrorLogger();
@@ -39,31 +38,25 @@ function* checkDevicesState() {
             if (device.status !== updatedDevice.status || !device.available) {
                 debug("Update HA");
                 yield put(
-                    updateHomeAssistant(
-                        merge(
-                            {},
-                            device,
-                            <DeviceState>{
-                                status: updatedDevice.status,
-                                available: true
-                            }
-                        )
-                    )
+                    updateHomeAssistant({
+                        ...device,
+                        status: updatedDevice.status,
+                        activity: updatedDevice.status !== 'AWAKE' 
+                            ? undefined 
+                            : updatedDevice.activity,
+                        available: true,
+                    })
                 );
             }
         } catch (e) {
             // previously available ps5 cannot be located
             yield put(
-                updateHomeAssistant(
-                    merge(
-                        {},
-                        device,
-                        <DeviceState>{
-                            status: "UNKNOWN",
-                            available: false
-                        }
-                    )
-                )
+                updateHomeAssistant({
+                    ...device,
+                    status: "UNKNOWN",
+                    available: false,
+                    activity: undefined,
+                })
             );
 
             errorLogger(e);

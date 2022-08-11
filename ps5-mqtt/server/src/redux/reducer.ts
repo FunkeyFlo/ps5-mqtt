@@ -1,8 +1,9 @@
 import { merge } from "lodash";
-import type { AnyAction, Device, State } from "./types";
+import type { AnyAction, State } from "./types";
 
 const defaultState: State = {
     devices: {},
+    accounts: {}
 };
 
 const reducer = (state = defaultState, action: AnyAction) => {
@@ -16,14 +17,9 @@ const reducer = (state = defaultState, action: AnyAction) => {
         }
 
         case "UPDATE_HOME_ASSISTANT": {
-            return merge({}, state, {
-                devices: {
-                    [action.payload.device.id]: <Partial<Device>>{
-                        status: action.payload.device.status,
-                        available: action.payload.device.available,
-                    },
-                },
-            });
+            const newState = merge({}, state);
+            newState.devices[action.payload.id] = action.payload;
+            return newState;
         }
 
         case "TRANSITIONING": {
@@ -32,6 +28,14 @@ const reducer = (state = defaultState, action: AnyAction) => {
                     [action.payload.id]: {
                         transitioning: action.payload.transitioning,
                     },
+                },
+            });
+        }
+
+        case "UPDATE_PSN_ACCOUNT": {
+            return merge({}, state, {
+                accounts: {
+                    [action.payload.accountId]: action.payload,
                 },
             });
         }

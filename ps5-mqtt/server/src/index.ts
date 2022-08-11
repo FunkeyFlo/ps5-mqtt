@@ -5,9 +5,12 @@ import createDebugger from "debug";
 import os from 'os';
 import path from 'path';
 import createSagaMiddleware from "redux-saga";
+import { PsnAccount } from "./psn-account";
 import reducer, {
     getDeviceRegistry,
-    pollDevices, pollDiscovery, saga, setPowerMode
+    pollDevices,
+    pollDiscovery, pollPsnPresence, saga,
+    setPowerMode
 } from "./redux";
 import { SwitchStatus } from "./redux/types";
 import { MQTT_CLIENT, Settings, SETTINGS } from "./services";
@@ -29,11 +32,16 @@ const {
 
     CREDENTIAL_STORAGE_PATH,
 
-    INCLUDE_PS4_DEVICES, 
+    INCLUDE_PS4_DEVICES,
 
     DEVICE_CHECK_INTERVAL,
     DEVICE_DISCOVERY_INTERVAL,
+    ACCOUNT_CHECK_INTERVAL,
+
+    PSN_ACCOUNTS,
 } = process.env;
+
+const accountsInfo = JSON.parse(PSN_ACCOUNTS);
 
 const credentialStoragePath = CREDENTIAL_STORAGE_PATH
     ? CREDENTIAL_STORAGE_PATH
@@ -49,6 +57,17 @@ const createMqtt = async (): Promise<MQTT.AsyncMqttClient> => {
     });
 };
 
+async function getPsnAccountRegistry(
+    accounts: { npsso: string }[]
+): Promise<Record<string, PsnAccount>> {
+    const accountRegistry: Record<string, PsnAccount> = {};
+    for (const { npsso } of accounts) {
+        const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso);
+        accountRegistry[account.accountId] = account;
+    }
+    return accountRegistry;
+}
+
 async function run() {
     debug("Started");
 
@@ -57,12 +76,16 @@ async function run() {
     debug("Connected to MQTT Broker!")
 
     const settings: Settings = {
+        // polling intervals
         checkDevicesInterval:
-            parseInt(DEVICE_CHECK_INTERVAL || "1000", 10),
+            parseInt(DEVICE_CHECK_INTERVAL || "5000", 10),
+        checkAccountInterval:
+            parseInt(ACCOUNT_CHECK_INTERVAL || "5000", 10),
         discoverDevicesInterval:
             parseInt(DEVICE_DISCOVERY_INTERVAL || "60000", 10),
+
         credentialStoragePath,
-        allowPs4Devices: INCLUDE_PS4_DEVICES === 'true'
+        allowPs4Devices: INCLUDE_PS4_DEVICES === 'true',
     };
 
     try {
@@ -72,9 +95,14 @@ async function run() {
                 [SETTINGS]: settings,
             }
         });
+        const accounts = await getPsnAccountRegistry(accountsInfo)
         const store = configureStore({
             reducer,
-            middleware: [sagaMiddleware]
+            middleware: [sagaMiddleware],
+            preloadedState: {
+                devices: {},
+                accounts: accounts, 
+            }
         });
         store.subscribe(() => {
             debugState(JSON.stringify(store.getState(), null, 2));
@@ -103,6 +131,11 @@ async function run() {
 
         await mqtt.subscribe('ps5-mqtt/#');
 
+        // don't poll if there are no accounts registered
+        if (Object.keys(accounts).length > 0) {
+            store.dispatch(pollPsnPresence());
+        }
+        
         store.dispatch(pollDiscovery());
         store.dispatch(pollDevices());
     } catch (e) {

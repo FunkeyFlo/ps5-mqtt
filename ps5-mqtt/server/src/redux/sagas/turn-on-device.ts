@@ -36,9 +36,10 @@ function* turnOnDevice(action: ChangePowerModeAction) {
         debug(stdout);
 
         yield put(
-            updateHomeAssistant(
-                merge({}, action.payload.device, { status: "AWAKE" })
-            )
+            updateHomeAssistant({
+                ...action.payload.device, 
+                status: "AWAKE"
+            })
         );
     } catch (e) {
         debugError(e);

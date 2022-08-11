@@ -6,12 +6,12 @@ import { checkDevicesState } from "../action-creators";
 const debugError = createErrorLogger();
 
 function* pollDevices() {
-    const settings: Settings = yield getContext(SETTINGS);
+    const { checkDevicesInterval }: Settings = yield getContext(SETTINGS);
 
     while (true) {
         try {
             yield put(checkDevicesState());
-            yield delay(settings.checkDevicesInterval);
+            yield delay(checkDevicesInterval);
         } catch (e) {
             debugError(e);
         }
