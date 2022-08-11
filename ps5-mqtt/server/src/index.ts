@@ -95,12 +95,13 @@ async function run() {
                 [SETTINGS]: settings,
             }
         });
+        const accounts = await getPsnAccountRegistry(accountsInfo)
         const store = configureStore({
             reducer,
             middleware: [sagaMiddleware],
             preloadedState: {
                 devices: {},
-                accounts: await getPsnAccountRegistry(accountsInfo)
+                accounts: accounts, 
             }
         });
         store.subscribe(() => {
@@ -130,7 +131,11 @@ async function run() {
 
         await mqtt.subscribe('ps5-mqtt/#');
 
-        store.dispatch(pollPsnPresence());
+        // don't poll if there are no accounts registered
+        if (Object.keys(accounts).length > 0) {
+            store.dispatch(pollPsnPresence());
+        }
+        
         store.dispatch(pollDiscovery());
         store.dispatch(pollDevices());
     } catch (e) {
