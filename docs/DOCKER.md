@@ -52,6 +52,10 @@ services:
 
       - DEVICE_CHECK_INTERVAL=5000
       - DEVICE_DISCOVERY_INTERVAL=60000
+      - ACCOUNT_CHECK_INTERVAL=5000
+
+      - 'PSN_ACCOUNTS=[{"username": "MyPsnUser", "npsso":"npsso_value"}]'
+
       - INCLUDE_PS4_DEVICES=false
 
       - FRONTEND_PORT=8645
