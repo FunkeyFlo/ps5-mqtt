@@ -1,3 +1,42 @@
+## 1.0.0 - 2022-08-11
+
+### What’s changed
+
+### 🚨 New functionality
+
+Matching PSN account activity to consoles is now supported.
+
+The add-on will create a new `sensor.my_playstation_activity` sensor that tells you which app/game is being used on the console! Both entities, `activity` and `power`, will now include the following attributes:
+| Attribute | Description |
+| -- | -- |
+| `Players`  | A list of players active on the device |
+| `Activity` / sensor.state | `idle`, `playing` or `none`; indicating the kind of activity on the device |
+| `Title Name` | A user-friendly name of the Playstation App / Game currently in use. |
+| `Title Image` | A `url` referring to the official box-art. |
+| `Title ID` | unique code for the Playstation App / Game currently in use. |
+
+Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/main/add-ons/ps5-mqtt-edge/DOCS.md#psn_accounts-optional-multiple) to see how to configure the add on for tracking PSN accounts and how to acquire the required information.
+
+#### Examples
+
+![image](https://user-images.githubusercontent.com/4623715/184224674-97c167f6-44bc-463a-a573-3a47b5eaefc8.png)
+![image](https://user-images.githubusercontent.com/4623715/184225211-9be41ffc-7a19-4ab1-9242-7eac7053285d.png)
+
+⚠ The MQTT implementation saw some changes that might cause you to have duplicate `power` entities in HA after upgrading. ⚠
+
+- The advised upgrade path is to remove your old devices from Home Assistant and let the add-on rediscover them for you.
+- Alternatively remove the old `power` entity and rename the *new* `power` entity (which will probably be called something like `switch.my_ps5_power_2`) to your old entity's name.
+
+### 🚀 Enhancements
+
+- Psn-presence @FunkeyFlo (#26)
+
+### 📚 Documentation
+
+- Update HA Core Docs @matt8707 (#24)
+- Add HA Core Docs @FunkeyFlo (#23)
+- Psn-presence @FunkeyFlo (#26)
+
 ## 0.7.1 - 2022-08-04
 
 ### What’s changed
@@ -20,7 +59,9 @@
 - - added dark/light theme option to client UI 🌗
 - 
 - 
+- 
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
+- 
 - 
 - 
 - 
@@ -42,6 +83,7 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 
 ## 0.5.2
 
@@ -53,7 +95,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - - ...reduce amount of messages being sent.
 - 
 - 
+- 
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- 
 - 
 - 
 - 
@@ -61,7 +105,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - - Added `device_discovery_interval` option to change the frequency of discovering PS5 devices.
 - 
 - 
+- 
 - - Optimizations for discovered devices.
+- 
 - 
 - 
 - 
