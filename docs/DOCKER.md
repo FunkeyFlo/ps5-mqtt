@@ -79,6 +79,8 @@ echo Starting PS5-MQTT...
 node app/server/dist/index.js
 ```
 
+*Note: if you create the `.sh` file on windows make sure to convert to LF line endings.*
+
 ## Need help or have a comment?
 - Can't figure out how to setup the component? Please consult our [discord] community!
 - See something in the documentation that's incorrect or missing? [Create an issue][github-issues] on github!
