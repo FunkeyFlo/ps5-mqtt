@@ -16,7 +16,7 @@ function* updateAccount({ payload: account }: UpdateAccountAction) {
             clonedDeviceState.activity?.activePlayers.some(p => p === account.accountName);
 
         // the player is using an app that matches the current device's platform
-        if (account.activity !== undefined && clonedDeviceState.type === account.activity.platform) {
+        if (account.activity !== undefined && clonedDeviceState.type === account.activity.launchPlatform) {
             // mark activity as the new activity, extending player list in the process
             clonedDeviceState.activity = {
                 ...account.activity,

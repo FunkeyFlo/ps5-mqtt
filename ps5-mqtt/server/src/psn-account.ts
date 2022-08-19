@@ -10,7 +10,18 @@ export module PsnAccount {
         titleImage: string;
         titleName: string;
 
+        /**
+         * Type of device the title was created for.
+         *
+         * @type {NormalizedDeviceType}
+         */
         platform: NormalizedDeviceType;
+
+        /**
+         * Type of device the title is being used on.
+         *
+         * @type {NormalizedDeviceType}
+         */
         launchPlatform: NormalizedDeviceType;
     }
 
