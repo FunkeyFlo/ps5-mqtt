@@ -1,3 +1,11 @@
+## 1.0.1 - 2022-08-19
+
+### What’s changed
+
+#### 🐛 Bug fixes
+
+- Fix PS4 title activity not being matched to PS5 devices @FunkeyFlo (#29)
+
 ## 1.0.0 - 2022-08-11
 
 ### What’s changed
@@ -60,7 +68,9 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 - 
 - 
 - 
+- 
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
+- 
 - 
 - 
 - 
@@ -84,6 +94,7 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 
 ## 0.5.2
 
@@ -96,7 +107,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- 
 - 
 - 
 - 
@@ -106,7 +119,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 - - Optimizations for discovered devices.
+- 
 - 
 - 
 - 
