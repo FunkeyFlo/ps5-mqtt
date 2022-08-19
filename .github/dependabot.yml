@@ -4,22 +4,3 @@ updates:
     directory: "/ps5-mqtt"
     schedule:
       interval: "weekly"
-    labels:
-      - "dev tools"
-      - "npm dependencies"
-  
-  - package-ecosystem: "npm"
-    directory: "/ps5-mqtt/server"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "backend"
-      - "npm dependencies"
-
-  - package-ecosystem: "npm"
-    directory: "/ps5-mqtt/client"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "frontend"
-      - "npm dependencies"
