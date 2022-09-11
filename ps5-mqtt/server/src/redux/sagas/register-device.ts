@@ -16,7 +16,7 @@ function* registerDevice(
         (
             topic: string,
             message: string | Buffer,
-            { qos: number, retain: boolean }
+            { qos, retain }: MQTT.IClientPublishOptions
         ) => Promise<MQTT.IPublishPacket>
     >(
         mqtt.publish.bind(mqtt),
@@ -49,7 +49,7 @@ function* registerDevice(
         (
             topic: string,
             message: string | Buffer,
-            { qos: number, retain: boolean }
+            { qos, retain }: MQTT.IClientPublishOptions
         ) => Promise<MQTT.IPublishPacket>
     >(
         mqtt.publish.bind(mqtt),
