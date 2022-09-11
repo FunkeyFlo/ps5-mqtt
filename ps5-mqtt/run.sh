@@ -3,7 +3,7 @@
 export CONFIG_PATH="/data/options.json"
 export CREDENTIAL_STORAGE_PATH="/config/ps5-mqtt/credentials.json"
 
-if [ bashio::config.is_empty 'mqtt' && bashio::var.has_value "$(bashio::services 'mqtt')" ]; then
+if bashio::config.is_empty 'mqtt' && bashio::var.has_value "$(bashio::services 'mqtt')"; then
     export MQTT_HOST="$(bashio::services 'mqtt' 'host')"
     export MQTT_PORT="$(bashio::services 'mqtt' 'port')"
     export MQTT_USERNAME="$(bashio::services 'mqtt' 'username')"
