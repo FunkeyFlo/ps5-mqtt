@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as process from 'process';
+import lodash from 'lodash';
 
 import { createErrorLogger } from './util/error-logger';
 
@@ -13,22 +14,26 @@ export interface AppConfig {
         port: string,
         user: string
     },
-    
+
     device_check_interval: number,
     device_discovery_interval: number,
 
     include_ps4_devices: boolean,
 
-    psn_accounts: {
-        npsso: string,
-        username?: string,
-    }[],
+    psn_accounts: AppConfig.PsnAccountInfo[],
 
     account_check_interval: number,
 
     // non yml options
     credentialsStoragePath: string,
     frontendPort: string,
+}
+
+export module AppConfig {
+    export interface PsnAccountInfo {
+        npsso: string,
+        username?: string,
+    }
 }
 
 export function getAppConfig(): AppConfig {
@@ -39,14 +44,11 @@ export function getAppConfig(): AppConfig {
     const configFileOptions = getJsonConfig(CONFIG_PATH);
     const envOptions = getEnvConfig();
 
-    return {
-        ...configFileOptions,
-        ...envOptions,
-    } as AppConfig
+    return lodash.merge(configFileOptions, envOptions) as AppConfig
 }
 
 function getJsonConfig(configPath: string): Partial<AppConfig> {
-    if(!fs.existsSync(configPath)) {
+    if (!fs.existsSync(configPath)) {
         logError(`config could not be read from '${configPath}'`);
         return {};
     }
@@ -54,9 +56,9 @@ function getJsonConfig(configPath: string): Partial<AppConfig> {
     try {
         const options: AppConfig = JSON.parse(optionsRaw);
         return options;
-    } catch(err) {
+    } catch (err) {
         logError(`Received invalid options: "${optionsRaw}".`)
-        return {};   
+        return {};
     }
 }
 
@@ -101,10 +103,10 @@ function getEnvConfig(): Partial<AppConfig> {
                 ? parseInt(ACCOUNT_CHECK_INTERVAL, 10)
                 : undefined,
 
-        psn_accounts: PSN_ACCOUNTS ? JSON.parse(PSN_ACCOUNTS) : [],
+        psn_accounts: PSN_ACCOUNTS ? JSON.parse(PSN_ACCOUNTS) : undefined,
         include_ps4_devices: Boolean(INCLUDE_PS4_DEVICES),
 
         credentialsStoragePath: CREDENTIAL_STORAGE_PATH,
-        frontendPort: FRONTEND_PORT 
+        frontendPort: FRONTEND_PORT
     }
 }

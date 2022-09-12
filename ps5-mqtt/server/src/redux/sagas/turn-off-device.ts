@@ -1,25 +1,25 @@
 import createDebugger from "debug";
-import { merge } from "lodash";
+import lodash from "lodash";
 import { getContext, put } from "redux-saga/effects";
 import sh from "shelljs";
 import { Settings, SETTINGS } from "../../services";
 import { createErrorLogger } from "../../util/error-logger";
 import { setTransitioning, updateHomeAssistant } from "../action-creators";
-import type { ChangePowerModeAction, Device } from "../types";
+import type { ChangePowerModeAction } from "../types";
 
 const debug = createDebugger("@ha:ps5:turnOffDevice");
 const debugError = createErrorLogger();
 
 function* turnOffDevice(action: ChangePowerModeAction) {
     const { credentialStoragePath }: Settings = yield getContext(SETTINGS);
-    
+
     if (action.payload.mode !== 'STANDBY') {
         return;
     }
 
     yield put(
         setTransitioning(
-            merge({}, action.payload.device, { transitioning: true })
+            lodash.merge({}, action.payload.device, { transitioning: true })
         )
     );
     try {
@@ -37,8 +37,8 @@ function* turnOffDevice(action: ChangePowerModeAction) {
 
         yield put(
             updateHomeAssistant({
-                ...action.payload.device, 
-                status: "STANDBY", 
+                ...action.payload.device,
+                status: "STANDBY",
                 activity: undefined // also clear the activity when a device turns off
             })
         );

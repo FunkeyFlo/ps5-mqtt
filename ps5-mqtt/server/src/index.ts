@@ -5,7 +5,7 @@ import createDebugger from "debug";
 import os from 'os';
 import path from 'path';
 import createSagaMiddleware from "redux-saga";
-import { getAppConfig } from "./config";
+import { AppConfig, getAppConfig } from "./config";
 import { PsnAccount } from "./psn-account";
 import reducer, {
     getDeviceRegistry,
@@ -36,11 +36,11 @@ const createMqtt = async (): Promise<MQTT.AsyncMqttClient> => {
 };
 
 async function getPsnAccountRegistry(
-    accounts: { npsso: string }[]
+    accounts: AppConfig.PsnAccountInfo[]
 ): Promise<Record<string, PsnAccount>> {
     const accountRegistry: Record<string, PsnAccount> = {};
-    for (const { npsso } of accounts) {
-        const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso);
+    for (const { npsso, username } of accounts) {
+        const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso, username);
         accountRegistry[account.accountId] = account;
     }
     return accountRegistry;
@@ -59,7 +59,7 @@ async function run() {
         checkAccountInterval: appConfig.account_check_interval || 5000,
         discoverDevicesInterval: appConfig.device_discovery_interval || 60000,
 
-        credentialStoragePath: appConfig.credentialsStoragePath 
+        credentialStoragePath: appConfig.credentialsStoragePath
             ?? path.join(os.homedir(), '.config', 'playactor', 'credentials.json'),
         allowPs4Devices: appConfig.include_ps4_devices ?? true,
     };
@@ -77,7 +77,7 @@ async function run() {
             middleware: [sagaMiddleware],
             preloadedState: {
                 devices: {},
-                accounts: accounts, 
+                accounts: accounts,
             }
         });
         store.subscribe(() => {
@@ -111,7 +111,7 @@ async function run() {
         if (Object.keys(accounts).length > 0) {
             store.dispatch(pollPsnPresence());
         }
-        
+
         store.dispatch(pollDiscovery());
         store.dispatch(pollDevices());
     } catch (e) {

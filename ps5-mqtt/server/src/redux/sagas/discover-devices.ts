@@ -1,4 +1,3 @@
-import { merge } from "lodash";
 import { Discovery } from "playactor/dist/discovery";
 import { DeviceType } from "playactor/dist/discovery/model";
 import { call, getContext, put, select } from "redux-saga/effects";
@@ -28,7 +27,7 @@ const useAsyncIterableWithSaga =
 
 function* discoverDevices() {
     const { allowPs4Devices }: Settings = yield getContext(SETTINGS);
-    
+
     const discovery = new Discovery();
     let discoveredDevices: Device[] = yield call(
         useAsyncIterableWithSaga(
@@ -40,7 +39,7 @@ function* discoverDevices() {
         )
     );
 
-    if(!allowPs4Devices) {
+    if (!allowPs4Devices) {
         discoveredDevices = discoveredDevices.filter(d => d.type === DeviceType.PS5);
     }
 
@@ -50,11 +49,11 @@ function* discoverDevices() {
             yield put(
                 registerDevice({
                     ...device,
-                    available: true, 
-                    normalizedName: 
+                    available: true,
+                    normalizedName:
                         device.name.replace(/[^a-zA-Z\d\s-_:]/g, '')
-                                .replace(/[\s-]/g, '_')
-                                .toLowerCase(),
+                            .replace(/[\s-]/g, '_')
+                            .toLowerCase(),
                     activity: undefined,
                 })
             );

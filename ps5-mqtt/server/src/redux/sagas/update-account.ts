@@ -1,4 +1,4 @@
-import { cloneDeep, isEqual } from "lodash";
+import lodash from "lodash";
 import { put, select } from "redux-saga/effects";
 import { updateHomeAssistant } from "../action-creators";
 import { getDeviceList } from "../selectors";
@@ -10,9 +10,9 @@ function* updateAccount({ payload: account }: UpdateAccountAction) {
     const devices: Device[] = yield select(getDeviceList);
 
     for (const device of devices) {
-        const clonedDeviceState: Device = cloneDeep(device);
+        const clonedDeviceState: Device = lodash.cloneDeep(device);
 
-        const isAccountCurrentlyActiveOnDevice = 
+        const isAccountCurrentlyActiveOnDevice =
             clonedDeviceState.activity?.activePlayers.some(p => p === account.accountName);
 
         // the player is using an app that matches the current device's platform
@@ -29,7 +29,7 @@ function* updateAccount({ payload: account }: UpdateAccountAction) {
         else if (isAccountCurrentlyActiveOnDevice && account.activity === undefined) {
             if (clonedDeviceState.activity.activePlayers.length > 1) {
                 // remove current player from the player list
-                clonedDeviceState.activity.activePlayers = 
+                clonedDeviceState.activity.activePlayers =
                     clonedDeviceState.activity.activePlayers.filter(p => p !== account.accountName);
             } else {
                 // no players = no activity
@@ -38,7 +38,7 @@ function* updateAccount({ payload: account }: UpdateAccountAction) {
         }
 
         // only apply update if something actually changed
-        if (!isEqual(device, clonedDeviceState)) {
+        if (!lodash.isEqual(device, clonedDeviceState)) {
             yield put(updateHomeAssistant(clonedDeviceState));
         }
     }

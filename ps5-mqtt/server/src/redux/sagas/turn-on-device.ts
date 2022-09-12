@@ -1,5 +1,5 @@
 import createDebugger from "debug";
-import { merge } from "lodash";
+import lodash from "lodash";
 import { getContext, put } from "redux-saga/effects";
 import sh from "shelljs";
 import { Settings, SETTINGS } from "../../services";
@@ -12,14 +12,14 @@ const debugError = createErrorLogger();
 
 function* turnOnDevice(action: ChangePowerModeAction) {
     const { credentialStoragePath }: Settings = yield getContext(SETTINGS);
-    
+
     if (action.payload.mode !== 'AWAKE') {
         return;
     }
 
     yield put(
         setTransitioning(
-            merge({}, action.payload.device, { transitioning: true })
+            lodash.merge({}, action.payload.device, { transitioning: true })
         )
     );
     try {
@@ -37,7 +37,7 @@ function* turnOnDevice(action: ChangePowerModeAction) {
 
         yield put(
             updateHomeAssistant({
-                ...action.payload.device, 
+                ...action.payload.device,
                 status: "AWAKE"
             })
         );
