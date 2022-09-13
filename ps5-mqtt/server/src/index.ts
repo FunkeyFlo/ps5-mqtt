@@ -5,6 +5,7 @@ import createDebugger from "debug";
 import os from 'os';
 import path from 'path';
 import createSagaMiddleware from "redux-saga";
+import { AppConfig, getAppConfig } from "./config";
 import { PsnAccount } from "./psn-account";
 import reducer, {
     getDeviceRegistry,
@@ -22,47 +23,24 @@ const debugMqtt = createDebugger("@ha:ps5:mqtt");
 const debugState = createDebugger("@ha:state");
 const logError = createErrorLogger();
 
-const {
-    MQTT_HOST,
-    MQTT_PASSWORD,
-    MQTT_PORT,
-    MQTT_USERNAME,
-
-    FRONTEND_PORT,
-
-    CREDENTIAL_STORAGE_PATH,
-
-    INCLUDE_PS4_DEVICES,
-
-    DEVICE_CHECK_INTERVAL,
-    DEVICE_DISCOVERY_INTERVAL,
-    ACCOUNT_CHECK_INTERVAL,
-
-    PSN_ACCOUNTS,
-} = process.env;
-
-const accountsInfo = JSON.parse(PSN_ACCOUNTS);
-
-const credentialStoragePath = CREDENTIAL_STORAGE_PATH
-    ? CREDENTIAL_STORAGE_PATH
-    : path.join(os.homedir(), '.config', 'playactor', 'credentials.json');
+const appConfig = getAppConfig();
 
 const createMqtt = async (): Promise<MQTT.AsyncMqttClient> => {
-    return await MQTT.connectAsync(`mqtt://${MQTT_HOST}`, {
-        password: MQTT_PASSWORD,
-        port: parseInt(MQTT_PORT || "1883", 10),
-        username: MQTT_USERNAME,
+    return await MQTT.connectAsync(`mqtt://${appConfig.mqtt.host}`, {
+        password: appConfig.mqtt.pass,
+        port: parseInt(appConfig.mqtt.port || "1883", 10),
+        username: appConfig.mqtt.user,
         reconnectPeriod: 2000,
         connectTimeout: 3 * 60 * 1000 // 3 minutes
     });
 };
 
 async function getPsnAccountRegistry(
-    accounts: { npsso: string }[]
+    accounts: AppConfig.PsnAccountInfo[]
 ): Promise<Record<string, PsnAccount>> {
     const accountRegistry: Record<string, PsnAccount> = {};
-    for (const { npsso } of accounts) {
-        const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso);
+    for (const { npsso, username } of accounts) {
+        const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso, username);
         accountRegistry[account.accountId] = account;
     }
     return accountRegistry;
@@ -77,15 +55,13 @@ async function run() {
 
     const settings: Settings = {
         // polling intervals
-        checkDevicesInterval:
-            parseInt(DEVICE_CHECK_INTERVAL || "5000", 10),
-        checkAccountInterval:
-            parseInt(ACCOUNT_CHECK_INTERVAL || "5000", 10),
-        discoverDevicesInterval:
-            parseInt(DEVICE_DISCOVERY_INTERVAL || "60000", 10),
+        checkDevicesInterval: appConfig.device_check_interval || 5000,
+        checkAccountInterval: appConfig.account_check_interval || 5000,
+        discoverDevicesInterval: appConfig.device_discovery_interval || 60000,
 
-        credentialStoragePath,
-        allowPs4Devices: INCLUDE_PS4_DEVICES === 'true',
+        credentialStoragePath: appConfig.credentialsStoragePath
+            ?? path.join(os.homedir(), '.config', 'playactor', 'credentials.json'),
+        allowPs4Devices: appConfig.include_ps4_devices ?? true,
     };
 
     try {
@@ -95,13 +71,13 @@ async function run() {
                 [SETTINGS]: settings,
             }
         });
-        const accounts = await getPsnAccountRegistry(accountsInfo)
+        const accounts = await getPsnAccountRegistry(appConfig.psn_accounts ?? [])
         const store = configureStore({
             reducer,
             middleware: [sagaMiddleware],
             preloadedState: {
                 devices: {},
-                accounts: accounts, 
+                accounts: accounts,
             }
         });
         store.subscribe(() => {
@@ -135,14 +111,14 @@ async function run() {
         if (Object.keys(accounts).length > 0) {
             store.dispatch(pollPsnPresence());
         }
-        
+
         store.dispatch(pollDiscovery());
         store.dispatch(pollDevices());
     } catch (e) {
         logError(e);
     }
 
-    setupWebserver(FRONTEND_PORT ?? 3000, settings)
+    setupWebserver(appConfig.frontendPort ?? 3000, settings)
 }
 
 if (require.main === module) {

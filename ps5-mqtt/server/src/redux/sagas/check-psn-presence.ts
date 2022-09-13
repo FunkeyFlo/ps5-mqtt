@@ -1,4 +1,3 @@
-import { merge } from "lodash";
 import { call, put, select } from "redux-saga/effects";
 import { PsnAccount } from "../../psn-account";
 import { createErrorLogger } from "../../util/error-logger";

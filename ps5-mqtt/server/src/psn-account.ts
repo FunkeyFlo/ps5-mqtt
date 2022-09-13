@@ -25,8 +25,8 @@ export module PsnAccount {
         launchPlatform: NormalizedDeviceType;
     }
 
-    export async function exchangeNpssoForPsnAccount(npsso: string): Promise<PsnAccount> {
-        return getAccount(npsso);
+    export async function exchangeNpssoForPsnAccount(npsso: string, username?: string): Promise<PsnAccount> {
+        return getAccount(npsso, username);
     }
 
     export async function updateAccount(account: PsnAccount): Promise<PsnAccount> {
@@ -86,7 +86,7 @@ interface BasicPresenceResponse {
     }
 }
 
-async function getAccount(npsso: string): Promise<PsnAccount> {
+async function getAccount(npsso: string, username?: string): Promise<PsnAccount> {
     const accessCode = await psnApi.exchangeNpssoForCode(npsso);
 
     const authorization = await psnApi.exchangeCodeForAccessToken(accessCode);
@@ -94,7 +94,7 @@ async function getAccount(npsso: string): Promise<PsnAccount> {
     const { profile } = await psnApi.getProfileFromUserName(authorization, 'me');
 
     const account: PsnAccount = {
-        accountName: profile.onlineId,
+        accountName: username ?? profile.onlineId,
         accountId: profile.accountId,
         npsso,
         authInfo: convertAuthResponseToAuthInfo(authorization)
@@ -130,7 +130,7 @@ async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<
             launchPlatform: activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
         }
     } else {
-        if(response.status >= 400 && response.status < 600) {
+        if (response.status >= 400 && response.status < 600) {
             debug(`Unable to retrieve PSN information. API response: "${response.status}:${response.statusText}"`)
         }
         return undefined;

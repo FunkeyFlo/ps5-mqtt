@@ -1,4 +1,4 @@
-import { merge } from "lodash";
+import _ from "lodash";
 import type { AnyAction, State } from "./types";
 
 const defaultState: State = {
@@ -9,7 +9,7 @@ const defaultState: State = {
 const reducer = (state = defaultState, action: AnyAction) => {
     switch (action.type) {
         case "ADD_DEVICE": {
-            return merge({}, state, {
+            return _.merge({}, state, {
                 devices: {
                     [action.payload.id]: action.payload,
                 },
@@ -17,13 +17,13 @@ const reducer = (state = defaultState, action: AnyAction) => {
         }
 
         case "UPDATE_HOME_ASSISTANT": {
-            const newState = merge({}, state);
+            const newState = _.merge({}, state);
             newState.devices[action.payload.id] = action.payload;
             return newState;
         }
 
         case "TRANSITIONING": {
-            return merge({}, state, {
+            return _.merge({}, state, {
                 devices: {
                     [action.payload.id]: {
                         transitioning: action.payload.transitioning,
@@ -33,7 +33,7 @@ const reducer = (state = defaultState, action: AnyAction) => {
         }
 
         case "UPDATE_PSN_ACCOUNT": {
-            return merge({}, state, {
+            return _.merge({}, state, {
                 accounts: {
                     [action.payload.accountId]: action.payload,
                 },
