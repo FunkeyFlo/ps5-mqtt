@@ -56,8 +56,8 @@ The registered PSN accounts will be used by the application to track online acti
 Follow [these steps][psn-api-auth] to get an NPSSO token.
 
 ```yaml
-username: MyPsnUser                  # only a label, the API will retrieve the actual accountname with the npsso
-npsso: '!secret my_npsso'            # token used for authenticating with PSN API's
+- username: MyPsnUser                  # only a label, the API will retrieve the actual accountname with the npsso
+  npsso: '!secret my_npsso'            # token used for authenticating with PSN API's
 ```
 
 *NOTE 1: The add-on does a best effort match to map PSN account activity to a device. This means that if you have multiple devices **and** you use the same account to game on both devices at the same time the add-on will match the activity to only one device.*

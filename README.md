@@ -43,8 +43,20 @@ The following features have been implemented or are planned for future implement
 | [Web UI for acquiring credentials][credentials-ui] | ✔           |
 | Match [PSN account activity][1.0.0] to device      | ✔           |
 
+## Installation
+1. Install an [MQTT broker][mqtt-broker], if you haven't already.
+2. Add the repository to Home Assistant using the repository's url or by pressing the *add-repostory* button above.
+3. Install the PS5 MQTT add-on. **Not the edge version!**.
+4. Configure the add-on as described in the [documentation][ha-docs].
+5. Start the add-on.
+6. Use the web-ui to authenticate with each PlayStation device.
+
+The MQTT entities will be created automatically when a new device is discovered on your network. 
+
+*Note: this does require MQTT auto-discovery to be enabled.* 
+
 ## Using the add-on with Home Assistant Core (`Docker`)
-This bit of [documentation][ha-core-docs] should get you on your way! 😻
+This bit of [documentation][docker-docs] should get you on your way! 😻
 
 ## Support the project!
 If you enjoy the project please consider donating to sponsor further development! 💕
@@ -53,12 +65,8 @@ If you enjoy the project please consider donating to sponsor further development
 
 ## Example usage
 ![image](https://user-images.githubusercontent.com/4623715/184224674-97c167f6-44bc-463a-a573-3a47b5eaefc8.png)
-![image](https://user-images.githubusercontent.com/4623715/184225211-9be41ffc-7a19-4ab1-9242-7eac7053285d.png)
 
 ## FAQ
-
-### I'm trying to update from version `0.6.2` but the installation is failing!
-Version >=`0.6.3` saw a switch from locally built Dockerfiles to pre-built images. Supervisor seems to not handle this upgrade properly. Instead you'll have to uninstall the add-on first and then re-install. You can follow the steps described in the [edge version documentation][edge-docs] for this.
 
 ### The log is showing 403 errors when I try to turn my ps5 on or off!
 Double check that you've enabled all required remote play features [as described in the remote play documentation][ps5-rp].
@@ -66,8 +74,11 @@ Double check that you've enabled all required remote play features [as described
 ### Why does this add-on only support Awake/Standby on Playstation 4?
 There already is a great [Home Assistant integration][ha-ps4] that supports more functionality for PS4 devices like starting games. However, users have reported that this add-on detects Awake/Standby changes faster than the existing integration. So if you want you can use this add-on next to the existing integration or instead of it, if you are only interested in Standby/Awake.
 
+### Can I get the yaml code for button in the [example image](#example-usage)?
+**No.** I based my personal custom button cards on [this project][matt8707-dash]. *But* I *heavily* modified them and added loads of custom stuff that is not suitable for sharing at this time as it will likely raise more questions than provide answers.
+
 ## Thanks & Credits
-The majority of the MQTT implementation was based on the work done by [andrew-codes][ac-user] and can be found in [this repository][ac-repo].
+The initial MQTT implementation for tracking device power was based on the work done by [andrew-codes][ac-user] and can be found in [this repository][ac-repo].
 
 <!-- links -->
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
@@ -75,15 +86,14 @@ The majority of the MQTT implementation was based on the work done by [andrew-co
 [armhf-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
-
 [credentials-ui]: https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v600-2
 [discord]: https://discord.gg/BnmvYHvz5N
-[ha-core-docs]: ./docs/DOCKER.md
-[edge-docs]: https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt-edge#updating-the-edge-add-on
-
+[docker-docs]: ./docs/DOCKER.md
+[ha-docs]: ./add-ons/ps5-mqtt/DOCS.md
 [ac-repo]: https://github.com/andrew-codes/home-automation
 [ac-user]: https://github.com/andrew-codes
-
+[matt8707-dash]: https://community.home-assistant.io/t/a-different-take-on-designing-a-lovelace-ui/162594
+[mqtt-broker]: https://www.home-assistant.io/docs/mqtt/broker/
 [ha-ps4]: https://www.home-assistant.io/integrations/ps4/
 [ps5-rp]: https://remoteplay.dl.playstation.net/remoteplay/lang/en/ps5_mobile.html#section3
 [1.0.0]: https://github.com/FunkeyFlo/ps5-mqtt/releases/tag/v1.0.0
