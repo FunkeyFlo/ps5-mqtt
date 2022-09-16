@@ -59,7 +59,8 @@ The MQTT entities will be created automatically when a new device is discovered 
 This bit of [documentation][docker-docs] should get you on your way! 😻
 
 ## Support the project!
-If you enjoy the project please consider donating to sponsor further development! 💕
+**If you enjoy the project please consider helping me and my family stay warm this winter! :cold_face:**<br>
+**Donate so I can keep paying my gas bill, whilst working on this awesome project! :fire:**
 
 <a href="https://www.buymeacoffee.com/funkeyflo" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
