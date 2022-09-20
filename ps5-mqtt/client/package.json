@@ -9,7 +9,7 @@
     "devDependencies": {
         "@types/react": "^18.0.19",
         "@types/react-dom": "^18.0.6",
-        "esbuild": "^0.15.7",
+        "esbuild": "^0.15.8",
         "grommet": "^2.25.3",
         "grommet-icons": "^4.8.0",
         "react": "^18.2.0",
