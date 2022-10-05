@@ -2,7 +2,7 @@ version: 1.1.0
 slug: ps5_mqtt
 name: PS5 MQTT
 description: Control Sony PlayStation 5 devices via MQTT
-url: https://github.com/FunkeyFlo/ps5-mqtt/tree/master/add-ons/ps5-mqtt-edge
+url: https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt
 arch:
   - armhf
   - armv7

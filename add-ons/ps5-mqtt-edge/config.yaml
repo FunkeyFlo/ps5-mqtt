@@ -2,7 +2,7 @@ version: "edge"
 slug: ps5_mqtt_edge
 name: PS5 MQTT - Edge
 description: Development build of the PS5 MQTT add-on
-url: https://github.com/FunkeyFlo/ps5-mqtt/tree/master/add-ons/ps5-mqtt-edge
+url: https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt-edge
 arch:
   - armhf
   - armv7
