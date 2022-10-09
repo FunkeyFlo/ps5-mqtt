@@ -87,7 +87,7 @@ The initial MQTT implementation for tracking device power was based on the work 
 [armhf-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
-[credentials-ui]: https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v600-2
+[credentials-ui]: https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#impressions-1
 [discord]: https://discord.gg/BnmvYHvz5N
 [docker-docs]: ./docs/DOCKER.md
 [ha-docs]: ./add-ons/ps5-mqtt/DOCS.md
