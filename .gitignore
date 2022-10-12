@@ -5,3 +5,4 @@ dist
 NOTES.md
 .docker-test
 options.dev.json
+coverage

@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "rootDir": "./src",
+        "declaration": false,
+        "outDir": "./dist",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "lib": [
+            "ES2020"
+        ]
+    },
+    "exclude": [
+        "node_modules",
+        "**/*.test.ts"
+    ]
+}

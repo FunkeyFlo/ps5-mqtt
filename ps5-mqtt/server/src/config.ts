@@ -8,12 +8,7 @@ const logError = createErrorLogger();
 
 export interface AppConfig {
     // yml options
-    mqtt: {
-        host: string,
-        pass: string,
-        port: string,
-        user: string
-    },
+    mqtt: AppConfig.MqttConfig,
 
     device_check_interval: number,
     device_discovery_interval: number,
@@ -34,6 +29,13 @@ export module AppConfig {
         npsso: string,
         username?: string,
     }
+
+    export interface MqttConfig {
+        host: string;
+        pass: string;
+        port: string;
+        user: string;
+    }
 }
 
 export function getAppConfig(): AppConfig {
@@ -47,8 +49,8 @@ export function getAppConfig(): AppConfig {
     return lodash.merge(configFileOptions, envOptions) as AppConfig
 }
 
-function getJsonConfig(configPath: string): Partial<AppConfig> {
-    if (!fs.existsSync(configPath)) {
+function getJsonConfig(configPath: string | undefined): Partial<AppConfig> {
+    if (configPath === undefined || !fs.existsSync(configPath)) {
         logError(`config could not be read from '${configPath}'`);
         return {};
     }
@@ -108,5 +110,7 @@ function getEnvConfig(): Partial<AppConfig> {
 
         credentialsStoragePath: CREDENTIAL_STORAGE_PATH,
         frontendPort: FRONTEND_PORT
-    }
+    } as Partial<AppConfig & {
+        mqtt: Partial<AppConfig.MqttConfig>
+    }>
 }

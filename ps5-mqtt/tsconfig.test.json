@@ -1,18 +1,15 @@
 {
-    "extends": "./tsconfig.build.json",
     "compilerOptions": {
+        "rootDir": "./",
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
-        "types": [
-            "node",
-            "jest"
-        ],
-        "strict": false
+        "importHelpers": true,
     },
     "include": [
         "**/*.test.ts"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "dist"
     ]
 }

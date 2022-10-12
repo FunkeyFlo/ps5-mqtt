@@ -74,7 +74,7 @@ export function setupWebserver(
                     onPerformLogin: async (url) => {
                         success = true;
                         res.status(200).send(url);
-                        return undefined;
+                        return undefined as unknown as string;
                     },
                     onPrompt: async (pt) => {
                         debugPa(pt);
@@ -124,9 +124,9 @@ export function setupWebserver(
 }
 
 async function handleDeviceAuthentication(device: IDiscoveredDevice, credentialStoragePath: string, handlers: {
-    onPerformLogin?: (url: string) => Promise<string>,
-    onPrompt?: (promptText: string) => Promise<string>
-} = {}): Promise<void> {
+    onPerformLogin: (url: string) => Promise<string>,
+    onPrompt: (promptText: string) => Promise<string>
+}): Promise<void> {
     const x: IInputOutput = {
         logError: (e) => {
             logError(e);

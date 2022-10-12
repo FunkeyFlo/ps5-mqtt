@@ -1,5 +1,3 @@
-import { DeviceType } from "playactor/dist/discovery/model";
-
 export interface Playstation {
     id: string;
     name: string;
@@ -9,5 +7,5 @@ export interface Playstation {
         port: number;
     };
     systemVersion: string;
-    type: DeviceType
+    type: "PS4" | "PS5"
 }
