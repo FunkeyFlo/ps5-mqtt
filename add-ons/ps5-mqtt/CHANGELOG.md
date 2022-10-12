@@ -1,3 +1,23 @@
+## 1.1.0 - 2022-09-15
+
+### What's changed?
+
+- Docker users can now use a `json` file to configure the add-on as well.
+
+### 🐛 Bug fixes
+
+- Start-up error when using more than one PSN account @FunkeyFlo (#68)
+- docker env "PSN_ACCOUNTS" mandatory @FunkeyFlo (#69)
+
+### ⬆️ Dependency updates
+
+- Bump @reduxjs/toolkit from 1.8.3 to 1.8.5 in /ps5-mqtt @dependabot (#48)
+- Bump redux-saga from 1.1.3 to 1.2.1 in /ps5-mqtt @dependabot (#50)
+- Bump grommet-icons from 4.7.0 to 4.8.0 in /ps5-mqtt @dependabot (#60)
+- Bump async-mqtt from 2.6.2 to 2.6.3 in /ps5-mqtt @dependabot (#65)
+- Bump grommet from 2.25.1 to 2.25.3 in /ps5-mqtt @dependabot (#66)
+- and much more...
+
 ## 1.0.1 - 2022-08-19
 
 ### What’s changed
@@ -69,7 +89,9 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 - 
 - 
 - 
+- 
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
+- 
 - 
 - 
 - 
@@ -95,6 +117,7 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 
 ## 0.5.2
 
@@ -108,7 +131,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- 
 - 
 - 
 - 
@@ -120,7 +145,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 - - Optimizations for discovered devices.
+- 
 - 
 - 
 - 

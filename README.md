@@ -59,7 +59,8 @@ The MQTT entities will be created automatically when a new device is discovered 
 This bit of [documentation][docker-docs] should get you on your way! 😻
 
 ## Support the project!
-If you enjoy the project please consider donating to sponsor further development! 💕
+**If you enjoy the project please consider helping me and my family stay warm this winter! :cold_face:**<br>
+**Donate so I can keep paying my gas bill, whilst working on this awesome project! :fire:**
 
 <a href="https://www.buymeacoffee.com/funkeyflo" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
@@ -86,7 +87,7 @@ The initial MQTT implementation for tracking device power was based on the work 
 [armhf-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
-[credentials-ui]: https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#authentication-ui-v600-2
+[credentials-ui]: https://community.home-assistant.io/t/ps5-mqtt-control-playstation-5-devices-using-mqtt/441141#impressions-1
 [discord]: https://discord.gg/BnmvYHvz5N
 [docker-docs]: ./docs/DOCKER.md
 [ha-docs]: ./add-ons/ps5-mqtt/DOCS.md

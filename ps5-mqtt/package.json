@@ -11,9 +11,9 @@
     },
     "devDependencies": {
         "@types/jest": "^29.0.3",
-        "@typescript-eslint/eslint-plugin": "^5.37.0",
-        "@typescript-eslint/parser": "^5.37.0",
-        "eslint": "^8.23.1",
+        "@typescript-eslint/eslint-plugin": "^5.39.0",
+        "@typescript-eslint/parser": "^5.39.0",
+        "eslint": "^8.24.0",
         "eslint-plugin-react": "^7.31.8",
         "jest": "^29.0.3",
         "redux-saga-testing": "^2.0.2",
