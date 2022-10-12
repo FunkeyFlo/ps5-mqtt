@@ -1,5 +1,5 @@
-import lodash from "lodash";
 import { put, select } from "redux-saga/effects";
+
 import { updateHomeAssistant } from "../action-creators";
 import { getDeviceList } from "../selectors";
 import type { Device, UpdateAccountAction } from "../types";
