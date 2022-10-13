@@ -158,6 +158,82 @@ describe("Check PSN Presence saga", () => {
         expect(mockedUpdateHa).toHaveBeenCalledTimes(1);
     });
 
+    test("will match account activity only to a device that's 'Awake'", async () => {
+        //#region MOCKS
+        const mockAccount: PsnAccount = {
+            accountId: "mock-account-id-1",
+            accountName: "TestUser1",
+            authInfo: {
+                accessToken: "",
+                accessTokenExpiration: 0,
+                refreshToken: "",
+                refreshTokenExpiration: 0
+            },
+            npsso: "----",
+            activity: {
+                launchPlatform: 'PS5',
+                platform: 'PS5',
+                titleId: "Game 1",
+                titleImage: "http://somegameurl.net/path-to-game1-image",
+                titleName: "GAME1ID"
+            }
+        };
+
+        const ps5Device1: Device = {
+            address: { address: "192.168.0.10", port: 80 },
+            available: true,
+            id: "mock-id-1",
+            name: "mock-ps5-1",
+            normalizedName: "mock_ps5_1",
+            status: 'STANDBY',
+            systemVersion: "",
+            transitioning: false,
+            type: 'PS5',
+            activity: undefined,
+        }
+
+        const ps5Device2: Device = {
+            address: { address: "192.168.0.11", port: 80 },
+            available: true,
+            id: "mock-id-2",
+            name: "mock-ps5-2",
+            normalizedName: "mock_ps5_2",
+            status: 'AWAKE',
+            systemVersion: "",
+            transitioning: false,
+            type: 'PS5',
+            activity: undefined,
+        }
+        //#endregion MOCKS
+
+        const dispatched = [];
+        await runSaga({
+            dispatch: (action) => {
+                return dispatched.push(action)
+            },
+            getState: () => (<Partial<State>>{
+                devices: {
+                    [ps5Device1.id]: ps5Device1,
+                    [ps5Device2.id]: ps5Device2,
+                }
+            }),
+        }, updateAccount, {
+            payload: mockAccount,
+            type: 'UPDATE_PSN_ACCOUNT'
+        }).toPromise();
+
+        const mockedUpdateHa = jest.requireMock("../action-creators").updateHomeAssistant;
+
+        expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
+            ...ps5Device2,
+            activity: {
+                ...mockAccount.activity,
+                activePlayers: [mockAccount.accountName],
+            }
+        });
+        expect(mockedUpdateHa).toHaveBeenCalledTimes(1);
+    });
+
     test("will add player to existing activity when another player is already active on the console", async () => {
         //#region MOCKS
         const mockActivity: PsnAccount.AccountActivity = {
@@ -317,8 +393,6 @@ describe("Check PSN Presence saga", () => {
         });
         expect(mockedUpdateHa).toHaveBeenCalledTimes(1);
     });
-
-    
 
     test("will remove activity from device when no players are active on the console", async () => {
         //#region MOCKS
