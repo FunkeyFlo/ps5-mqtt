@@ -12,7 +12,7 @@ function* updateAccount({ payload: account }: UpdateAccountAction) {
 
     // find best device match for activity
     if (account.activity !== undefined) {
-        bestMatch = devices.find(d => d.type === account.activity.launchPlatform);
+        bestMatch = devices.find(d => d.status === 'AWAKE' && d.type === account.activity.launchPlatform);
         if (bestMatch !== undefined) {
             // if there already is an activity on that device add the player to the active player list
             if (bestMatch.activity !== undefined && !bestMatch.activity.activePlayers.includes(account.accountName)) {

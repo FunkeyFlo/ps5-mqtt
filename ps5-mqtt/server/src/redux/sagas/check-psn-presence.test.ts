@@ -4,7 +4,7 @@ import { runSaga } from 'redux-saga';
 
 import { PsnAccount } from "../../psn-account";
 import { updateAccount } from "../action-creators";
-import { State } from "../types";
+import { Account, State } from "../types";
 import { checkPsnPresence } from './check-psn-presence';
 
 jest.mock("../../psn-account");
@@ -13,7 +13,7 @@ jest.mock("../action-creators");
 const mockPsnUpdateAccount = jest.mocked(PsnAccount.updateAccount);
 const mockUpdateAccount = jest.mocked(updateAccount);
 
-const mockAccount: PsnAccount = {
+const mockAccount: Account = {
     accountId: "0000000000",
     accountName: "TestUser",
     authInfo: {
@@ -23,7 +23,8 @@ const mockAccount: PsnAccount = {
         refreshTokenExpiration: 0
     },
     npsso: "----",
-    activity: undefined
+    activity: undefined,
+    preferredDevices: {}
 }
 
 // https://redux-saga.js.org/docs/advanced/Testing/

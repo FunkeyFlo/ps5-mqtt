@@ -160,7 +160,7 @@ describe("Check PSN Presence saga", () => {
         expect(mockedUpdateHa).toHaveBeenCalledTimes(1);
     });
 
-    test("will match account activity to a preferred device", async () => {
+    test("will match account activity only to a device that's 'Awake'", async () => {
         //#region MOCKS
         const mockAccount: Account = {
             accountId: "mock-account-id-1",
@@ -179,9 +179,7 @@ describe("Check PSN Presence saga", () => {
                 titleImage: "http://somegameurl.net/path-to-game1-image",
                 titleName: "GAME1ID"
             },
-            preferredDevices: {
-                ps5: "mock-id-2"
-            }
+            preferredDevices: {}
         };
 
         const ps5Device1: Device = {
@@ -190,7 +188,7 @@ describe("Check PSN Presence saga", () => {
             id: "mock-id-1",
             name: "mock-ps5-1",
             normalizedName: "mock_ps5_1",
-            status: 'AWAKE',
+            status: 'STANDBY',
             systemVersion: "",
             transitioning: false,
             type: 'PS5',
