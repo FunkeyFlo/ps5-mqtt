@@ -23,7 +23,6 @@ function* updateHomeAssistant({ payload: device }: UpdateHomeAssistantAction) {
                 : 'none',
             players: device.activity?.activePlayers,
             title_id: device.activity?.titleId,
-            entity_picture: device.activity?.titleImage,
             title_image: device.activity?.titleImage,
             title_name: device.activity?.titleName,
         }),
