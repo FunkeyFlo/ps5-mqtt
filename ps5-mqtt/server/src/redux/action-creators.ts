@@ -14,6 +14,7 @@ import type {
     CheckPsnPresenceAction,
     PollPsnPresenceAction,
     UpdateAccountAction,
+    Account,
 } from "./types";
 
 const discoverDevices = (): DiscoverDevicesAction => ({
@@ -73,7 +74,7 @@ const updateHomeAssistant = (device: Device): UpdateHomeAssistantAction => ({
     payload: device,
 });
 
-const updateAccount = (account: PsnAccount): UpdateAccountAction => ({
+const updateAccount = (account: Account): UpdateAccountAction => ({
     type: 'UPDATE_PSN_ACCOUNT',
     payload: account,
 })

@@ -5,6 +5,7 @@ import createDebugger from "debug";
 import os from 'os';
 import path from 'path';
 import createSagaMiddleware from "redux-saga";
+
 import { AppConfig, getAppConfig } from "./config";
 import { PsnAccount } from "./psn-account";
 import reducer, {
@@ -13,7 +14,7 @@ import reducer, {
     pollDiscovery, pollPsnPresence, saga,
     setPowerMode
 } from "./redux";
-import { SwitchStatus } from "./redux/types";
+import { Account, SwitchStatus } from "./redux/types";
 import { MQTT_CLIENT, Settings, SETTINGS } from "./services";
 import { createErrorLogger } from "./util/error-logger";
 import { setupWebserver } from "./web-server";
@@ -37,11 +38,20 @@ const createMqtt = async (): Promise<MQTT.AsyncMqttClient> => {
 
 async function getPsnAccountRegistry(
     accounts: AppConfig.PsnAccountInfo[]
-): Promise<Record<string, PsnAccount>> {
-    const accountRegistry: Record<string, PsnAccount> = {};
-    for (const { npsso, username } of accounts) {
-        const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso, username);
-        accountRegistry[account.accountId] = account;
+): Promise<Record<string, Account>> {
+    const accountRegistry: Record<string, Account> = {};
+    for (const accountInfo of accounts) {
+        const account = await PsnAccount.exchangeNpssoForPsnAccount(
+            accountInfo.npsso, 
+            accountInfo.username
+        );
+        accountRegistry[account.accountId] = {
+            ...account,
+            preferredDevices: {
+                ps4: accountInfo.preferred_ps4,
+                ps5: accountInfo.preferred_ps5,
+            }
+        };
     }
     return accountRegistry;
 }
