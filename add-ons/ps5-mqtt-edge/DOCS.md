@@ -15,6 +15,8 @@ include_ps4_devices: false          # Only enable if you only require awake/stan
 psn_accounts:                       # [optional] Add PSN accounts to match online activity to your devices
   - username: MyPsnUser            
     npsso: '!secret my_npsso'       # NPSSO token (expires after two months 😢)
+    preferred_ps5: 70C881D600B0     # ID of the PS5 that will be preferred when activity can be matched to multiple PS5's 
+    preferred_ps4: 60E899D600B0     # ID of the PS4 that will be preferred when activity can be matched to multiple PS4's
 
 account_check_interval: 5000        # Recommended interval for checking account state (don't go lower than 3000!)
 ```
@@ -38,7 +40,7 @@ For logging the [debug][node-debug] npm module is used. This allows you to filte
 Value in miliseconds that lets you change the frequency of scanning for PS5 state changes. 
 
 ### `device_discovery_interval`
-Value in miliseconds that lest you change the frequency of discovering PS5 devices.
+Value in miliseconds that lets you change the frequency of discovering PS5 devices.
 
 ### `account_check_interval`
 Value in miliseconds that lets you change the frequency of checking the online status of a PSN account.
@@ -58,6 +60,8 @@ Follow [these steps][psn-api-auth] to get an NPSSO token.
 ```yaml
 - username: MyPsnUser                  # only a label, the API will retrieve the actual accountname with the npsso
   npsso: '!secret my_npsso'            # token used for authenticating with PSN API's
+  preferred_ps5: 70C881D600B0     # ID of the PS5 that will be preferred when activity can be matched to multiple PS5's 
+  preferred_ps4: 60E899D600B0     # ID of the PS4 that will be preferred when activity can be matched to multiple PS4's
 ```
 
 *NOTE 1: The add-on does a best effort match to map PSN account activity to a device. This means that if you have multiple devices **and** you use the same account to game on both devices at the same time the add-on will match the activity to only one device.*
