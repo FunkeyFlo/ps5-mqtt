@@ -12,6 +12,17 @@ function* updateAccount({ payload: account }: UpdateAccountAction) {
 
     // find best device match for activity
     if (account.activity !== undefined) {
+
+        if(account.preferredDevices.ps5 !== undefined || account.preferredDevices.ps4 !== undefined) {
+            devices.sort((a, _b) => {
+                if(a.id === account.preferredDevices.ps5 || a.id === account.preferredDevices.ps4) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            });
+        }
+
         bestMatch = devices.find(d => d.status === 'AWAKE' && d.type === account.activity.launchPlatform);
         if (bestMatch !== undefined) {
             // if there already is an activity on that device add the player to the active player list

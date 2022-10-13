@@ -1,4 +1,3 @@
-import { PsnAccount } from "../psn-account";
 import type {
     RegisterDeviceAction,
     Device,
