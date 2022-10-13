@@ -35,7 +35,7 @@ function* updateAccount({ payload: account }: UpdateAccountAction) {
         // remove player from player list
         if (device.activity.activePlayers.length > 1) {
             const accountIndex = device.activity.activePlayers.indexOf(account.accountName);
-            device.activity.activePlayers.splice(accountIndex);
+            device.activity.activePlayers.splice(accountIndex, 1);
         }
         // if player was the only player on activity clear activity in it's entirity
         else {

@@ -11,7 +11,10 @@ jest.mock("../action-creators", () => {
     return {
         __esModule: true, // Use it when dealing with esModules
         ...originalModule,
-        updateHomeAssistant: jest.fn(originalModule.updateHomeAssistant),
+        updateHomeAssistant: jest.fn((device) => ({
+            type: "UPDATE_HOME_ASSISTANT",
+            payload: device,
+        })),
     };
 });
 
@@ -237,6 +240,153 @@ describe("Check PSN Presence saga", () => {
                 ...mockActivity,
                 activePlayers: [mockAccount1.accountName, mockAccount2.accountName]
             },
+        });
+        expect(mockedUpdateHa).toHaveBeenCalledTimes(1);
+    });
+
+    test("will remove player from existing activity when another player is still active on the console", async () => {
+        //#region MOCKS
+        const mockActivity: PsnAccount.AccountActivity = {
+            launchPlatform: 'PS5',
+            platform: 'PS5',
+            titleId: "Game 1",
+            titleImage: "http://somegameurl.net/path-to-game1-image",
+            titleName: "GAME1ID",
+        }
+
+        const mockAccount: PsnAccount = {
+            accountId: "mock-account-id-1",
+            accountName: "TestUser1",
+            authInfo: {
+                accessToken: "",
+                accessTokenExpiration: 0,
+                refreshToken: "",
+                refreshTokenExpiration: 0
+            },
+            npsso: "----",
+        };
+
+        const mockDevice: Device = {
+            address: { address: "192.168.0.10", port: 80 },
+            available: true,
+            id: "mock-id-1",
+            name: "mock-ps5-1",
+            normalizedName: "mock_ps5_1",
+            status: 'AWAKE',
+            systemVersion: "",
+            transitioning: false,
+            type: 'PS5',
+            activity: {
+                ...mockActivity,
+                activePlayers: [mockAccount.accountName, "other_user"]
+            },
+        }
+        //#endregion MOCKS
+
+        const dispatched = [];
+        await runSaga({
+            dispatch: (action) => {
+                return dispatched.push(action)
+            },
+            getState: () => (<Partial<State>>{
+                devices: {
+                    [mockDevice.id]: mockDevice
+                }
+            }),
+        }, updateAccount, {
+            payload: mockAccount,
+            type: 'UPDATE_PSN_ACCOUNT'
+        }).toPromise();
+
+        const mockedUpdateHa = jest.requireMock("../action-creators").updateHomeAssistant;
+
+        expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
+            address: { address: "192.168.0.10", port: 80 },
+            available: true,
+            id: "mock-id-1",
+            name: "mock-ps5-1",
+            normalizedName: "mock_ps5_1",
+            status: 'AWAKE',
+            systemVersion: "",
+            transitioning: false,
+            type: 'PS5',
+            activity: {
+                ...mockActivity,
+                activePlayers: ["other_user"]
+            },
+        });
+        expect(mockedUpdateHa).toHaveBeenCalledTimes(1);
+    });
+
+    
+
+    test("will remove activity from device when no players are active on the console", async () => {
+        //#region MOCKS
+        const mockActivity: PsnAccount.AccountActivity = {
+            launchPlatform: 'PS5',
+            platform: 'PS5',
+            titleId: "Game 1",
+            titleImage: "http://somegameurl.net/path-to-game1-image",
+            titleName: "GAME1ID",
+        }
+
+        const mockAccount: PsnAccount = {
+            accountId: "mock-account-id-1",
+            accountName: "TestUser1",
+            authInfo: {
+                accessToken: "",
+                accessTokenExpiration: 0,
+                refreshToken: "",
+                refreshTokenExpiration: 0
+            },
+            npsso: "----",
+        };
+
+        const mockDevice: Device = {
+            address: { address: "192.168.0.10", port: 80 },
+            available: true,
+            id: "mock-id-1",
+            name: "mock-ps5-1",
+            normalizedName: "mock_ps5_1",
+            status: 'AWAKE',
+            systemVersion: "",
+            transitioning: false,
+            type: 'PS5',
+            activity: {
+                ...mockActivity,
+                activePlayers: [mockAccount.accountName]
+            },
+        }
+        //#endregion MOCKS
+
+        const dispatched = [];
+        await runSaga({
+            dispatch: (action) => {
+                return dispatched.push(action)
+            },
+            getState: () => (<Partial<State>>{
+                devices: {
+                    [mockDevice.id]: mockDevice
+                }
+            }),
+        }, updateAccount, {
+            payload: mockAccount,
+            type: 'UPDATE_PSN_ACCOUNT'
+        }).toPromise();
+
+        const mockedUpdateHa = jest.requireMock("../action-creators").updateHomeAssistant;
+
+        expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
+            address: { address: "192.168.0.10", port: 80 },
+            available: true,
+            id: "mock-id-1",
+            name: "mock-ps5-1",
+            normalizedName: "mock_ps5_1",
+            status: 'AWAKE',
+            systemVersion: "",
+            transitioning: false,
+            type: 'PS5',
+            activity: undefined,
         });
         expect(mockedUpdateHa).toHaveBeenCalledTimes(1);
     });
