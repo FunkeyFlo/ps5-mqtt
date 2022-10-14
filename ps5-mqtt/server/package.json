@@ -6,8 +6,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc -p .",
-    "watch": "tsc --watch -p .",
+    "build": "tsc -p ./tsconfig.build.json",
+    "watch": "tsc --watch -p ./tsconfig.build.json",
     "start": "node dist/index.js",
     "lint": "eslint . --ext .ts"
   },

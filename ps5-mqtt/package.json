@@ -6,12 +6,20 @@
     ],
     "private": true,
     "scripts": {
-        "build": "npm run build --workspaces --if-present"
+        "build": "npm run build --workspaces --if-present",
+        "test": "jest"
     },
     "devDependencies": {
+        "@jest/globals": "29.1.2",
+        "@types/jest": "^29.0.3",
         "@typescript-eslint/eslint-plugin": "^5.39.0",
         "@typescript-eslint/parser": "^5.39.0",
         "eslint": "^8.24.0",
-        "eslint-plugin-react": "^7.31.8"
+        "eslint-plugin-react": "^7.31.8",
+        "jest": "^29.1.2",
+        "redux-saga-testing": "^2.0.2",
+        "ts-jest": "^29.0.3",
+        "ts-node": "^10.9.1",
+        "typescript": "^4.8.3"
     }
 }

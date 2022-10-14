@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Launch Program",
             "skipFiles": [
@@ -17,6 +17,23 @@
                 "${workspaceFolder}/ps5-mqtt/server/dist/**/*.js",
                 "${workspaceFolder}/ps5-mqtt/dev.js"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Jest: current file",
+            "cwd": "${workspaceFolder}/ps5-mqtt",
+            //"env": { "NODE_ENV": "test" },
+            "program": "${workspaceFolder}/ps5-mqtt/node_modules/.bin/jest",
+            "args": [
+                "${fileBasenameNoExtension}",
+                "--config",
+                "jest.config.js"
+            ],
+            "console": "integratedTerminal",
+            "windows": {
+                "program": "${workspaceFolder}/ps5-mqtt/node_modules/jest/bin/jest"
+            }
         }
     ]
 }

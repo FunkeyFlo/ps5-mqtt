@@ -1,46 +1,51 @@
-import lodash from "lodash";
 import { put, select } from "redux-saga/effects";
+
 import { updateHomeAssistant } from "../action-creators";
 import { getDeviceList } from "../selectors";
 import type { Device, UpdateAccountAction } from "../types";
-
 
 // handles changes in accounts and propegates them to devices state in the (Redux) store
 function* updateAccount({ payload: account }: UpdateAccountAction) {
     const devices: Device[] = yield select(getDeviceList);
 
-    for (const device of devices) {
-        const clonedDeviceState: Device = lodash.cloneDeep(device);
+    let bestMatch: Device = undefined;
 
-        const isAccountCurrentlyActiveOnDevice =
-            clonedDeviceState.activity?.activePlayers.some(p => p === account.accountName);
-
-        // the player is using an app that matches the current device's platform
-        if (account.activity !== undefined && clonedDeviceState.type === account.activity.launchPlatform) {
-            // mark activity as the new activity, extending player list in the process
-            clonedDeviceState.activity = {
-                ...account.activity,
-                activePlayers: isAccountCurrentlyActiveOnDevice
-                    ? clonedDeviceState.activity.activePlayers
-                    : [...(clonedDeviceState.activity?.activePlayers ?? []), account.accountName],
+    // find best device match for activity
+    if (account.activity !== undefined) {
+        bestMatch = devices.find(d => d.status === 'AWAKE' && d.type === account.activity.launchPlatform);
+        if (bestMatch !== undefined) {
+            // if there already is an activity on that device add the player to the active player list
+            if (bestMatch.activity !== undefined && !bestMatch.activity.activePlayers.includes(account.accountName)) {
+                bestMatch.activity.activePlayers.push(account.accountName);
+            }
+            // otherwise add activity to matched device
+            else {
+                bestMatch.activity = {
+                    ...account.activity,
+                    activePlayers: [account.accountName]
+                }
             }
         }
-        // the player was recently marked as using an app on the current device but is no longer using an app.
-        else if (isAccountCurrentlyActiveOnDevice && account.activity === undefined) {
-            if (clonedDeviceState.activity.activePlayers.length > 1) {
-                // remove current player from the player list
-                clonedDeviceState.activity.activePlayers =
-                    clonedDeviceState.activity.activePlayers.filter(p => p !== account.accountName);
-            } else {
-                // no players = no activity
-                clonedDeviceState.activity = undefined;
-            }
-        }
+    }
 
-        // only apply update if something actually changed
-        if (!lodash.isEqual(device, clonedDeviceState)) {
-            yield put(updateHomeAssistant(clonedDeviceState));
+    const devicesToUpdate: Device[] = bestMatch !== undefined ? [bestMatch] : [];
+
+    // find any devices the player was recently active on except the bestMatch
+    for (const device of devices.filter(d => d !== bestMatch && d.activity?.activePlayers?.includes(account.accountName))) {
+        // remove player from player list
+        if (device.activity.activePlayers.length > 1) {
+            const accountIndex = device.activity.activePlayers.indexOf(account.accountName);
+            device.activity.activePlayers.splice(accountIndex, 1);
         }
+        // if player was the only player on activity clear activity in it's entirity
+        else {
+            device.activity = undefined;
+        }
+        devicesToUpdate.push(device);
+    }
+
+    for (const device of devicesToUpdate) {
+        yield put(updateHomeAssistant(device));
     }
 }
 

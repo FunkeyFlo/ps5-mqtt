@@ -61,6 +61,10 @@ jobs:
     - name: ⏬ Install dependencies
       working-directory: ./ps5-mqtt
       run: npm ci
+
+    - name: 🧪 Run tests
+      working-directory: ./ps5-mqtt
+      run: npm test
       
     - name: 👨‍🏭 Build App
       working-directory: ./ps5-mqtt

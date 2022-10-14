@@ -9,7 +9,7 @@ type DeviceState = {
     status: SwitchStatus;
     available: boolean;
 
-    activity: PsnAccount.AccountActivity & {
+    activity?: PsnAccount.AccountActivity & {
         activePlayers: string[];
     };
 }
