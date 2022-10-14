@@ -25,6 +25,7 @@ const debugState = createDebugger("@ha:state");
 const logError = createErrorLogger();
 
 const appConfig = getAppConfig();
+createDebugger("@ha:ps5-sensitive:config")(appConfig);
 
 const createMqtt = async (): Promise<MQTT.AsyncMqttClient> => {
     return await MQTT.connectAsync(`mqtt://${appConfig.mqtt.host}`, {
@@ -81,7 +82,8 @@ async function run() {
                 [SETTINGS]: settings,
             }
         });
-        const accounts = await getPsnAccountRegistry(appConfig.psn_accounts ?? [])
+        const accounts = await getPsnAccountRegistry(appConfig.psn_accounts ?? []);
+        createDebugger("@ha:ps5-sensitive:registered-accounts")(accounts);
         const store = configureStore({
             reducer,
             middleware: [sagaMiddleware],
