@@ -1,6 +1,7 @@
 {
     "extends": "./tsconfig.build.json",
     "compilerOptions": {
+        "module": "ESNext",
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "strict": false

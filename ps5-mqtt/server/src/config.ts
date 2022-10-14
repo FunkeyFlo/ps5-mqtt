@@ -26,8 +26,17 @@ export interface AppConfig {
 
 export module AppConfig {
     export interface PsnAccountInfo {
-        npsso: string,
-        username?: string,
+        npsso: string;
+        username?: string;
+        preferred_ps5?: string;
+        preferred_ps4?: string;
+    }
+
+    export interface MqttConfig {
+        host: string;
+        pass: string;
+        port: string;
+        user: string;
     }
 
     export interface MqttConfig {

@@ -1,11 +1,18 @@
 import { Playstation } from "../device";
 import { PsnAccount } from "../psn-account";
 
-type Device = Playstation & DeviceState & {
+export type Device = Playstation & DeviceState & {
     normalizedName: string
 };
 
-type DeviceState = {
+export type Account = PsnAccount & {
+    preferredDevices: {
+        ps4?: string,
+        ps5?: string,
+    }
+}
+
+export type DeviceState = {
     status: SwitchStatus;
     available: boolean;
 
@@ -14,29 +21,29 @@ type DeviceState = {
     };
 }
 
-type Ps5Status = "STANDBY" | "AWAKE";
-type SwitchStatus = Ps5Status | "UNKNOWN";
+export type Ps5Status = "STANDBY" | "AWAKE";
+export type SwitchStatus = Ps5Status | "UNKNOWN";
 
-type DiscoverDevicesAction = {
+export type DiscoverDevicesAction = {
     type: "DISCOVER_DEVICES";
 };
 
-type AddDeviceAction = {
+export type AddDeviceAction = {
     type: "ADD_DEVICE";
     payload: Device;
 };
 
-type RegisterDeviceAction = {
+export type RegisterDeviceAction = {
     type: "REGISTER_DEVICE";
     payload: Device;
 };
 
-type UpdateHomeAssistantAction = {
+export type UpdateHomeAssistantAction = {
     type: "UPDATE_HOME_ASSISTANT";
     payload: Device;
 };
 
-type ChangePowerModeAction = {
+export type ChangePowerModeAction = {
     type: "CHANGE_POWER_MODE";
     payload: {
         device: Device;
@@ -44,47 +51,47 @@ type ChangePowerModeAction = {
     };
 };
 
-type SetTransitioningAction = {
+export type SetTransitioningAction = {
     type: "TRANSITIONING";
     payload: { id: string; transitioning: boolean };
 };
 
-type UpdateDeviceAction = {
+export type UpdateDeviceAction = {
     type: "UPDATE_DEVICE";
     payload: Partial<Device> & { id: string };
 };
 
-type CheckDevicesStateAction = {
+export type CheckDevicesStateAction = {
     type: "CHECK_DEVICES_STATE";
 };
 
-type CheckPsnPresenceAction = {
+export type CheckPsnPresenceAction = {
     type: "CHECK_PSN_PRESENCE";
 };
 
-type PersistDevicesAction = {
+export type PersistDevicesAction = {
     type: "PERSIST_DEVICES";
     payload: Record<string, Device>;
 };
 
-type PollDevicesAction = {
+export type PollDevicesAction = {
     type: "POLL_DEVICES";
 };
 
-type PollDiscoveryAction = {
+export type PollDiscoveryAction = {
     type: "POLL_DISCOVERY";
 };
 
-type PollPsnPresenceAction = {
+export type PollPsnPresenceAction = {
     type: "POLL_PSN_PRESENCE";
 };
 
-type UpdateAccountAction = {
+export type UpdateAccountAction = {
     type: "UPDATE_PSN_ACCOUNT";
-    payload: PsnAccount;
+    payload: Account;
 }
 
-type AnyAction =
+export type AnyAction =
     | RegisterDeviceAction
     | PersistDevicesAction
     | ChangePowerModeAction
@@ -101,30 +108,7 @@ type AnyAction =
     | UpdateAccountAction
     ;
 
-type State = {
+export type State = {
     devices: Record<string, Device>;
-    accounts: Record<string, PsnAccount>;
-};
-
-export type {
-    RegisterDeviceAction,
-    AnyAction,
-    AddDeviceAction,
-    PersistDevicesAction,
-    ChangePowerModeAction,
-    CheckDevicesStateAction,
-    Device,
-    DeviceState,
-    DiscoverDevicesAction,
-    SetTransitioningAction,
-    PollDevicesAction,
-    PollDiscoveryAction,
-    Ps5Status,
-    State,
-    UpdateHomeAssistantAction,
-    UpdateDeviceAction,
-    SwitchStatus,
-    UpdateAccountAction,
-    CheckPsnPresenceAction,
-    PollPsnPresenceAction,
+    accounts: Record<string, Account>;
 };

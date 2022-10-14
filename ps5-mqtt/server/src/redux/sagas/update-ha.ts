@@ -1,5 +1,6 @@
 import type MQTT from "async-mqtt";
 import { call, getContext } from "redux-saga/effects";
+
 import { MQTT_CLIENT } from "../../services";
 import type { UpdateHomeAssistantAction } from "../types";
 
@@ -23,7 +24,6 @@ function* updateHomeAssistant({ payload: device }: UpdateHomeAssistantAction) {
                 : 'none',
             players: device.activity?.activePlayers,
             title_id: device.activity?.titleId,
-            entity_picture: device.activity?.titleImage,
             title_image: device.activity?.titleImage,
             title_name: device.activity?.titleName,
         }),

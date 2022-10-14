@@ -1,11 +1,10 @@
-import { PsnAccount } from "../psn-account";
-import type { Device, State } from "./types"
+import type { Device, State, Account } from "./types"
 
 const getDeviceList = (state: State): Device[] => {
   return Object.values(state.devices);
 }
 
-const getAccounts = (state: State): PsnAccount[] => {
+const getAccounts = (state: State): Account[] => {
   return Object.values(state.accounts)
 }
 
