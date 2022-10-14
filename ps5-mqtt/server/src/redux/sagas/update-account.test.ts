@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { runSaga } from 'redux-saga';
-import { PsnAccount } from '../../psn-account';
 
+import { PsnAccount } from '../../psn-account';
 import { Account, Device, State } from '../types';
 import { updateAccount } from './update-account';
 

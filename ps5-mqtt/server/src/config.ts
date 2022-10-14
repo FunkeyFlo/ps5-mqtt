@@ -38,6 +38,13 @@ export module AppConfig {
         port: string;
         user: string;
     }
+
+    export interface MqttConfig {
+        host: string;
+        pass: string;
+        port: string;
+        user: string;
+    }
 }
 
 export function getAppConfig(): AppConfig {
