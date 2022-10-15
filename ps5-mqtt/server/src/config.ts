@@ -1,10 +1,12 @@
 import * as fs from 'fs';
 import * as process from 'process';
 import lodash from 'lodash';
+import createDebugger from "debug";
 
 import { createErrorLogger } from './util/error-logger';
 
 const logError = createErrorLogger();
+const logSensitive = createDebugger("@ha:ps5-sensitive:raw-config")
 
 export interface AppConfig {
     // yml options
@@ -64,6 +66,7 @@ function getJsonConfig(configPath: string | undefined): Partial<AppConfig> {
         return {};
     }
     const optionsRaw = fs.readFileSync(configPath, { encoding: 'utf-8' });
+    logSensitive(optionsRaw);
     try {
         const options: AppConfig = JSON.parse(optionsRaw);
         return options;
@@ -115,7 +118,7 @@ function getEnvConfig(): Partial<AppConfig> {
                 : undefined,
 
         psn_accounts: PSN_ACCOUNTS ? JSON.parse(PSN_ACCOUNTS) : undefined,
-        include_ps4_devices: Boolean(INCLUDE_PS4_DEVICES),
+        include_ps4_devices: Boolean(INCLUDE_PS4_DEVICES) ? JSON.parse(INCLUDE_PS4_DEVICES) : undefined,
 
         credentialsStoragePath: CREDENTIAL_STORAGE_PATH,
         frontendPort: FRONTEND_PORT

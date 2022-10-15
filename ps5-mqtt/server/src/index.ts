@@ -25,7 +25,7 @@ const debugState = createDebugger("@ha:state");
 const logError = createErrorLogger();
 
 const appConfig = getAppConfig();
-createDebugger("@ha:ps5-sensitive:config")(appConfig);
+createDebugger("@ha:ps5-sensitive:parsed-config")(appConfig);
 
 const createMqtt = async (): Promise<MQTT.AsyncMqttClient> => {
     return await MQTT.connectAsync(`mqtt://${appConfig.mqtt.host}`, {
