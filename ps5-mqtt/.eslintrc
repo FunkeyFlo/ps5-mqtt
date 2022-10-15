@@ -16,6 +16,7 @@
     ],
     "rules": {
         "@typescript-eslint/prefer-namespace-keyword": "off",
-        "@typescript-eslint/no-namespace": "off"
+        "@typescript-eslint/no-namespace": "off",
+        "no-extra-boolean-cast": "off"
     }
 }
