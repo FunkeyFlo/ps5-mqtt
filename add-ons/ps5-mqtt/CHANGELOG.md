@@ -21,12 +21,8 @@ Users can now specify the preferred console per account. This is useful when, fo
 ```
 You can find the ID of your PlayStation device by:
 
-1. Using the Web-UI <br>
-2. ![image](https://user-images.githubusercontent.com/4623715/196047737-1eac0ce1-574c-4998-9d6f-949a24080910.png)
-3. 
-4. Examining the MQTT topic <br>
-5. ![image](https://user-images.githubusercontent.com/4623715/196047663-a855bf66-840c-444e-9719-66f9878a97e6.png)
-6. 
+1. Using the Web-UI <br> ![image](https://user-images.githubusercontent.com/4623715/196047737-1eac0ce1-574c-4998-9d6f-949a24080910.png)
+2. Examining the MQTT topic <br> ![image](https://user-images.githubusercontent.com/4623715/196047663-a855bf66-840c-444e-9719-66f9878a97e6.png)
 
 ### ⬆️ Dependency updates
 
