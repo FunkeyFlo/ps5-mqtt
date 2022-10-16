@@ -40,6 +40,8 @@ schema:
   psn_accounts:
     - username: str?
       npsso: str
+      preferred_ps5: str?
+      preferred_ps4: str?
   logger: str?
   device_check_interval: int
   device_discovery_interval: int
