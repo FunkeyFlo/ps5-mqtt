@@ -111,7 +111,7 @@ async function getAccount(npsso: string, username?: string): Promise<PsnAccount>
 async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<PsnAccount.AccountActivity> {
     try {
         const response = await fetch(
-            `https://m.np.playstation.net/api/` +
+            `https://m.np.playstation.com/api/` +
             `userProfile/v1/internal/users/${accountId}/basicPresences?type=primary`,
             {
                 method: 'GET',
