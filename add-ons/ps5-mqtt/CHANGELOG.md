@@ -1,3 +1,11 @@
+## 1.2.1 - 2022-10-18
+
+### What’s changed
+
+### 🐛 Bug Fixes
+
+- Fixed psn api failure causing fatal error
+
 ## 1.2.0 - 2022-10-16
 
 ### What’s changed
@@ -17,6 +25,7 @@ Users can now specify the preferred console per account. This is useful when, fo
   npsso: '!secret my_npsso'
   preferred_ps5: 70C881D600B0      # ID of the PS5 that will be preferred when activity can be matched to multiple PS5's 
   preferred_ps4: 60E899D600B0      # ID of the PS4 that will be preferred when activity can be matched to multiple PS4's
+
 
 ```
 You can find the ID of your PlayStation device by:
@@ -122,7 +131,9 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 - 
 - 
 - 
+- 
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
+- 
 - 
 - 
 - 
@@ -152,6 +163,7 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 
 ## 0.5.2
 
@@ -167,7 +179,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- 
 - 
 - 
 - 
@@ -183,7 +197,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 - - Optimizations for discovered devices.
+- 
 - 
 - 
 - 
