@@ -30,30 +30,21 @@ export module PsnAccount {
     export async function exchangeNpssoForPsnAccount(
         npsso: string,
         username?: string
-    ): Promise<PsnAccount | undefined> {
-        try {
-            return getAccount(npsso, username);
-        } catch (e) {
-            logError(e)
-            return undefined;
-        }
+    ): Promise<PsnAccount> {
+        return getAccount(npsso, username);
     }
 
     export async function updateAccount(account: PsnAccount): Promise<PsnAccount> {
         const authInfo = await getRefreshedAccountAuthInfo(account);
 
-        if (authInfo !== undefined) {
-            const refreshedAccount: PsnAccount = {
-                ...account,
-                authInfo
-            }
+        const refreshedAccount: PsnAccount = {
+            ...account,
+            authInfo
+        }
 
-            return {
-                ...refreshedAccount,
-                activity: await getAccountActivity(refreshedAccount)
-            }
-        } else {
-            return undefined;
+        return {
+            ...refreshedAccount,
+            activity: await getAccountActivity(refreshedAccount)
         }
     }
 }
