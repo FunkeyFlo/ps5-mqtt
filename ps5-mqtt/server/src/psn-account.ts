@@ -27,7 +27,10 @@ export module PsnAccount {
         launchPlatform: NormalizedDeviceType;
     }
 
-    export async function exchangeNpssoForPsnAccount(npsso: string, username?: string): Promise<PsnAccount> {
+    export async function exchangeNpssoForPsnAccount(
+        npsso: string,
+        username?: string
+    ): Promise<PsnAccount> {
         return getAccount(npsso, username);
     }
 
@@ -108,7 +111,7 @@ async function getAccount(npsso: string, username?: string): Promise<PsnAccount>
     }
 }
 
-async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<PsnAccount.AccountActivity> {
+async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<PsnAccount.AccountActivity | undefined> {
     try {
         const response = await fetch(
             `https://m.np.playstation.com/api/` +
@@ -145,7 +148,7 @@ async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<
     return undefined;
 }
 
-async function getRefreshedAccountAuthInfo({ authInfo, npsso }: PsnAccount): Promise<PsnAccountAuthenticationInfo | undefined> {
+async function getRefreshedAccountAuthInfo({ authInfo, npsso }: PsnAccount): Promise<PsnAccountAuthenticationInfo> {
     if (Date.now() < authInfo.accessTokenExpiration) {
         return authInfo;
     }
