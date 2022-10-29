@@ -46,13 +46,17 @@ async function getPsnAccountRegistry(
             accountInfo.npsso, 
             accountInfo.username
         );
-        accountRegistry[account.accountId] = {
-            ...account,
-            preferredDevices: {
-                ps4: accountInfo.preferred_ps4,
-                ps5: accountInfo.preferred_ps5,
-            }
-        };
+        if(account !== undefined) {
+            accountRegistry[account.accountId] = {
+                ...account,
+                preferredDevices: {
+                    ps4: accountInfo.preferred_ps4,
+                    ps5: accountInfo.preferred_ps5,
+                }
+            };
+        } else {
+            logError(`Account '${accountInfo.username ?? 'unknown'}' could not be retrieved. Activity will not be tracked.`)
+        }
     }
     return accountRegistry;
 }

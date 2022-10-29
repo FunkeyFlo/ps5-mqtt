@@ -27,21 +27,33 @@ export module PsnAccount {
         launchPlatform: NormalizedDeviceType;
     }
 
-    export async function exchangeNpssoForPsnAccount(npsso: string, username?: string): Promise<PsnAccount> {
-        return getAccount(npsso, username);
+    export async function exchangeNpssoForPsnAccount(
+        npsso: string,
+        username?: string
+    ): Promise<PsnAccount | undefined> {
+        try {
+            return getAccount(npsso, username);
+        } catch (e) {
+            logError(e)
+            return undefined;
+        }
     }
 
     export async function updateAccount(account: PsnAccount): Promise<PsnAccount> {
         const authInfo = await getRefreshedAccountAuthInfo(account);
 
-        const refreshedAccount: PsnAccount = {
-            ...account,
-            authInfo
-        }
+        if (authInfo !== undefined) {
+            const refreshedAccount: PsnAccount = {
+                ...account,
+                authInfo
+            }
 
-        return {
-            ...refreshedAccount,
-            activity: await getAccountActivity(refreshedAccount)
+            return {
+                ...refreshedAccount,
+                activity: await getAccountActivity(refreshedAccount)
+            }
+        } else {
+            return undefined;
         }
     }
 }
@@ -108,7 +120,7 @@ async function getAccount(npsso: string, username?: string): Promise<PsnAccount>
     }
 }
 
-async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<PsnAccount.AccountActivity> {
+async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<PsnAccount.AccountActivity | undefined> {
     try {
         const response = await fetch(
             `https://m.np.playstation.com/api/` +
@@ -145,7 +157,7 @@ async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<
     return undefined;
 }
 
-async function getRefreshedAccountAuthInfo({ authInfo, npsso }: PsnAccount): Promise<PsnAccountAuthenticationInfo | undefined> {
+async function getRefreshedAccountAuthInfo({ authInfo, npsso }: PsnAccount): Promise<PsnAccountAuthenticationInfo> {
     if (Date.now() < authInfo.accessTokenExpiration) {
         return authInfo;
     }
