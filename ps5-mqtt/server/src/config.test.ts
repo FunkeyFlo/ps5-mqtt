@@ -29,6 +29,7 @@ describe("Configuration", () => {
             device_discovery_interval: 60000,
             account_check_interval: 5000,
             include_ps4_devices: true,
+            device_discovery_broadcast_address: '255.255.255.255',
             psn_accounts: [
                 {
                     username: 'REDACTED',
@@ -53,6 +54,7 @@ describe("Configuration", () => {
             device_discovery_interval: 60000,
             account_check_interval: 5000,
             include_ps4_devices: true,
+            device_discovery_broadcast_address: '255.255.255.255',
             psn_accounts: [
                 {
                     username: 'REDACTED',
@@ -104,6 +106,7 @@ describe("Configuration", () => {
             device_discovery_interval: 60000,
             account_check_interval: 5000,
             include_ps4_devices: false,
+            device_discovery_broadcast_address: undefined,
             psn_accounts: [
                 {
                     username: 'REDACTED',
