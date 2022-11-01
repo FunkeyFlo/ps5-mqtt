@@ -7,7 +7,7 @@
         "watch": "esbuild src/client.tsx --bundle --outfile=dist/client.js --watch"
     },
     "devDependencies": {
-        "@types/react": "^18.0.22",
+        "@types/react": "^18.0.24",
         "@types/react-dom": "^18.0.8",
         "esbuild": "^0.15.11",
         "grommet": "^2.26.0",
