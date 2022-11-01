@@ -1,3 +1,52 @@
+## 1.2.2 - 2022-10-18
+
+### What’s changed
+
+### 🐛 Bug Fixes
+
+- Activity sensor working again thanks to the lovely folks @ [psn-api](https://github.com/achievements-app/psn-api)
+
+## 1.2.1 - 2022-10-18
+
+### What’s changed
+
+### 🐛 Bug Fixes
+
+- Fixed psn api failure causing fatal error
+
+## 1.2.0 - 2022-10-16
+
+### What’s changed
+
+- Fix include_ps4_devices flag being ignored @FunkeyFlo (#111)
+- Added "preferred" devices @FunkeyFlo (#106)
+- Fix wrong urls in addon config @chpego (#97)
+
+### 🚨 New functionality
+
+#### "preferred" devices (#106)
+
+Users can now specify the preferred console per account. This is useful when, for example, you have multiple PSN users in your home and multiple PS4's or multiple PS5's. This new option lets you define a preferred device per account.
+
+```yaml
+- username: MyPsnUser
+  npsso: '!secret my_npsso'
+  preferred_ps5: 70C881D600B0      # ID of the PS5 that will be preferred when activity can be matched to multiple PS5's 
+  preferred_ps4: 60E899D600B0      # ID of the PS4 that will be preferred when activity can be matched to multiple PS4's
+
+
+
+```
+You can find the ID of your PlayStation device by:
+
+1. Using the Web-UI <br> ![image](https://user-images.githubusercontent.com/4623715/196047737-1eac0ce1-574c-4998-9d6f-949a24080910.png)
+2. Examining the MQTT topic <br> ![image](https://user-images.githubusercontent.com/4623715/196047663-a855bf66-840c-444e-9719-66f9878a97e6.png)
+
+### ⬆️ Dependency updates
+
+- Bump grommet from 2.25.3 to 2.26.0 in /ps5-mqtt @dependabot (#87)
+- Bump body-parser from 1.20.0 to 1.20.1 in /ps5-mqtt @dependabot (#101)
+
 ## 1.1.0 - 2022-09-15
 
 ### What's changed?
@@ -90,7 +139,13 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 - 
 - 
 - 
+- 
+- 
+- 
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
+- 
+- 
+- 
 - 
 - 
 - 
@@ -118,6 +173,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
+- 
+- 
 
 ## 0.5.2
 
@@ -132,7 +190,13 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
+- 
+- 
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- 
+- 
+- 
 - 
 - 
 - 
@@ -146,7 +210,13 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
+- 
+- 
 - - Optimizations for discovered devices.
+- 
+- 
+- 
 - 
 - 
 - 

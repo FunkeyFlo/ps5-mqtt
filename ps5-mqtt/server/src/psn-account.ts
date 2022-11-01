@@ -1,8 +1,10 @@
 import * as psnApi from 'psn-api';
 import fetch from 'node-fetch';
 import createDebugger from 'debug';
+import { createErrorLogger } from './util/error-logger';
 
 const debug = createDebugger('@ha:ps5:psn-api');
+const logError = createErrorLogger()
 
 export module PsnAccount {
     export interface AccountActivity {
@@ -25,7 +27,10 @@ export module PsnAccount {
         launchPlatform: NormalizedDeviceType;
     }
 
-    export async function exchangeNpssoForPsnAccount(npsso: string, username?: string): Promise<PsnAccount> {
+    export async function exchangeNpssoForPsnAccount(
+        npsso: string,
+        username?: string
+    ): Promise<PsnAccount> {
         return getAccount(npsso, username);
     }
 
@@ -106,38 +111,44 @@ async function getAccount(npsso: string, username?: string): Promise<PsnAccount>
     }
 }
 
-async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<PsnAccount.AccountActivity> {
-    const response = await fetch(
-        `https://m.np.playstation.net/api/` +
-        `userProfile/v1/internal/users/${accountId}/basicPresences?type=primary`,
-        {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + authInfo.accessToken,
-            },
-        }
-    );
-    const { basicPresence }: BasicPresenceResponse = await response.json();
+async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<PsnAccount.AccountActivity | undefined> {
+    try {
+        const response = await fetch(
+            `https://m.np.playstation.com/api/` +
+            `userProfile/v1/internal/users/${accountId}/basicPresences?type=primary`,
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + authInfo.accessToken,
+                },
+            }
+        );
 
-    if (basicPresence?.gameTitleInfoList?.length > 0) {
-        const [activeTitle] = basicPresence.gameTitleInfoList;
-
-        return {
-            titleId: activeTitle.npTitleId,
-            titleImage: activeTitle.npTitleIconUrl ?? activeTitle.conceptIconUrl,
-            titleName: activeTitle.titleName,
-            platform: activeTitle.format.toUpperCase() as NormalizedDeviceType,
-            launchPlatform: activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
-        }
-    } else {
         if (response.status >= 400 && response.status < 600) {
-            debug(`Unable to retrieve PSN information. API response: "${response.status}:${response.statusText}"`)
+            debug(`Unable to retrieve PSN information. API response: "${response.status}:${response.statusText}"`);
+        } else {
+            const { basicPresence }: BasicPresenceResponse = await response.json();
+
+            if (basicPresence?.gameTitleInfoList?.length > 0) {
+                const [activeTitle] = basicPresence.gameTitleInfoList;
+
+                return {
+                    titleId: activeTitle.npTitleId,
+                    titleImage: activeTitle.npTitleIconUrl ?? activeTitle.conceptIconUrl,
+                    titleName: activeTitle.titleName,
+                    platform: activeTitle.format.toUpperCase() as NormalizedDeviceType,
+                    launchPlatform: activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
+                }
+            }
         }
-        return undefined;
+    } catch (e) {
+        logError(e);
     }
+
+    return undefined;
 }
 
-async function getRefreshedAccountAuthInfo({ authInfo, npsso }: PsnAccount): Promise<PsnAccountAuthenticationInfo | undefined> {
+async function getRefreshedAccountAuthInfo({ authInfo, npsso }: PsnAccount): Promise<PsnAccountAuthenticationInfo> {
     if (Date.now() < authInfo.accessTokenExpiration) {
         return authInfo;
     }

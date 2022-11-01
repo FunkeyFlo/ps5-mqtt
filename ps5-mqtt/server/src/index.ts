@@ -42,17 +42,22 @@ async function getPsnAccountRegistry(
 ): Promise<Record<string, Account>> {
     const accountRegistry: Record<string, Account> = {};
     for (const accountInfo of accounts) {
-        const account = await PsnAccount.exchangeNpssoForPsnAccount(
-            accountInfo.npsso, 
-            accountInfo.username
-        );
-        accountRegistry[account.accountId] = {
-            ...account,
-            preferredDevices: {
-                ps4: accountInfo.preferred_ps4,
-                ps5: accountInfo.preferred_ps5,
-            }
-        };
+        try {
+            const account = await PsnAccount.exchangeNpssoForPsnAccount(
+                accountInfo.npsso,
+                accountInfo.username
+            );
+            accountRegistry[account.accountId] = {
+                ...account,
+                preferredDevices: {
+                    ps4: accountInfo.preferred_ps4,
+                    ps5: accountInfo.preferred_ps5,
+                }
+            };
+        } catch (e) {
+            logError(e);
+            logError(`Account '${accountInfo.username ?? 'unknown'}' retrieval failed. Activity for this account will not be tracked.`)
+        }
     }
     return accountRegistry;
 }
