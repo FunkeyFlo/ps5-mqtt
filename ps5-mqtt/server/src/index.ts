@@ -78,6 +78,8 @@ async function run() {
         credentialStoragePath: appConfig.credentialsStoragePath
             ?? path.join(os.homedir(), '.config', 'playactor', 'credentials.json'),
         allowPs4Devices: appConfig.include_ps4_devices ?? true,
+
+        deviceDiscoveryBroadcastAddress: appConfig.device_discovery_broadcast_address
     };
 
     try {
