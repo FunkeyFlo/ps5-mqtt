@@ -1,4 +1,5 @@
 import createDebugger from "debug";
+import { stdout } from "process";
 import { getContext, put, select } from "redux-saga/effects";
 import sh from "shelljs";
 import { Settings, SETTINGS } from "../../services";
@@ -16,13 +17,19 @@ function* checkDevicesState() {
     const devices: Device[] = yield select(getDeviceList);
     for (const device of devices) {
         try {
-            const shellOutput = sh.exec(
-                `playactor check --host-name "${device.name}" --machine-friendly`
+            const { stdout, stderr } = sh.exec(
+                `playactor check --ip ${device.address.address} --machine-friendly`
                 + ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth`
                 + ` -c ${credentialStoragePath}`,
                 { silent: true, timeout: 15000 }
             );
-            const updatedDevice: Device = JSON.parse(shellOutput.stdout);
+
+            if (stderr) {
+                throw new Error(stderr)
+            }
+
+            const updatedDevice: Device = JSON.parse(stdout);
+
             if (
                 device.transitioning
             ) {
@@ -41,8 +48,8 @@ function* checkDevicesState() {
                     updateHomeAssistant({
                         ...device,
                         status: updatedDevice.status,
-                        activity: updatedDevice.status !== 'AWAKE' 
-                            ? undefined 
+                        activity: updatedDevice.status !== 'AWAKE'
+                            ? undefined
                             : updatedDevice.activity,
                         available: true,
                     })
