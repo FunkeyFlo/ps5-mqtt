@@ -55,7 +55,9 @@ If enabled (`true`) the add-on will also discover / allow the registration of Pl
 ### `psn_account(s)` *optional*, *multiple*
 The registered PSN accounts will be used by the application to track online activity and used to make a *best-effort* match on your device(s).
 
-Follow [these steps][psn-api-auth] to get an NPSSO token.
+*NOTE: Without this information, you will not see "playing" status or what game you are playing!*
+
+Follow [these steps][psn-api-auth] to get an NPSSO token. You can copy the below into the config editor in Home Assistant for correct formatting. You can get your PS5 ID from the PS5-MQTT Web UI page.
 
 ```yaml
 - username: MyPsnUser                  # only a label, the API will retrieve the actual accountname with the npsso
