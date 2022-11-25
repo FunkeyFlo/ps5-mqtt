@@ -55,6 +55,8 @@ If enabled (`true`) the add-on will also discover / allow the registration of Pl
 ### `psn_account(s)` *optional*, *multiple*
 The registered PSN accounts will be used by the application to track online activity and used to make a *best-effort* match on your device(s).
 
+*NOTE: Without this information, you will not see "playing" status or what game you are playing!*
+
 Follow [these steps][psn-api-auth] to get an NPSSO token.
 
 ```yaml
