@@ -16,6 +16,7 @@ export interface AppConfig {
     device_discovery_interval: number,
 
     include_ps4_devices: boolean,
+    device_discovery_broadcast_address: string,
 
     psn_accounts: AppConfig.PsnAccountInfo[],
 
@@ -89,6 +90,8 @@ function getEnvConfig(): Partial<AppConfig> {
 
         INCLUDE_PS4_DEVICES,
 
+        DEVICE_DISCOVERY_BROADCAST_ADDRESS,
+
         DEVICE_CHECK_INTERVAL,
         DEVICE_DISCOVERY_INTERVAL,
         ACCOUNT_CHECK_INTERVAL,
@@ -119,6 +122,8 @@ function getEnvConfig(): Partial<AppConfig> {
 
         psn_accounts: PSN_ACCOUNTS ? JSON.parse(PSN_ACCOUNTS) : undefined,
         include_ps4_devices: Boolean(INCLUDE_PS4_DEVICES) ? JSON.parse(INCLUDE_PS4_DEVICES) : undefined,
+
+        device_discovery_broadcast_address: DEVICE_DISCOVERY_BROADCAST_ADDRESS,
 
         credentialsStoragePath: CREDENTIAL_STORAGE_PATH,
         frontendPort: FRONTEND_PORT

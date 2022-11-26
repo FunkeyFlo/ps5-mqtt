@@ -26,9 +26,14 @@ const useAsyncIterableWithSaga =
             });
 
 function* discoverDevices() {
-    const { allowPs4Devices }: Settings = yield getContext(SETTINGS);
+    const {
+        allowPs4Devices,
+        deviceDiscoveryBroadcastAddress
+    }: Settings = yield getContext(SETTINGS);
 
-    const discovery = new Discovery();
+    const discovery = new Discovery({
+        deviceIp: deviceDiscoveryBroadcastAddress
+    });
     let discoveredDevices: Device[] = yield call(
         useAsyncIterableWithSaga(
             discovery.discover.bind(discovery),

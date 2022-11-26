@@ -9,4 +9,6 @@ export interface Settings {
 
     credentialStoragePath: string;
     allowPs4Devices: boolean;
+
+    deviceDiscoveryBroadcastAddress: string;
 }
