@@ -72,6 +72,13 @@ Follow [these steps][psn-api-auth] to get an NPSSO token.
 
 *NOTE 3: You don't have to use a `!secret` for the `npsso` token. But it is highly advised as it's basically a password.*
 
+### `device_discovery_broadcast_address` *optional*
+IP address the addon will use for UDP broadcasting which is required for device discovery.
+
+If your devices are located on a VLAN you must use this option to point the addon to the broadcast ip of the VLAN your devices are located on.
+
+*NOTE: only one broadcast address is supported. So all devices will need to be on the same VLAN.*
+
 <!-- LINKS -->
 [npsso]: https://ca.account.sony.com/api/v1/ssocookie
 [ha-ps4]: https://www.home-assistant.io/integrations/ps4/
