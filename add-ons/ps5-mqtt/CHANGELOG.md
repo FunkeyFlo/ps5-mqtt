@@ -1,3 +1,25 @@
+## 1.3.0 - 2022-11-26
+
+### What’s changed
+
+- small docs changes for psn_accounts @hdsheena (#136)
+
+### 🚨 New functionality
+
+#### VLAN support @FunkeyFlo (#140)
+
+The new option `device_discovery_broadcast_address` allows you to manually set the [broadcast address](https://en.wikipedia.org/wiki/Broadcast_address) the addon will use to discover devices.
+
+### ⬆️ Dependency updates
+
+- Bump @types/node from 18.8.5 to 18.11.0 in /ps5-mqtt @dependabot (#114)
+- Bump jest and @types/jest in /ps5-mqtt @dependabot (#118)
+- Bump @typescript-eslint/eslint-plugin from 5.40.1 to 5.41.0 in /ps5-mqtt @dependabot (#120)
+- Bump @jest/globals from 29.2.0 to 29.2.2 in /ps5-mqtt @dependabot (#116)
+- Bump @types/react from 18.0.21 to 18.0.22 in /ps5-mqtt @dependabot (#117)
+- Bump @types/react-dom from 18.0.6 to 18.0.8 in /ps5-mqtt @dependabot (#123)
+- Bump @types/react from 18.0.22 to 18.0.24 in /ps5-mqtt @dependabot (#127)
+
 ## 1.2.2 - 2022-10-18
 
 ### What’s changed
@@ -33,6 +55,7 @@ Users can now specify the preferred console per account. This is useful when, fo
   npsso: '!secret my_npsso'
   preferred_ps5: 70C881D600B0      # ID of the PS5 that will be preferred when activity can be matched to multiple PS5's 
   preferred_ps4: 60E899D600B0      # ID of the PS4 that will be preferred when activity can be matched to multiple PS4's
+
 
 
 
@@ -142,7 +165,9 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 - 
 - 
 - 
+- 
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
+- 
 - 
 - 
 - 
@@ -176,6 +201,7 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 
 ## 0.5.2
 
@@ -193,7 +219,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
+- 
 - 
 - 
 - 
@@ -213,7 +241,9 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 - 
 - 
 - 
+- 
 - - Optimizations for discovered devices.
+- 
 - 
 - 
 - 
