@@ -42,7 +42,7 @@ version: '3'
 services:
   ps5-mqtt:
     container_name: PS5-MQTT                            # choose whatever name you like
-    image: ghcr.io/funkeyflo/ps5-mqtt/amd64:1.1.0       # you can also use 'latest' instead of a specific version
+    image: ghcr.io/funkeyflo/ps5-mqtt/amd64:latest      # you can also use a specific version
     entrypoint: /config/run.sh                          # the file that will be executed at startup
     volumes:                                            # we will use this volume to get our custom startup script into the container
       - ./config:/config
@@ -67,8 +67,7 @@ services:
       - DEBUG=@ha:ps5:*
 ```
 
-*NOTE 1: at the time of writing version `1.1.0` was the latest stable release.*<br>
-*NOTE 2: for more information on configuration variables please refer to the [add-on docs][add-on-docs] and the [regular startup script][regular-startup-script].*
+*NOTE: for more information on configuration variables please refer to the [add-on docs][add-on-docs] and the [regular startup script][regular-startup-script].*
 
 #### Option 2. configuring the app with a `json` file.
 
