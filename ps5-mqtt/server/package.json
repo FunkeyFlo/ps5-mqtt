@@ -22,7 +22,7 @@
     "mqtt": "^4.3.7",
     "node-fetch": "^2.6.7",
     "playactor": "^0.4.1",
-    "psn-api": "^2.8.2",
+    "psn-api": "^2.8.3",
     "redux": "^4.2.0",
     "redux-saga": "^1.2.1",
     "shelljs": "^0.8.5"

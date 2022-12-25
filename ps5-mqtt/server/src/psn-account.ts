@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import createDebugger from 'debug';
 import { createErrorLogger } from './util/error-logger';
 
-const debug = createDebugger('@ha:ps5:psn-api');
+const debug = createDebugger('@ha:debug-ps5:psn-api');
 const logError = createErrorLogger()
 
 export module PsnAccount {
@@ -125,7 +125,7 @@ async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<
         );
 
         if (response.status >= 400 && response.status < 600) {
-            debug(`Unable to retrieve PSN information. API response: "${response.status}:${response.statusText}"`);
+            logError(`Unable to retrieve PSN information. API response: "${response.status}:${response.statusText}"`);
         } else {
             const { basicPresence }: BasicPresenceResponse = await response.json();
 
@@ -153,9 +153,12 @@ async function getRefreshedAccountAuthInfo({ authInfo, npsso }: PsnAccount): Pro
         return authInfo;
     }
     else if (Date.now() < authInfo.refreshTokenExpiration) {
+        debug(`Auth: refresh token used`)
         const authResponse = await psnApi.exchangeRefreshTokenForAuthTokens(authInfo.refreshToken);
+
         return convertAuthResponseToAuthInfo(authResponse);
     } else {
+        debug(`Auth: npsso used`)
         const accessCode = await psnApi.exchangeNpssoForCode(npsso);
         const authResponse = await psnApi.exchangeCodeForAccessToken(accessCode);
         return convertAuthResponseToAuthInfo(authResponse)
@@ -165,11 +168,17 @@ async function getRefreshedAccountAuthInfo({ authInfo, npsso }: PsnAccount): Pro
 function convertAuthResponseToAuthInfo(
     authResponse: psnApi.AuthTokensResponse
 ): PsnAccountAuthenticationInfo {
+    const refreshTokenExpiration = getExpirationDateValue(authResponse.refreshTokenExpiresIn);
+    const accessTokenExpiration = getExpirationDateValue(authResponse.expiresIn);
+
+    debug(`Auth res: refresh token expires at:`, refreshTokenExpiration);
+    debug(`Auth res: access token expires at:`, accessTokenExpiration);
+
     return {
         accessToken: authResponse.accessToken,
         refreshToken: authResponse.refreshToken,
-        accessTokenExpiration: getExpirationDateValue(authResponse.expiresIn),
-        refreshTokenExpiration: getExpirationDateValue(authResponse.refreshTokenExpiresIn),
+        accessTokenExpiration,
+        refreshTokenExpiration,
     }
 }
 
