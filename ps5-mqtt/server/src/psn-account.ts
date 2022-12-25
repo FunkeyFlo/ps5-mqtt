@@ -171,8 +171,8 @@ function convertAuthResponseToAuthInfo(
     const refreshTokenExpiration = getExpirationDateValue(authResponse.refreshTokenExpiresIn);
     const accessTokenExpiration = getExpirationDateValue(authResponse.expiresIn);
 
-    debug(`Auth res: refresh token expires at:`, refreshTokenExpiration.toString());
-    debug(`Auth res: access token expires at:`, accessTokenExpiration.toString());
+    debug(`Auth res: refresh token expires at:`, new Date(refreshTokenExpiration).toString());
+    debug(`Auth res: access token expires at:`, new Date(accessTokenExpiration).toString());
 
     return {
         accessToken: authResponse.accessToken,
