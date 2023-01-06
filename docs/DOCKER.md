@@ -93,9 +93,9 @@ services:
 {
   "mqtt": {
       "host": "192.168.0.132",
-      "pass": "1883",
-      "port": "mqttuser",
-      "user": "mqttpassword"
+      "port": "1883",
+      "user": "mqttuser",
+      "pass": "mqttpassword"
   },
 
   "device_check_interval": 5000,
