@@ -113,7 +113,7 @@ services:
   "account_check_interval": 5000,
 
   "credentialsStoragePath": "/config/credentials.json",
-  "frontendPort": "8645",
+  "frontendPort": "8645"
 }
 ```
 
