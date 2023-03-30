@@ -1,7 +1,5 @@
 # Using the app with Docker (HA Core)
-There are multiple ways of using the `Docker` images created by this project with HA Core.
-
-This bit of documentation will outline one of those methods. Namely by creating your own startup script file.
+This document describes the *recommended way* of using the `Docker` images created by this project with HA Core.
 
 ## Prerequisites
 This document assumes:
@@ -10,26 +8,23 @@ This document assumes:
 3. A linux-based docker host. The app relies on the `network_mode: host` option of docker to function and unfortunatly this option is only available on linux and not mac or windows as you can see [here][network-mode-windows].
 
 ## Steps
-The following steps describe how you can use a `docker-compose.yml` and a custom `run.sh` file to start the add-on.
-
-This allows you to circumvent the default startup command, which depends on [bashio][bashio], which is only available when using the app as a Home Assistant Add-on. And instead provide the required configuration through the `.sh` file we will create.
-<br><br>
+The following steps describe how you can use a `docker-compose.yml` to setup the add-on.
 
 *Directory structure of the example.*
 ```
 .  
 │
-├─── config                     # we will need a separate directory to use as a volume
+├─── config                # we will use this folder as a volume for persisting credentials
 │    │
-│    └─── run.sh                # custom startup script
+│    └─── options.json*    # optional config file used to provide settings via .json rather than env. variables.
 │   
-└─── docker-compose.yml         # configuration of our container
+└─── docker-compose.yml    # configuration of our container
 ```
 
-### 1. Create a `docker-compose.yml` file
+### Creating the `docker-compose.yml` file
 Create a `docker-compose.yml` file with the following contents.
 
-The example uses the architecture "`amd64`" in the `image` reference, but you should of course adapt this to match that of the instance that you're running docker on.
+The example uses the architecture "`amd64`" in the `image` reference, but you should of course adapt this to match the architecture of the instance that you're running docker on.
 
 You can find the available images [here][docker-images].
 
@@ -43,8 +38,8 @@ services:
   ps5-mqtt:
     container_name: PS5-MQTT                            # choose whatever name you like
     image: ghcr.io/funkeyflo/ps5-mqtt/amd64:latest      # you can also use a specific version
-    entrypoint: /config/run.sh                          # the file that will be executed at startup
-    volumes:                                            # we will use this volume to get our custom startup script into the container
+    entrypoint: /app/run-docker.sh                      # startup script without dependencies on home assistant supervisor
+    volumes:                                            # a volume is required to persist credentials
       - ./config:/config
     network_mode: host                                  # changing/omiting this option WILL BREAK the app.
     environment:
@@ -118,19 +113,6 @@ services:
 ```
 
 NOTE: you can also combine `json` config and environment variables. If duplicate values are detected the environment variable value wins.
-
-### 2. Create a startup file
-The only thing left to do is to simply point the app to the server executable using `node.js`. We'll do this by creating a shell script called `run.sh` as mentioned before with the following contents.
-
-```sh
-#!/bin/sh
-set -e
-
-echo Starting PS5-MQTT...
-node app/server/dist/index.js
-```
-
-*Note: if you create the `.sh` file on windows make sure to convert to LF line endings.*
 
 ## Need help or have a comment?
 - Can't figure out how to setup the component? Please consult our [discord] community!
