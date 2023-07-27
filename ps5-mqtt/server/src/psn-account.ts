@@ -1,12 +1,10 @@
 import * as psnApi from 'psn-api';
-import fetch from 'node-fetch';
-import createDebugger from 'debug';
 import { createErrorLogger } from './util/error-logger';
+import {AuthorizationPayload, BasicPresenceResponse} from "psn-api";
 
-const debug = createDebugger('@ha:ps5:psn-api');
 const logError = createErrorLogger()
 
-export module PsnAccount {
+export namespace PsnAccount {
     export interface AccountActivity {
         titleId: string;
         titleImage: string;
@@ -58,37 +56,14 @@ export interface PsnAccount {
     activity?: PsnAccount.AccountActivity;
 }
 
-type NormalizedDeviceType = 'PS4' | 'PS5';
+export type NormalizedDeviceType = 'PS4' | 'PS5';
 
 interface PsnAccountAuthenticationInfo {
     refreshToken: string;
     refreshTokenExpiration: number;
 
-    accessToken: string;
+    accessToken: AuthorizationPayload;
     accessTokenExpiration: number;
-}
-
-interface BasicPresenceResponse {
-    basicPresence: {
-        availability: 'unavailable' | 'availableToPlay';
-        lastAvailableDate: string;
-        primaryPlatformInfo: {
-            onlineStatus: 'offline';
-            platform: 'ps4' | 'PS5';
-            lastOnlineDate: string;
-        }
-        lastOnlineDate: string
-        onlineStatus: 'offline' | 'online';
-        platform: 'ps4' | 'PS5';
-        gameTitleInfoList: {
-            format: 'ps4' | 'PS5';
-            launchPlatform: 'ps4' | 'PS5';
-            npTitleIconUrl: string;
-            conceptIconUrl: string;
-            npTitleId: string;
-            titleName: string;
-        }[]
-    }
 }
 
 async function getAccount(npsso: string, username?: string): Promise<PsnAccount> {
@@ -111,34 +86,19 @@ async function getAccount(npsso: string, username?: string): Promise<PsnAccount>
     }
 }
 
-async function getAccountActivity({ accountId, authInfo }: PsnAccount): Promise<PsnAccount.AccountActivity | undefined> {
+export async function getAccountActivity({accountId, authInfo}: PsnAccount): Promise<PsnAccount.AccountActivity | undefined> {
     try {
-        const response = await fetch(
-            `https://m.np.playstation.com/api/` +
-            `userProfile/v1/internal/users/${accountId}/basicPresences?type=primary`,
-            {
-                method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + authInfo.accessToken,
-                },
-            }
-        );
+        const {basicPresence}: BasicPresenceResponse = await psnApi.getBasicPresence(authInfo.accessToken, accountId)
 
-        if (response.status >= 400 && response.status < 600) {
-            debug(`Unable to retrieve PSN information. API response: "${response.status}:${response.statusText}"`);
-        } else {
-            const { basicPresence }: BasicPresenceResponse = await response.json();
+        if (basicPresence?.gameTitleInfoList?.length > 0) {
+            const [activeTitle] = basicPresence.gameTitleInfoList;
 
-            if (basicPresence?.gameTitleInfoList?.length > 0) {
-                const [activeTitle] = basicPresence.gameTitleInfoList;
-
-                return {
-                    titleId: activeTitle.npTitleId,
-                    titleImage: activeTitle.npTitleIconUrl ?? activeTitle.conceptIconUrl,
-                    titleName: activeTitle.titleName,
-                    platform: activeTitle.format.toUpperCase() as NormalizedDeviceType,
-                    launchPlatform: activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
-                }
+            return {
+                titleId: activeTitle.npTitleId,
+                titleImage: activeTitle.npTitleIconUrl ?? activeTitle.conceptIconUrl,
+                titleName: activeTitle.titleName,
+                platform: activeTitle.format.toUpperCase() as NormalizedDeviceType,
+                launchPlatform: activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
             }
         }
     } catch (e) {
@@ -166,7 +126,7 @@ function convertAuthResponseToAuthInfo(
     authResponse: psnApi.AuthTokensResponse
 ): PsnAccountAuthenticationInfo {
     return {
-        accessToken: authResponse.accessToken,
+        accessToken: { accessToken: authResponse.accessToken},
         refreshToken: authResponse.refreshToken,
         accessTokenExpiration: getExpirationDateValue(authResponse.expiresIn),
         refreshTokenExpiration: getExpirationDateValue(authResponse.refreshTokenExpiresIn),

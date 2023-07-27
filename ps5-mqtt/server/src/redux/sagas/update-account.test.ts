@@ -29,7 +29,7 @@ describe("Check PSN Presence saga", () => {
             accountId: "mock-account-id-1",
             accountName: "TestUser1",
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0
@@ -89,7 +89,7 @@ describe("Check PSN Presence saga", () => {
             accountId: "mock-account-id-1",
             accountName: "TestUser1",
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0
@@ -166,7 +166,7 @@ describe("Check PSN Presence saga", () => {
             accountId: "mock-account-id-1",
             accountName: "TestUser1",
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0
@@ -245,7 +245,7 @@ describe("Check PSN Presence saga", () => {
             accountId: "mock-account-id-1",
             accountName: "TestUser1",
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0
@@ -324,7 +324,7 @@ describe("Check PSN Presence saga", () => {
             accountId: "mock-account-id-1",
             accountName: "TestUser1",
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0
@@ -407,7 +407,7 @@ describe("Check PSN Presence saga", () => {
 
         const mockAccountBase = {
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0
@@ -502,7 +502,7 @@ describe("Check PSN Presence saga", () => {
 
         const mockAccountBase = {
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0
@@ -623,7 +623,7 @@ describe("Check PSN Presence saga", () => {
             accountId: "mock-account-id-1",
             accountName: "TestUser1",
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0
@@ -698,7 +698,7 @@ describe("Check PSN Presence saga", () => {
             accountId: "mock-account-id-1",
             accountName: "TestUser1",
             authInfo: {
-                accessToken: "",
+                accessToken: {accessToken: ""},
                 accessTokenExpiration: 0,
                 refreshToken: "",
                 refreshTokenExpiration: 0

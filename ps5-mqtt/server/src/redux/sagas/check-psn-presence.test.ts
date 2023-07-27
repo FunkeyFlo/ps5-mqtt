@@ -17,7 +17,7 @@ const mockAccount: Account = {
     accountId: "0000000000",
     accountName: "TestUser",
     authInfo: {
-        accessToken: "",
+        accessToken: {accessToken: ""},
         accessTokenExpiration: 0,
         refreshToken: "",
         refreshTokenExpiration: 0
