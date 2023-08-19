@@ -29,6 +29,7 @@ export module HaMqtt {
 
         interface MqttEntity {
             name: string,
+            has_entity_name:boolean,
             state_topic?: string;
             object_id?: string;
             unique_id?: string;

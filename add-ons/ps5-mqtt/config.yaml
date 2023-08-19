@@ -1,8 +1,8 @@
-version: 1.3.1
-slug: ps5_mqtt
-name: PS5 MQTT
+version: 1.3.2
+slug: ps5_mqtt_dror
+name: PS5 MQTT Dror
 description: Control Sony PlayStation 5 devices via MQTT
-url: https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt
+url: https://github.com/dror1544/ps5-mqtt
 arch:
   - armhf
   - armv7

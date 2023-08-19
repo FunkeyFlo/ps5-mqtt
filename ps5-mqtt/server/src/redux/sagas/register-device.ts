@@ -29,7 +29,8 @@ function* registerDevice(
                     value_template: "{{ value_json.device_status }}"
                 }
             ],
-            name: device.name + " power",
+            name: "power",
+            has_entity_name:true,
             command_topic: `ps5-mqtt/${device.id}/set/power`,
             state_topic: `ps5-mqtt/${device.id}`,
             unique_id: `${device.id}_power_ps5mqtt`,
@@ -62,8 +63,9 @@ function* registerDevice(
                 }
             ],
             unique_id: `${device.id}_activity_ps5mqtt`,
+            name: "activity",
+            has_entity_name:true,
             state_topic: `ps5-mqtt/${device.id}`,
-            name: device.name + " activity",
             device: deviceConfig,
             enabled_by_default: true,
             json_attributes_topic: `ps5-mqtt/${device.id}`,
