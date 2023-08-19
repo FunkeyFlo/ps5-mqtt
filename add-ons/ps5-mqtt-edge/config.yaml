@@ -2,7 +2,7 @@ version: "Dror_edge"
 slug: ps5_mqtt_edge_deoe
 name: PS5 MQTT - Edge Dror
 description: Development build of the PS5 MQTT add-on
-url: https://github.com/dror1544/ps5-mqtt/tree/main/add-ons/ps5-mqtt-edge
+url: https://github.com/dror1544/ps5-mqtt
 arch:
   - armhf
   - armv7
