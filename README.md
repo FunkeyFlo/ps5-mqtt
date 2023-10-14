@@ -72,6 +72,9 @@ This bit of [documentation][docker-docs] should get you on your way! 😻
 ### The log is showing 403 errors when I try to turn my ps5 on or off!
 Double check that you've enabled all required remote play features [as described in the remote play documentation][ps5-rp].
 
+### Can devices be powered on/off from/to other modes than rest mode?
+**No.** The underlying remote play protocol from sony does not support this.
+
 ### Why does this add-on only support Awake/Standby on Playstation 4?
 There already is a great [Home Assistant integration][ha-ps4] that supports more functionality for PS4 devices like starting games. However, users have reported that this add-on detects Awake/Standby changes faster than the existing integration. So if you want you can use this add-on next to the existing integration or instead of it, if you are only interested in Standby/Awake.
 
