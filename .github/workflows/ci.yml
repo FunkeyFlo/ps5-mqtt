@@ -85,7 +85,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         
     - name: 🏭 Build ${{ matrix.arch }} add-on - Edge
-      uses: home-assistant/builder@2022.07.0
+      uses: home-assistant/builder@2023.09.0
       if: github.actor != github.repository_owner
       with:
         args: |
@@ -100,7 +100,7 @@ jobs:
           --addon
 
     - name: 🏭 Build & Deploy ${{ matrix.arch }} add-on - Edge
-      uses: home-assistant/builder@2022.07.0
+      uses: home-assistant/builder@2023.09.0
       if: github.actor == github.repository_owner
       with:
         args: |
