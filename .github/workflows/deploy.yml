@@ -42,7 +42,7 @@ jobs:
           if [[ "${{ github.event_name }}" = "release" ]]; then
             target="ps5-mqtt"
           fi
-          echo "target=${target}" >> $GITHUB_OUTPUT
+          echo "target=${target}" >> "$GITHUB_OUTPUT"
       - name: ⏭ Copy add-on files
         run: |
           cp add-ons/common/Dockerfile add-ons/${{ steps.prepare.outputs.target }}
@@ -64,8 +64,8 @@ jobs:
             version="${version#v}"
             environment="stable"
           fi
-          echo "environment=${environment}" >> $GITHUB_OUTPUT
-          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "environment=${environment}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: 👷 Build & Deploy ${{ matrix.arch }}
