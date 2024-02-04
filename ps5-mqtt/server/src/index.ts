@@ -19,7 +19,7 @@ import { MQTT_CLIENT, Settings, SETTINGS } from "./services";
 import { createErrorLogger } from "./util/error-logger";
 import { setupWebserver } from "./web-server";
 
-const debug = createDebugger("@ha:ps5");
+const debug = createDebugger("@ha:ps5:debug");
 const debugMqtt = createDebugger("@ha:ps5:mqtt");
 const debugState = createDebugger("@ha:state");
 const logError = createErrorLogger();
