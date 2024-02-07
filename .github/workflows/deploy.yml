@@ -42,7 +42,7 @@ jobs:
           if [[ "${{ github.event_name }}" = "release" ]]; then
             target="ps5-mqtt"
           fi
-          echo "target=${target}" >> "$GITHUB_OUTPUT"
+          echo "::set-output name=target::${target}"
       - name: ⏭ Copy add-on files
         run: |
           cp add-ons/common/Dockerfile add-ons/${{ steps.prepare.outputs.target }}
@@ -64,8 +64,8 @@ jobs:
             version="${version#v}"
             environment="stable"
           fi
-          echo "environment=${environment}" >> "$GITHUB_OUTPUT"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "::set-output name=environment::${environment}"
+          echo "::set-output name=version::${version}"
 
   deploy:
     name: 👷 Build & Deploy ${{ matrix.arch }}
@@ -80,18 +80,18 @@ jobs:
     steps:
     - name: ⤵ Check out repository
       uses: actions/checkout@v3.0.2
-      
+
     - uses: actions/setup-node@v3
       with:
         node-version: 16
         registry-url: https://registry.npmjs.org/
         cache-dependency-path: ./ps5-mqtt/package-lock.json
         cache: 'npm'
-        
+
     - name: ⏬ Install dependencies
       working-directory: ./ps5-mqtt
       run: npm ci
-      
+
     - name: 👨‍🏭 Build App
       working-directory: ./ps5-mqtt
       run: npm run build
@@ -104,14 +104,14 @@ jobs:
         cp add-ons/common/.dockerignore add-ons/${{ needs.information.outputs.target }}
 
     - name: 🔐 Login to GitHub Container Registry
-      uses: docker/login-action@v2.0.0
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-        
+
     - name: 🏭 [EDGE] Build & Publish add-on ${{ needs.information.outputs.target }}-${{ matrix.arch }}
-      uses: home-assistant/builder@2022.07.0
+      uses: home-assistant/builder@master
       if: needs.information.outputs.environment == 'edge'
       with:
         args: |
@@ -123,9 +123,9 @@ jobs:
           --docker-hub "ghcr.io/${{ github.repository_owner }}" \
           --no-latest \
           --addon
-          
+
     - name: 🏭 [STABLE] Build & Publish add-on ${{ needs.information.outputs.target }}-${{ matrix.arch }}
-      uses: home-assistant/builder@2022.07.0
+      uses: home-assistant/builder@master
       if: needs.information.outputs.environment == 'stable'
       with:
         args: |
@@ -174,6 +174,6 @@ jobs:
           branch: main
           commit_message: >
             🎉 Release version ${{needs.information.outputs.version}}
-          
+
             [skip-ci]
           file_pattern: add-ons/ps5-mqtt/CHANGELOG.md add-ons/ps5-mqtt/config.yaml
