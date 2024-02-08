@@ -28,7 +28,7 @@ If you enjoy the project please consider donating to sponsor further development
 [releases-shield]: https://img.shields.io/github/release/FunkeyFlo/ps5-mqtt.svg
 [releases]: https://github.com/FunkeyFlo/ps5-mqtt/releases
 
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2022.svg
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2024.svg
 [license-shield]: https://img.shields.io/github/license/hassio-addons/addon-ssh.svg
 [paypal]: https://www.paypal.com/donate/?hosted_button_id=VLDJUM2CMHMNG
 [discord]: https://discord.gg/BnmvYHvz5N
