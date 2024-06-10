@@ -10,9 +10,9 @@ This document assumes:
 3. A linux-based docker host. The app relies on the `network_mode: host` option of docker to function and unfortunatly this option is only available on linux and not mac or windows as you can see [here][network-mode-windows].
 
 ## Steps
-The following steps describe how you can use a `docker-compose.yml` and a custom `run.sh` file to start the add-on.
+The following steps describe how you can use a `docker-compose.yml` file to start the add-on.
 
-This allows you to circumvent the default startup command, which depends on [bashio][bashio], which is only available when using the app as a Home Assistant Add-on. And instead provide the required configuration through the `.sh` file we will create.
+This allows you to circumvent the default startup command, which depends on [bashio][bashio], which is only available when using the app as a Home Assistant Add-on. And instead provide the required configuration directly.
 <br><br>
 
 *Directory structure of the example.*
@@ -20,13 +20,11 @@ This allows you to circumvent the default startup command, which depends on [bas
 .  
 │
 ├─── config                     # we will need a separate directory to use as a volume
-│    │
-│    └─── run.sh                # custom startup script
 │   
 └─── docker-compose.yml         # configuration of our container
 ```
 
-### 1. Create a `docker-compose.yml` file
+### Create a `docker-compose.yml` file
 Create a `docker-compose.yml` file with the following contents.
 
 The example uses the architecture "`amd64`" in the `image` reference, but you should of course adapt this to match that of the instance that you're running docker on.
@@ -43,8 +41,8 @@ services:
   ps5-mqtt:
     container_name: PS5-MQTT                            # choose whatever name you like
     image: ghcr.io/funkeyflo/ps5-mqtt/amd64:latest      # you can also use a specific version
-    entrypoint: /config/run.sh                          # the file that will be executed at startup
-    volumes:                                            # we will use this volume to get our custom startup script into the container
+    entrypoint: node app/server/dist/index.js           # the file that will be executed at startup
+    volumes:                                            # we will use this volume to save credentials and get our custom startup script into the container
       - ./config:/config
     network_mode: host                                  # changing/omiting this option WILL BREAK the app.
     environment:
@@ -79,9 +77,6 @@ services:
   ps5-mqtt:
     # ...
     # same as Option 1.
-    # ...
-    volumes:
-      - ./config:/config
     # ...
     environment:
       - CONFIG_PATH=/config/options.json
@@ -118,19 +113,6 @@ services:
 ```
 
 NOTE: you can also combine `json` config and environment variables. If duplicate values are detected the environment variable value wins.
-
-### 2. Create a startup file
-The only thing left to do is to simply point the app to the server executable using `node.js`. We'll do this by creating a shell script called `run.sh` as mentioned before with the following contents.
-
-```sh
-#!/bin/sh
-set -e
-
-echo Starting PS5-MQTT...
-node app/server/dist/index.js
-```
-
-*Note: if you create the `.sh` file on windows make sure to convert to LF line endings.*
 
 ## Need help or have a comment?
 - Can't figure out how to setup the component? Please consult our [discord] community!
