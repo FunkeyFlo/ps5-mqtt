@@ -23,7 +23,7 @@
     "node-fetch": "^2.6.7",
     "playactor": "^0.4.1",
     "psn-api": "^2.8.2",
-    "redux": "^4.2.0",
+    "redux": "^5.0.1",
     "redux-saga": "^1.2.2",
     "shelljs": "^0.8.5"
   },
