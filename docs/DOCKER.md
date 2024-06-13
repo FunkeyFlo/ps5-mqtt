@@ -50,6 +50,7 @@ services:
       - MQTT_PORT=1883                                  # port of your mqtt broker
       - MQTT_USERNAME=mqttuser                          # username used for connecting to your mqtt broker
       - MQTT_PASSWORD=mqttpassword                      # password used for connecting to your mqtt broker
+      - DISCOVERY_TOPIC=your_custom_discovery_topic     # Home Assistant discovery topic. Only needs to be set if you've changed the discovery topic in Home Assistant. Default: homeassistant
 
       - DEVICE_CHECK_INTERVAL=5000
       - DEVICE_DISCOVERY_INTERVAL=60000
@@ -90,7 +91,8 @@ services:
       "host": "192.168.0.132",
       "port": "1883",
       "user": "mqttuser",
-      "pass": "mqttpassword"
+      "pass": "mqttpassword",
+      "discovery_topic": "your_custom_discovery_topic"
   },
 
   "device_check_interval": 5000,
