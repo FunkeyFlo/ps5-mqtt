@@ -37,6 +37,7 @@ schema:
     port: port?
     user: str?
     pass: str?
+    discovery_topic: str?
   psn_accounts:
     - username: str?
       npsso: str
