@@ -41,7 +41,7 @@ services:
   ps5-mqtt:
     container_name: PS5-MQTT                            # choose whatever name you like
     image: ghcr.io/funkeyflo/ps5-mqtt/amd64:latest      # you can also use a specific version
-    entrypoint: node app/server/dist/index.js           # the file that will be executed at startup
+    entrypoint: /app/entrypoint.sh                      # the file that will be executed at startup
     volumes:                                            # we will use this volume to save credentials and get our custom startup script into the container
       - ./config:/config
     network_mode: host                                  # changing/omiting this option WILL BREAK the app.
