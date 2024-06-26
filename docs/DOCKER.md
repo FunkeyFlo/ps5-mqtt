@@ -63,6 +63,12 @@ services:
 
       - CREDENTIAL_STORAGE_PATH=/config/credentials.json
       - DEBUG=@ha:ps5:*
+    healthcheck:                                        # Optional add docker healthcheck as it may be important for some setups
+      test: ls -l /proc/*/exe | grep node
+      interval: 5m00s
+      timeout: 10s
+      retries: 2
+      start_period: 30s
 ```
 
 *NOTE: for more information on configuration variables please refer to the [add-on docs][add-on-docs] and the [regular startup script][regular-startup-script].*
