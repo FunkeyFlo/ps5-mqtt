@@ -108,7 +108,7 @@ function getEnvConfig(): Partial<AppConfig> {
             port: MQTT_PORT,
             pass: MQTT_PASSWORD,
             user: MQTT_USERNAME,
-            discovery_topic: DISCOVERY_TOPIC,
+            discovery_topic: DISCOVERY_TOPIC || "homeassistant",
         },
 
         device_check_interval:

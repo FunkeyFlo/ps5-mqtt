@@ -1,21 +1,18 @@
 import type MQTT from "async-mqtt";
 import { call, getContext, put } from "redux-saga/effects";
-import { MQTT_CLIENT } from "../../services";
+
+import { MQTT_CLIENT, SETTINGS, Settings } from "../../services";
 import { HaMqtt } from "../../util/ha-mqtt";
 import { addDevice, updateHomeAssistant } from "../action-creators";
 import type { RegisterDeviceAction } from "../types";
-import { getAppConfig } from "../../config";
-
-const appConfig = getAppConfig();
 
 function* registerDevice(
     { payload: device }: RegisterDeviceAction
 ) {
     const mqtt: MQTT.AsyncClient = yield getContext(MQTT_CLIENT);
+    const { discoveryTopic }: Settings = yield getContext(SETTINGS);
 
     const deviceConfig = HaMqtt.getMqttDeviceConfig(device);
-
-    const discoveryTopic: string = appConfig.mqtt.discovery_topic || "homeassistant";
 
     yield call<
         (
