@@ -22,7 +22,8 @@ describe("Configuration", () => {
                 host: 'core-mosquitto',
                 port: '1883',
                 pass: 'REDACTED',
-                user: 'addons'
+                user: 'addons',
+                discovery_topic: 'homeassistant'
             },
             logger: '@ha:ps5:*,@ha:ps5-sensitive:*',
             device_check_interval: 5000,
@@ -47,7 +48,8 @@ describe("Configuration", () => {
                 host: 'core-mosquitto',
                 port: '1883',
                 pass: 'REDACTED',
-                user: 'addons'
+                user: 'addons',
+                discovery_topic: 'homeassistant'
             },
             logger: '@ha:ps5:*,@ha:ps5-sensitive:*',
             device_check_interval: 5000,
@@ -76,7 +78,8 @@ describe("Configuration", () => {
                 host: 'core-mosquitto',
                 port: '1883',
                 pass: 'REDACTED',
-                user: 'addons'
+                user: 'addons',
+                discovery_topic: 'homeassistant'
             },
             logger: '@ha:ps5:*,@ha:ps5-sensitive:*',
             device_check_interval: 5000,
@@ -99,7 +102,8 @@ describe("Configuration", () => {
                 host: 'core-mosquitto',
                 port: '1883',
                 pass: 'REDACTED',
-                user: 'addons'
+                user: 'addons',
+                discovery_topic: 'homeassistant'
             },
             logger: '@ha:ps5:*,@ha:ps5-sensitive:*',
             device_check_interval: 5000,

@@ -1,6 +1,7 @@
 import type MQTT from "async-mqtt";
 import { call, getContext, put } from "redux-saga/effects";
-import { MQTT_CLIENT } from "../../services";
+
+import { MQTT_CLIENT, SETTINGS, Settings } from "../../services";
 import { HaMqtt } from "../../util/ha-mqtt";
 import { addDevice, updateHomeAssistant } from "../action-creators";
 import type { RegisterDeviceAction } from "../types";
@@ -9,6 +10,7 @@ function* registerDevice(
     { payload: device }: RegisterDeviceAction
 ) {
     const mqtt: MQTT.AsyncClient = yield getContext(MQTT_CLIENT);
+    const { discoveryTopic }: Settings = yield getContext(SETTINGS);
 
     const deviceConfig = HaMqtt.getMqttDeviceConfig(device);
 
@@ -20,7 +22,7 @@ function* registerDevice(
         ) => Promise<MQTT.IPublishPacket>
     >(
         mqtt.publish.bind(mqtt),
-        `homeassistant/switch/${device.id}/power/config`,
+        `${discoveryTopic}/switch/${device.id}/power/config`,
         // https://www.home-assistant.io/integrations/switch.mqtt/
         JSON.stringify(<HaMqtt.Config.MqttSwitchEntity>{
             availability: [
@@ -53,7 +55,7 @@ function* registerDevice(
         ) => Promise<MQTT.IPublishPacket>
     >(
         mqtt.publish.bind(mqtt),
-        `homeassistant/sensor/${device.id}/activity/config`,
+        `${discoveryTopic}/sensor/${device.id}/activity/config`,
         JSON.stringify(<HaMqtt.Config.MqttSensorEntity>{
             availability: [
                 {
