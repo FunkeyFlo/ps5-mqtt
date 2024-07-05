@@ -41,7 +41,7 @@ services:
   ps5-mqtt:
     container_name: PS5-MQTT                            # choose whatever name you like
     image: ghcr.io/funkeyflo/ps5-mqtt/amd64:latest      # you can also use a specific version
-    entrypoint: /app/entrypoint.sh                      # the file that will be executed at startup
+    entrypoint: /config/entrypoint.sh                      # the file that will be executed at startup
     volumes:                                            # we will use this volume to save credentials
       - ./config:/config
     network_mode: host                                  # changing/omiting this option WILL BREAK the app.
@@ -119,6 +119,12 @@ services:
 ```
 
 NOTE: you can also combine `json` config and environment variables. If duplicate values are detected the environment variable value wins.
+
+Then create entrypoint.sh using the one found in this repository and place it in the docker/config folder from the directory structure.
+
+Start the docker container and proceed to the web-ui found at http://localhost:8645. From there select authenticate and complete the instructions. This will create a credentials.json file inside the /config folder.
+
+From there, add the MQTT integration and follow directions. From there the PS5 should be detected in HASS.
 
 ## Need help or have a comment?
 - Can't figure out how to setup the component? Please consult our [discord] community!
