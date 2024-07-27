@@ -13,7 +13,7 @@
   },
   "author": "",
   "dependencies": {
-    "@reduxjs/toolkit": "^1.9.5",
+    "@reduxjs/toolkit": "^2.2.6",
     "async-mqtt": "^2.6.3",
     "body-parser": "^1.20.1",
     "debug": "^4.3.4",
