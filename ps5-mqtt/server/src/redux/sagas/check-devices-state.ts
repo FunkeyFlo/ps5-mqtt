@@ -28,6 +28,12 @@ function* checkDevicesState() {
                 throw new Error(stderr)
             }
 
+            if (!stdout) {
+                throw "No data received from Playstation. If this error continues, " +
+                    "your Playstation is likely powered off or unreachable - it will " +
+                    "not be available until it is in either rest mode/powered on and reachable.";
+            }
+        
             const updatedDevice: Device = JSON.parse(stdout);
 
             if (

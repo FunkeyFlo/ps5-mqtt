@@ -11,4 +11,6 @@ export interface Settings {
     allowPs4Devices: boolean;
 
     deviceDiscoveryBroadcastAddress: string;
+
+    discoveryTopic: string;
 }

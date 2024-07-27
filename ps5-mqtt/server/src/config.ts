@@ -40,6 +40,7 @@ export module AppConfig {
         pass: string;
         port: string;
         user: string;
+        discovery_topic: string;
     }
 
     export interface MqttConfig {
@@ -47,6 +48,7 @@ export module AppConfig {
         pass: string;
         port: string;
         user: string;
+        discovery_topic: string;
     }
 }
 
@@ -83,6 +85,7 @@ function getEnvConfig(): Partial<AppConfig> {
         MQTT_PASSWORD,
         MQTT_PORT,
         MQTT_USERNAME,
+        DISCOVERY_TOPIC,
 
         FRONTEND_PORT,
 
@@ -105,6 +108,7 @@ function getEnvConfig(): Partial<AppConfig> {
             port: MQTT_PORT,
             pass: MQTT_PASSWORD,
             user: MQTT_USERNAME,
+            discovery_topic: DISCOVERY_TOPIC || "homeassistant",
         },
 
         device_check_interval:

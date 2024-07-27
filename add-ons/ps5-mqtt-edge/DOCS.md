@@ -24,13 +24,17 @@ account_check_interval: 5000        # Recommended interval for checking account 
 ### `mqtt` *optional*
 Optional [MQTT][mqtt-broker] connection information. 
 
+
 If no information was provided the connection information will be acquired automatically.
+
+**If you don't use the default Home Assistant discovery topic (i.e., "homeassistant"), you MUST set the `discovery_topic` to your custom discovery topic as this cannot be acquired automatically.**
 
 ```yaml
 host: 192.168.0.2                   # (ip)address of your mqtt broker
 port: '1883'                        # port of your mqtt broker
 user: mqttuser                      # username used for connecting to your mqtt broker
 pass: somepassword                  # password used for connecting to your mqtt broker
+discovery_topic: custom_topic       # Home Assistant discovery topic. Must be set if you've changed the discovery topic in Home Assistant. Default: homeassistant 
 ``` 
 
 ### `logger`
