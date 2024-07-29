@@ -18,7 +18,9 @@ COPY ./ps5-mqtt ./app
 RUN cd /app && \
     npm install
 
+# set permissions for both docker standalone and HA add-on startup scripts
 RUN chmod a+x /app/run.sh
+RUN chmod a+x /app/run-standalone.sh
 
 EXPOSE 8645
 
