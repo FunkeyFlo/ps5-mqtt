@@ -122,8 +122,6 @@ services:
 
 NOTE: you can also combine `json` config and environment variables. If duplicate values are detected the environment variable value wins.
 
-Then create entrypoint.sh using the one found in this repository and place it in the docker/config folder from the directory structure.
-
 Start the docker container and proceed to the web-ui found at http://localhost:8645. From there select authenticate and complete the instructions. This will create a credentials.json file inside the /config folder.
 
 From there, add the MQTT integration and follow directions. From there the PS5 should be detected in HASS.
@@ -137,7 +135,6 @@ From there, add the MQTT integration and follow directions. From there the PS5 s
 [arch-types]: ../add-ons/common/build.yaml
 [docker-images]: https://github.com/FunkeyFlo?tab=packages&repo_name=ps5-mqtt
 [add-on-docs]: ../add-ons/ps5-mqtt/DOCS.md
-[regular-startup-script]: ../ps5-mqtt/run.sh
 [network-mode-windows]: https://stackoverflow.com/questions/48915458/windows-run-docker-with-network-host-and-access-with-127-0-0-1
 [discord]: https://discord.com/invite/BnmvYHvz5N
 [github-issues]: https://github.com/FunkeyFlo/ps5-mqtt/issues/new/choose
