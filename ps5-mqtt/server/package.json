@@ -20,7 +20,7 @@
     "express": "^4.18.1",
     "lodash": "^4.17.21",
     "mqtt": "^4.3.7",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^3.3.2",
     "playactor": "^0.4.1",
     "psn-api": "^2.8.2",
     "redux": "^4.2.0",
