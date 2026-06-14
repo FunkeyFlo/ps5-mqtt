@@ -1,4 +1,7 @@
 dist
+.ts-build
+*.tsbuildinfo
+.packaged
 .resources
 **/.env
 **/node_modules
@@ -6,3 +9,12 @@ NOTES.md
 .docker-test
 options.dev.json
 coverage
+
+# Yarn (PnP / zero-installs)
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

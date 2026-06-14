@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "outDir": "./.ts-build/test",
+    "rootDir": "./",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*.ts", "scripts/**/*.ts"]
+}

@@ -1,13 +1,13 @@
-import createDebugger, { Debugger } from 'debug';
+import createDebugger, { Debugger } from "debug"
 
-let errorLogger: Debugger = undefined;
+let errorLogger: Debugger = undefined
 
 const createErrorLogger = (): Debugger => {
-    if (errorLogger === undefined) {
-        errorLogger = createDebugger("@ha:ps5:error")
-    }
+  if (errorLogger === undefined) {
+    errorLogger = createDebugger("@ha:ps5:error")
+  }
 
-    return errorLogger;
-};
+  return errorLogger
+}
 
-export { createErrorLogger };
+export { createErrorLogger }

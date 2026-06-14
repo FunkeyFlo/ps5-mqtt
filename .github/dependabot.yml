@@ -1,6 +1,8 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/ps5-mqtt"
+    directories:
+      - ./
+      - ./ps5-mqtt/*
     schedule:
       interval: "weekly"

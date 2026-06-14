@@ -1,0 +1,22 @@
+{
+  "name": "@ps5-mqtt/dev-services",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Local dev dependencies (e.g. MQTT broker) for ps5-mqtt development",
+  "author": {
+    "name": "FunkeyFlo",
+    "url": "https://github.com/FunkeyFlo"
+  },
+  "contributors": [
+    {
+      "name": "Andrew Smith",
+      "url": "https://andrew.codes"
+    }
+  ],
+  "scripts": {
+    "clean": "docker compose down --volumes --remove-orphans",
+    "start": "docker compose up --detach --wait",
+    "stop": "docker compose down"
+  }
+}

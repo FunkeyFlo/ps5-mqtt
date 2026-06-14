@@ -1,0 +1,267 @@
+---
+name: CD
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ARCHITECTURES: '["amd64", "aarch64"]'
+  IMAGE_NAME: ps5-mqtt-home-assistant-add-on-edge
+  BUILD_IMAGE_NAME: ps5-mqtt-home-assistant-add-on-edge-build
+
+jobs:
+  sync-docs:
+    name: ⏭ Sync add-on docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: ⏭ Copy README & DOCS to add-on
+        run: |
+          cp README.md add-ons/ps5-mqtt-edge/README.md
+          cp docs/DOCS.md add-ons/ps5-mqtt-edge/DOCS.md
+          sed -i 's#./add-ons/ps5-mqtt/DOCS.md#./add-ons/ps5-mqtt-edge/DOCS.md#' add-ons/ps5-mqtt-edge/README.md
+          sed -i 's#./add-ons/ps5-mqtt/logo.png#./add-ons/ps5-mqtt-edge/logo.png#' add-ons/ps5-mqtt-edge/README.md
+          sed -i -E 's#(github.com%2F[^%)]+%2F)ps5-mqtt\)#\1ps5-mqtt-edge)#' add-ons/ps5-mqtt-edge/README.md
+
+      - name: 🙌 Commit README & DOCS
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          branch: main
+          commit_message: "⏭ Sync edge add-on docs [skip ci]"
+          file_pattern: add-ons/ps5-mqtt-edge/README.md add-ons/ps5-mqtt-edge/DOCS.md
+
+  information:
+    name: ℹ Gather add-on information
+    runs-on: ubuntu-latest
+    outputs:
+      description: ${{ steps.information.outputs.description }}
+      name: ${{ steps.information.outputs.name }}
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v6
+      - name: ⏭ Copy add-on files
+        run: |
+          cp add-ons/common/Dockerfile add-ons/ps5-mqtt-edge
+          cp add-ons/common/build.yaml add-ons/ps5-mqtt-edge
+          cp add-ons/common/.dockerignore add-ons/ps5-mqtt-edge
+      - name: 🚀 Run add-on information action
+        id: information
+        uses: frenck/action-addon-information@v1.4.2
+        with:
+          path: "./add-ons/ps5-mqtt-edge"
+
+  static-analysis:
+    name: ✅ Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵ Check out repository
+        uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
+
+      - name: ⏬ Install dependencies
+        run: yarn install --immutable
+
+      - name: 🎨 Check formatting
+        run: yarn format/check
+
+      - name: 🔍 Run typecheck
+        run: yarn typecheck
+
+      - name: 🧹 Run lint
+        run: yarn lint
+
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵ Check out repository
+        uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
+
+      - name: ⏬ Install dependencies
+        run: yarn install --immutable
+
+      - name: 🧪 Run tests
+        run: yarn run test/unit
+
+  init:
+    name: 🧮 Prepare build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: ⤵ Check out repository
+        uses: actions/checkout@v6
+
+      - name: 🧮 Get build matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: ${{ env.BUILD_IMAGE_NAME }}
+
+  build:
+    needs: [information, static-analysis, test, init]
+    runs-on: ${{ matrix.os }}
+    name: 🏭 Build ${{ matrix.arch }} add-on
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+
+    steps:
+      - name: ⤵ Check out repository
+        uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
+
+      - name: ⏬ Install dependencies
+        run: yarn install --immutable
+
+      - name: 👨‍🏭 Build App
+        run: yarn build
+
+      - name: 📦 Package App
+        env:
+          PREPARE_ONLY: "1"
+          SKIP_BUILD: "1"
+        run: yarn workspace @ps5-mqtt/server package
+
+      - name: ⏭ Copy App Files
+        run: |
+          rsync -a --exclude='.git' --exclude='add-ons' ./ add-ons/ps5-mqtt-edge/
+          cp add-ons/common/Dockerfile add-ons/ps5-mqtt-edge
+          cp add-ons/common/build.yaml add-ons/ps5-mqtt-edge
+          cp add-ons/common/.dockerignore add-ons/ps5-mqtt-edge
+          cp add-ons/common/run.sh add-ons/ps5-mqtt-edge
+
+      - name: 🏭 Build & Deploy ${{ matrix.arch }} add-on - Dev
+        uses: home-assistant/builder/actions/build-image@2026.03.2
+        with:
+          arch: ${{ matrix.arch }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          context: ./add-ons/ps5-mqtt-edge
+          build-args: |
+            BUILD_FROM=ghcr.io/home-assistant/${{ matrix.arch }}-base:3.21
+          image: ${{ matrix.image }}
+          image-tags: |
+            dev
+            ${{ github.sha }}
+          version: dev
+          push: "true"
+
+  manifest:
+    name: 📦 Publish multi-arch manifest - Dev
+    needs: [init, build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+    steps:
+      - name: 📦 Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ env.BUILD_IMAGE_NAME }}
+          image-tags: |
+            dev
+            ${{ github.sha }}
+
+      - name: 🏷️ Promote multi-arch manifest
+        run: |
+          # GHCR namespaces must be lowercase; github.repository_owner may not be.
+          REGISTRY_PREFIX="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}"
+          tags=("dev" "${{ github.sha }}")
+
+          tag_args=()
+          for tag in "${tags[@]}"; do
+            tag_args+=("--tag" "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}")
+          done
+
+          metadata_file="$(mktemp)"
+
+          docker buildx imagetools create \
+            --metadata-file "${metadata_file}" \
+            "${tag_args[@]}" \
+            "${REGISTRY_PREFIX}/${BUILD_IMAGE_NAME}:${tags[0]}"
+
+          digest="$(jq -r '.["containerimage.descriptor"].digest' "${metadata_file}")"
+          cosign sign --yes "${REGISTRY_PREFIX}/${IMAGE_NAME}@${digest}"
+
+  standalone:
+    name: 🐳 Build & Publish standalone image - Dev
+    needs: [static-analysis, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - name: ⤵ Check out repository
+        uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
+
+      - name: ⏬ Install dependencies
+        run: yarn install --immutable
+
+      - name: 👨‍🏭 Build App
+        run: yarn build
+
+      - name: 🔧 Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: 🔑 Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚀 Build & publish standalone image
+        env:
+          REGISTRY: ghcr.io
+          OWNER: ${{ github.repository_owner }}
+          IMAGE: ps5-mqtt
+          TAGS: "dev ${{ github.sha }}"
+          PLATFORMS: linux/amd64,linux/arm64
+          SKIP_BUILD: "1"
+        run: yarn workspace @ps5-mqtt/server publish

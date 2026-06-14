@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": ["scripts/**/*.ts"],
+  "exclude": ["node_modules", ".pnp.*", "dist", ".packaged"],
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "types": ["node"]
+  },
+  "references": [
+    { "path": "./ps5-mqtt/client/tsconfig.build.json" },
+    { "path": "./ps5-mqtt/server/tsconfig.build.json" },
+    { "path": "./ps5-mqtt/server/tsconfig.test.json" },
+    { "path": "./ps5-mqtt/server/tsconfig.scripts.json" }
+  ]
+}

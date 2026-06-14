@@ -10,8 +10,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Addon version
-      placeholder: '0.4.0'
+      label: Version
+      placeholder: "0.1.0"
     validations:
       required: true
   - type: textarea

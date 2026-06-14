@@ -87,17 +87,11 @@ Users can now specify the preferred console per account. This is useful when, fo
 
 ```yaml
 - username: MyPsnUser
-  npsso: '!secret my_npsso'
-  preferred_ps5: 70C881D600B0      # ID of the PS5 that will be preferred when activity can be matched to multiple PS5's 
-  preferred_ps4: 60E899D600B0      # ID of the PS4 that will be preferred when activity can be matched to multiple PS4's
-
-
-
-
-
-
-
+  npsso: "!secret my_npsso"
+  preferred_ps5: 70C881D600B0 # ID of the PS5 that will be preferred when activity can be matched to multiple PS5's
+  preferred_ps4: 60E899D600B0 # ID of the PS4 that will be preferred when activity can be matched to multiple PS4's
 ```
+
 You can find the ID of your PlayStation device by:
 
 1. Using the Web-UI <br> ![image](https://user-images.githubusercontent.com/4623715/196047737-1eac0ce1-574c-4998-9d6f-949a24080910.png)
@@ -147,7 +141,7 @@ Matching PSN account activity to consoles is now supported.
 The add-on will create a new `sensor.my_playstation_activity` sensor that tells you which app/game is being used on the console! Both entities, `activity` and `power`, will now include the following attributes:
 | Attribute | Description |
 | -- | -- |
-| `Players`  | A list of players active on the device |
+| `Players` | A list of players active on the device |
 | `Activity` / sensor.state | `idle`, `playing` or `none`; indicating the kind of activity on the device |
 | `Title Name` | A user-friendly name of the Playstation App / Game currently in use. |
 | `Title Image` | A `url` referring to the official box-art. |
@@ -163,7 +157,7 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 ⚠ The MQTT implementation saw some changes that might cause you to have duplicate `power` entities in HA after upgrading. ⚠
 
 - The advised upgrade path is to remove your old devices from Home Assistant and let the add-on rediscover them for you.
-- Alternatively remove the old `power` entity and rename the *new* `power` entity (which will probably be called something like `switch.my_ps5_power_2`) to your old entity's name.
+- Alternatively remove the old `power` entity and rename the _new_ `power` entity (which will probably be called something like `switch.my_ps5_power_2`) to your old entity's name.
 
 ### 🚀 Enhancements
 
@@ -179,13 +173,13 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 
 ### What’s changed
 
-- 💪 #22: PS4 devices were *unintentionally* being discovered as [@bryeartem](https://github.com/bryeartem) correctly pointed out. He also mentioned that, in his case, the add-on detects state changes in the PS4 quicker than the HA integration. So instead of 'fixing' the issue I decided to add an extra option (`include_ps4_devices`) to the config. Turning the option on will discover PS4 devices as well as PS5's. The option is disabled by default.
+- 💪 #22: PS4 devices were _unintentionally_ being discovered as [@bryeartem](https://github.com/bryeartem) correctly pointed out. He also mentioned that, in his case, the add-on detects state changes in the PS4 quicker than the HA integration. So instead of 'fixing' the issue I decided to add an extra option (`include_ps4_devices`) to the config. Turning the option on will discover PS4 devices as well as PS5's. The option is disabled by default.
 
 ## 0.7.0 - 2022-08-03
 
 ### What’s changed
 
-- 🔧 #21: fixed failing device state checks when PS5 name contained **non**-alphanumeric or '-' and '_' characters.
+- 🔧 #21: fixed failing device state checks when PS5 name contained **non**-alphanumeric or '-' and '\_' characters.
 - 🔐 improved add-on security (rating) by adding ingress support.
 - 💔 removed `ps5_credentials` option from add-on configuration.
 
@@ -194,32 +188,29 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 ### What’s changed
 
 - client improvements @FunkeyFlo (#19)
-  
 - - added dark/light theme option to client UI 🌗
-  
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
 - - (hopefully) cleared up some of the confusion people were having with the authentication steps by changing the walkthrough text that's displayed in the Authorization dialog.
-  
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
 
 ## 0.6.3
 
@@ -227,29 +218,25 @@ Take a look at the [documentation](https://github.com/FunkeyFlo/ps5-mqtt/blob/ma
 
 ### **⚠ IMPORTANT FOR USERS UPGRADING FROM `v0.6.2` ⚠**
 
-Because the add-on switched from locally built Dockerfiles to pre-built images you *have* to **uninstall** and **re-install** the add-on to upgrade! ⚠ Be sure to backup your configuration first because Home Assistant *will not* save it for you!
+Because the add-on switched from locally built Dockerfiles to pre-built images you _have_ to **uninstall** and **re-install** the add-on to upgrade! ⚠ Be sure to backup your configuration first because Home Assistant _will not_ save it for you!
 
 ## 0.6.2
 
 - Added a Web UI to acquire credentials through the Add-on itself.
-  
 - Credentials file will now be written to the file `/config/ps5-mqtt/credentials.json`.
-  
 - ⚠ **Deprecation Warning**
-  
-- - The `ps5_credentials` option is deprecated and will be removed with the next *[minor](https://semver.org/)* release. Check the [docs](/ps5-mqtt/DOCS.md) for migration options.
-  
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
+- - The `ps5_credentials` option is deprecated and will be removed with the next _[minor](https://semver.org/)_ release. Check the [docs](/ps5-mqtt/DOCS.md) for migration options.
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
 
 ## 0.5.2
 
@@ -258,61 +245,54 @@ Because the add-on switched from locally built Dockerfiles to pre-built images y
 ## 0.5.0
 
 - Changed MQTT implementation to...
-  
 - - ...reduce amount of messages being sent.
-  
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
 - - ...avoid entities being unavailable after home assistant restart. ([#5](https://github.com/FunkeyFlo/ps5-mqtt/issues/5))
-  
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
 - Re-implemented device discovery
-  
 - - Added `device_discovery_interval` option to change the frequency of discovering PS5 devices.
-  
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
 - - Optimizations for discovered devices.
-  
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
-- 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
 - Various minor tweaks and improvements.
-  
 
 ## 0.4.4
 

@@ -1,15 +1,9 @@
 {
-    "extends": "./tsconfig.build.json",
-    "compilerOptions": {
-        "module": "ESNext",
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "strict": false
-    },
-    "include": [
-        "**/*.test.ts"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.build.json" },
+    { "path": "./tsconfig.test.json" },
+    { "path": "./tsconfig.scripts.json" },
+    { "path": "./tsconfig.config.json" }
+  ]
 }

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "outDir": "./.ts-build/scripts",
+    "rootDir": "./scripts",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "types": ["node"]
+  },
+  "include": ["scripts/**/*.ts"],
+  "exclude": ["node_modules", "**/__tests__/*.test.ts"]
+}

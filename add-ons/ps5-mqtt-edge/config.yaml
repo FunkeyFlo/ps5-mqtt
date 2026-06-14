@@ -1,14 +1,11 @@
-version: "edge"
-slug: ps5_mqtt_edge
-name: PS5 MQTT - Edge
+version: "dev"
+slug: ps5_mqtt_dev
+name: PS5 MQTT - Development Version
 description: Development build of the PS5 MQTT add-on
 url: https://github.com/FunkeyFlo/ps5-mqtt/tree/main/add-ons/ps5-mqtt-edge
 arch:
-  - armhf
-  - armv7
   - aarch64
   - amd64
-  - i386
 startup: application
 services:
   - "mqtt:need"
@@ -16,7 +13,7 @@ boot: auto
 host_network: true
 ingress: true
 ingress_port: 0
-panel_icon: 'mdi:sony-playstation'
+panel_icon: "mdi:sony-playstation"
 ports:
   8645/tcp: null
 ports_description:
@@ -50,4 +47,4 @@ schema:
   account_check_interval: int
   include_ps4_devices: bool
 stdin: true
-image: "ghcr.io/funkeyflo/ps5-mqtt/{arch}"
+image: "ghcr.io/funkeyflo/ps5-mqtt-home-assistant-add-on-edge"
