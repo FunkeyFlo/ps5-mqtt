@@ -1,0 +1,69 @@
+---
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+sort-direction: ascending
+
+categories:
+  - title: "🚨 Breaking changes"
+    labels:
+      - "breaking-change"
+  - title: "✨ New features"
+    labels:
+      - "new-feature"
+      - "enhancement"
+      - "performance"
+  - title: "🐛 Bug fixes"
+    labels:
+      - "bugfix"
+  - title: "🧰 Maintenance"
+    labels:
+      - "refactor"
+      - "maintenance"
+      - "ci"
+  - title: "📚 Documentation"
+    labels:
+      - "documentation"
+  - title: "🌎 Translations"
+    labels:
+      - "translations"
+  - title: "⬆️ Dependency updates"
+    labels:
+      - "dependencies"
+
+version-resolver:
+  major:
+    labels:
+      - "major"
+      - "breaking-change"
+  minor:
+    labels:
+      - "minor"
+      - "new-feature"
+      - "enhancement"
+      - "performance"
+  patch:
+    labels:
+      - "patch"
+      - "bugfix"
+      - "chore"
+      - "ci"
+      - "dependencies"
+      - "documentation"
+      - "refactor"
+  default: patch
+
+template: |
+  ## What’s changed
+  $CHANGES
+
+autolabeler:
+  - label: "major"
+    title: ["/^break(ing)?[:(]/i"]
+    body: ["/BREAKING CHANGE/"]
+  - label: "minor"
+    branch: ['/^feat(ure)?\/.+/']
+    title: ["/^feat/i"]
+  - label: "patch"
+    branch: ['/^(fix|chore|docs)\/.+/']
+    title: ["/^(fix|chore|docs)/i"]

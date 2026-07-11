@@ -1,0 +1,44 @@
+---
+name: Cleanup PR images
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  packages: write
+
+jobs:
+  cleanup:
+    name: 🧹 Delete pr-${{ github.event.pull_request.number }} images
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧹 Delete pr-${{ github.event.pull_request.number }} image tags
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: pr-${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          # Consumer packages that CI pushes PR tags to, plus any -build
+          # intermediates a failed run may have left behind.
+          packages="ps5-mqtt ps5-mqtt-home-assistant-add-on-edge"
+          leftovers=$(gh api "/users/${GITHUB_REPOSITORY_OWNER}/packages?package_type=container" \
+            --paginate --jq '.[].name' \
+            | grep -F "ps5-mqtt-home-assistant-add-on-edge-build" || true)
+
+          for pkg in $packages $leftovers; do
+            enc=$(jq -rn --arg p "$pkg" '$p|@uri')
+            ids=$(gh api "/users/${GITHUB_REPOSITORY_OWNER}/packages/container/${enc}/versions" \
+              --paginate \
+              --jq ".[] | select(.metadata.container.tags | index(\"${TAG}\")) | .id" \
+              2>/dev/null || true)
+            for id in $ids; do
+              echo "Deleting ${pkg} version ${id} (tagged ${TAG})"
+              gh api -X DELETE \
+                "/users/${GITHUB_REPOSITORY_OWNER}/packages/container/${enc}/versions/${id}" || true
+            done
+          done

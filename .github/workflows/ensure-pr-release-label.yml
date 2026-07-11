@@ -1,0 +1,52 @@
+---
+name: PR release label
+
+# yamllint disable-line rule:truthy
+on:
+  # pull_request_target (not pull_request) so the autolabeler has a writable
+  # token on fork PRs too. Safe: this workflow never checks out or runs PR code.
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+
+jobs:
+  autolabel:
+    name: 🏷 Auto-label from release-drafter config
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: 🏷 Apply autolabeler rules
+        uses: release-drafter/release-drafter@v7
+        with:
+          config-name: release-drafter.yml
+          disable-releaser: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  require-release-label:
+    name: ✅ Require a version-resolvable label
+    needs: autolabel
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: mheap/github-action-required-labels@v5
+        with:
+          mode: minimum
+          count: 1
+          # Keep in sync with version-resolver in .github/release-drafter.yml
+          # and the version job in release.yml.
+          labels: >-
+            major, breaking-change,
+            minor, new-feature, enhancement, performance,
+            patch, bugfix, chore, ci, dependencies, documentation, refactor

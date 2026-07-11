@@ -2,19 +2,17 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import semver from "semver"
 
-const RELEASE_TYPES = {
-  MAJOR: "major",
-  MINOR: "minor",
-  PATCH: "patch",
-} as const
+const RELEASE_TYPES = ["major", "minor", "patch"] as const
+type ReleaseType = (typeof RELEASE_TYPES)[number]
 
-const releaseType = process.argv[2]?.toUpperCase() as
-  | keyof typeof RELEASE_TYPES
-  | undefined
+// Accepts either a release level ("major" | "minor" | "patch") or an explicit
+// version ("1.5.0" / "v1.5.0"). CI passes the explicit version computed by the
+// release workflow's version job so every job agrees on a single version.
+const arg = process.argv[2]
 
-if (!releaseType || !(releaseType in RELEASE_TYPES)) {
+if (!arg) {
   throw new Error(
-    `releaseType must be one of ${Object.keys(RELEASE_TYPES).join(", ")}, received "${process.argv[2]}"`,
+    `A release level (${RELEASE_TYPES.join(", ")}) or explicit version (e.g. 1.5.0) is required`,
   )
 }
 
@@ -24,16 +22,26 @@ const configYamlPath = join(rootDir, "add-ons", "ps5-mqtt", "config.yaml")
 
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"))
 const currentVersion = packageJson.version as string
-const nextVersion = semver.inc(currentVersion, RELEASE_TYPES[releaseType])
+
+const explicitVersion = semver.valid(arg.replace(/^v/, ""))
+const level = arg.toLowerCase() as ReleaseType
+
+const nextVersion = explicitVersion
+  ? explicitVersion
+  : RELEASE_TYPES.includes(level)
+    ? semver.inc(currentVersion, level)
+    : null
 
 if (!nextVersion) {
-  throw new Error(`Unable to increment version "${currentVersion}"`)
+  throw new Error(
+    `Expected a release level (${RELEASE_TYPES.join(", ")}) or a valid semver version, received "${arg}"`,
+  )
 }
 
 packageJson.version = nextVersion
 writeFileSync(
   packageJsonPath,
-  `${JSON.stringify(packageJson, null, 4)}\n`,
+  `${JSON.stringify(packageJson, null, 2)}\n`,
   "utf-8",
 )
 

@@ -14,11 +14,14 @@
  *   REGISTRY    Registry host (default: ghcr.io)
  *   OWNER       Registry namespace/owner (required, e.g. funkeyflo)
  *   IMAGE       Image name (default: ps5-mqtt)
- *   TAGS        Space- or comma-separated list of tags (default: latest)
- *   PLATFORMS   buildx platforms (default: linux/amd64,linux/arm64)
+ *   TAGS          Space- or comma-separated list of tags (default: latest)
+ *   PLATFORMS     buildx platforms (default: linux/amd64,linux/arm64)
+ *   SKIP_PACKAGE  When "1", use an existing `.packaged/` tree instead of
+ *                 rebuilding it (e.g. a CI artifact shared across jobs)
+ *   DRY_RUN       When "1", build the image but don't push it
  */
 import { execFileSync } from "node:child_process"
-import { rmSync } from "node:fs"
+import { existsSync, rmSync } from "node:fs"
 import { join } from "node:path"
 
 const SERVER_DIR = join(__dirname, "..") // ps5-mqtt/server
@@ -39,18 +42,30 @@ if (!OWNER) {
 
 const REPO = `${REGISTRY}/${OWNER}/${IMAGE}`
 
-// Build the packaged application tree (no local single-arch image build).
-execFileSync("tsx", [join(__dirname, "package.ts")], {
-  stdio: "inherit",
-  env: { ...process.env, PREPARE_ONLY: "1" },
-})
+// Build the packaged application tree (no local single-arch image build),
+// unless the caller already provided one (SKIP_PACKAGE=1).
+if (process.env.SKIP_PACKAGE === "1") {
+  if (!existsSync(PACKAGED_DIR)) {
+    console.error(`❌ SKIP_PACKAGE=1 but ${PACKAGED_DIR} does not exist.`)
+    process.exit(1)
+  }
+} else {
+  execFileSync("tsx", [join(__dirname, "package.ts")], {
+    stdio: "inherit",
+    env: { ...process.env, PREPARE_ONLY: "1" },
+  })
+}
 
 const tagArgs = TAGS.split(/[ ,]+/)
   .filter(Boolean)
   .flatMap((tag) => ["--tag", `${REPO}:${tag}`])
 
+const dryRun = process.env.DRY_RUN === "1"
+
 try {
-  console.log(`🚀 Publishing ${REPO} [${TAGS}] for ${PLATFORMS}...`)
+  console.log(
+    `🚀 ${dryRun ? "Building (dry run, no push)" : "Publishing"} ${REPO} [${TAGS}] for ${PLATFORMS}...`,
+  )
   execFileSync(
     "docker",
     [
@@ -59,7 +74,7 @@ try {
       "--platform",
       PLATFORMS,
       ...tagArgs,
-      "--push",
+      ...(dryRun ? [] : ["--push"]),
       "-f",
       join(SERVER_DIR, "Dockerfile"),
       SERVER_DIR,
@@ -67,7 +82,11 @@ try {
     { stdio: "inherit" },
   )
 
-  console.log(`✅ Published ${REPO} [${TAGS}]`)
+  console.log(
+    dryRun
+      ? `✅ Built ${REPO} [${TAGS}] (dry run, not pushed)`
+      : `✅ Published ${REPO} [${TAGS}]`,
+  )
 } finally {
   rmSync(PACKAGED_DIR, { recursive: true, force: true })
 }

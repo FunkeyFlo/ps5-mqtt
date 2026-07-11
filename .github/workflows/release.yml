@@ -1,23 +1,21 @@
----
 name: Release
 
-# yamllint disable-line rule:truthy
 on:
   workflow_dispatch:
     inputs:
-      releaseType:
-        description: "Version part to increment"
-        required: true
-        type: choice
-        default: PATCH
-        options:
-          - MAJOR
-          - MINOR
-          - PATCH
-      releaseNotes:
-        description: "Release notes for this version"
-        required: true
-        type: string
+      dry_run:
+        description: "Run the full pipeline but don't push images, commit, or release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: read
+
+# Only one release at a time; a second dispatch waits instead of interleaving.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 env:
   ARCHITECTURES: '["amd64", "aarch64"]'
@@ -26,61 +24,90 @@ env:
 
 jobs:
   version:
-    name: 🔖 Bump version
+    name: 🧮 Compute version
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     outputs:
-      version: ${{ steps.bump.outputs.version }}
+      # Single source of truth: every other job takes the version from here.
+      version: ${{ steps.version.outputs.version }} # e.g. 1.5.0 (images, config.yaml, changelog)
+      tag: ${{ steps.version.outputs.tag }} # e.g. v1.5.0 (git tag, GitHub release)
+      level: ${{ steps.bump.outputs.level }}
+      last_tag: ${{ steps.bump.outputs.last_tag }}
     steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
-          ref: main
+          fetch-depth: 0
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.16.0
-
-      - name: 🧶 Enable Corepack
-        run: corepack enable
-
-      - name: ⏬ Install dependencies
-        run: yarn install --immutable
-
-      - name: 🔖 Bump package.json & add-on version
+      - name: Resolve bump from merged PR labels
         id: bump
-        run: yarn bump-version ${{ inputs.releaseType }}
-
-      - name: ⏭ Sync add-on docs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          cp README.md add-ons/ps5-mqtt/README.md
-          cp docs/DOCS.md add-ons/ps5-mqtt/DOCS.md
+          set -euo pipefail
 
-      - name: 🙌 Commit version bump
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          branch: main
-          commit_message: >-
-            🎉 Release version ${{ steps.bump.outputs.version }} [skip ci]
-          file_pattern: package.json add-ons/ps5-mqtt/config.yaml add-ons/ps5-mqtt/README.md add-ons/ps5-mqtt/DOCS.md
+          last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$last_tag" ]; then
+            since=$(git log -1 --format=%cI "$last_tag")
+          else
+            since="1970-01-01T00:00:00Z"
+          fi
+          echo "last_tag=$last_tag" >> "$GITHUB_OUTPUT"
+
+          labels=$(gh pr list --state merged --base "${{ github.ref_name }}" \
+            --search "merged:>$since" \
+            --json labels --jq '.[].labels[].name' | tr '[:upper:]' '[:lower:]')
+
+          major="major breaking-change"
+          minor="minor new-feature enhancement performance"
+          patch="patch bugfix chore ci dependencies documentation refactor"
+
+          match() { for l in $2; do echo "$1" | grep -qx "$l" && return 0; done; return 1; }
+
+          level=patch
+          if match "$labels" "$major"; then level=major
+          elif match "$labels" "$minor"; then level=minor
+          elif match "$labels" "$patch"; then level=patch
+          fi
+          echo "level=$level" >> "$GITHUB_OUTPUT"
+          echo "Resolved bump: $level (since ${last_tag:-beginning})"
+
+      - name: Compute next version
+        id: version
+        run: |
+          set -euo pipefail
+          base="${{ steps.bump.outputs.last_tag }}"
+          if [ -z "$base" ]; then
+            # No tag reachable from this ref (e.g. first release on a fork):
+            # fall back to the version the codebase itself declares.
+            base="v$(node -p "require('./package.json').version")"
+            echo "No reachable git tag; using package.json version as base ($base)"
+          fi
+          ver="${base#v}"
+          IFS=. read -r MA MI PA <<< "$ver"
+          case "${{ steps.bump.outputs.level }}" in
+            major) MA=$((MA+1)); MI=0; PA=0 ;;
+            minor) MI=$((MI+1)); PA=0 ;;
+            patch) PA=$((PA+1)) ;;
+          esac
+          echo "version=${MA}.${MI}.${PA}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${MA}.${MI}.${PA}" >> "$GITHUB_OUTPUT"
+          echo "Next version: ${MA}.${MI}.${PA}"
 
   static-analysis:
     name: ✅ Static Analysis
-    needs: version
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
-          ref: main
+          ref: ${{ github.sha }}
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
 
       - uses: actions/setup-node@v6
         with:
           node-version: 24.16.0
-
-      - name: 🧶 Enable Corepack
-        run: corepack enable
+          cache: yarn
 
       - name: ⏬ Install dependencies
         run: yarn install --immutable
@@ -96,20 +123,20 @@ jobs:
 
   test:
     name: 🧪 Test
-    needs: version
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
-          ref: main
+          ref: ${{ github.sha }}
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
 
       - uses: actions/setup-node@v6
         with:
           node-version: 24.16.0
-
-      - name: 🧶 Enable Corepack
-        run: corepack enable
+          cache: yarn
 
       - name: ⏬ Install dependencies
         run: yarn install --immutable
@@ -122,49 +149,54 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
+      registry-prefix: ${{ steps.registry.outputs.prefix }}
     steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v6
-        with:
-          ref: main
+      - name: 🏷 Compute registry prefix
+        id: registry
+        # GHCR namespaces must be lowercase; github.repository_owner may not be.
+        run: echo "prefix=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
 
       - name: 🧮 Get build matrix
         id: matrix
-        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.06.0
         with:
           architectures: ${{ env.ARCHITECTURES }}
           image-name: ${{ env.BUILD_IMAGE_NAME }}
+          registry-prefix: ${{ steps.registry.outputs.prefix }}
 
-  build:
-    name: 🏭 Build & Publish add-on ${{ matrix.arch }}
+  # Build the app exactly once; every image (both add-on archs and the
+  # standalone image) ships the byte-identical artifacts produced here.
+  prepare:
+    name: 👨‍🏭 Build & package app
     needs:
       - version
       - static-analysis
       - test
-      - init
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      id-token: write
-      packages: write
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
-          ref: main
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.16.0
+          ref: ${{ github.sha }}
 
       - name: 🧶 Enable Corepack
         run: corepack enable
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+          cache: yarn
+
       - name: ⏬ Install dependencies
         run: yarn install --immutable
+
+      - name: 🔖 Apply release version
+        run: yarn bump-version ${{ needs.version.outputs.version }}
+
+      - name: ⏭ Sync add-on docs
+        run: |
+          cp README.md add-ons/ps5-mqtt/README.md
+          cp docs/DOCS.md add-ons/ps5-mqtt/DOCS.md
 
       - name: 👨‍🏭 Build App
         run: yarn build
@@ -175,16 +207,59 @@ jobs:
           SKIP_BUILD: "1"
         run: yarn workspace @ps5-mqtt/server package
 
-      - name: ⏭ Copy App Files
+      - name: 🗂 Assemble add-on Docker context
         run: |
-          rsync -a --exclude='.git' --exclude='add-ons' ./ add-ons/ps5-mqtt/
-          cp add-ons/common/Dockerfile add-ons/ps5-mqtt
-          cp add-ons/common/build.yaml add-ons/ps5-mqtt
-          cp add-ons/common/.dockerignore add-ons/ps5-mqtt
-          cp add-ons/common/run.sh add-ons/ps5-mqtt
+          cp add-ons/common/Dockerfile add-ons/ps5-mqtt/
+          cp add-ons/common/build.yaml add-ons/ps5-mqtt/
+          cp add-ons/common/.dockerignore add-ons/ps5-mqtt/
+          cp add-ons/common/run.sh add-ons/ps5-mqtt/
+          mkdir -p add-ons/ps5-mqtt/ps5-mqtt/server
+          cp -R ps5-mqtt/server/.packaged add-ons/ps5-mqtt/ps5-mqtt/server/.packaged
+
+      - name: ⏫ Upload add-on context
+        uses: actions/upload-artifact@v7
+        with:
+          name: addon-context
+          path: add-ons/ps5-mqtt
+          include-hidden-files: true
+          if-no-files-found: error
+
+      - name: ⏫ Upload packaged app
+        uses: actions/upload-artifact@v7
+        with:
+          name: packaged-app
+          path: ps5-mqtt/server/.packaged
+          include-hidden-files: true
+          if-no-files-found: error
+
+  build:
+    name: 🏭 Build & Publish add-on ${{ matrix.arch }}
+    needs:
+      - version
+      - init
+      - prepare
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+
+      - name: ⏬ Download prepared add-on context
+        uses: actions/download-artifact@v8
+        with:
+          name: addon-context
+          path: add-ons/ps5-mqtt
 
       - name: 🏭 Build & Publish add-on ps5-mqtt-${{ matrix.arch }}
-        uses: home-assistant/builder/actions/build-image@2026.03.2
+        uses: home-assistant/builder/actions/build-image@2026.06.0
         with:
           arch: ${{ matrix.arch }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
@@ -192,11 +267,12 @@ jobs:
           build-args: |
             BUILD_FROM=ghcr.io/home-assistant/${{ matrix.arch }}-base:3.21
           image: ${{ matrix.image }}
+          # No "v" prefix: the HA Supervisor pulls <image>:<config.yaml version>.
           image-tags: |
             ${{ needs.version.outputs.version }}
             latest
           version: ${{ needs.version.outputs.version }}
-          push: "true"
+          push: ${{ inputs.dry_run && 'false' || 'true' }}
 
   manifest:
     name: 📦 Publish multi-arch manifest
@@ -207,16 +283,19 @@ jobs:
       packages: write
     steps:
       - name: 📦 Publish multi-arch manifest
-        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
+        if: ${{ !inputs.dry_run }}
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
         with:
           architectures: ${{ env.ARCHITECTURES }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-name: ${{ env.BUILD_IMAGE_NAME }}
+          registry-prefix: ${{ needs.init.outputs.registry-prefix }}
           image-tags: |
             ${{ needs.version.outputs.version }}
             latest
 
       - name: 🏷️ Promote multi-arch manifest
+        if: ${{ !inputs.dry_run }}
         run: |
           # GHCR namespaces must be lowercase; github.repository_owner may not be.
           REGISTRY_PREFIX="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}"
@@ -233,12 +312,32 @@ jobs:
 
           cosign sign --yes "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tags[0]}"
 
+      - name: 🧹 Delete intermediate -build packages
+        if: ${{ !inputs.dry_run }}
+        # The per-arch and combined -build images only exist so imagetools can
+        # stitch the multi-arch manifest; once promoted they're dead weight and
+        # should never be visible to users. Cleanup failure must not fail the
+        # release (requires the repo to have admin on the packages, which
+        # GITHUB_TOKEN-published packages grant automatically).
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          pkgs=$(gh api "/users/${GITHUB_REPOSITORY_OWNER}/packages?package_type=container" \
+            --paginate --jq '.[].name' | grep -F "${BUILD_IMAGE_NAME}" || true)
+          [ -z "$pkgs" ] && { echo "No -build packages found"; exit 0; }
+          while IFS= read -r pkg; do
+            enc=$(jq -rn --arg p "$pkg" '$p|@uri')
+            echo "Deleting intermediate package ${pkg}"
+            gh api -X DELETE "/users/${GITHUB_REPOSITORY_OWNER}/packages/container/${enc}"
+          done <<< "$pkgs"
+
   standalone:
     name: 🐳 Build & Publish standalone image
     needs:
       - version
-      - static-analysis
-      - test
+      - prepare
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -246,22 +345,26 @@ jobs:
       packages: write
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
-          ref: main
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.16.0
+          ref: ${{ github.sha }}
 
       - name: 🧶 Enable Corepack
         run: corepack enable
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+          cache: yarn
+
       - name: ⏬ Install dependencies
         run: yarn install --immutable
 
-      - name: 👨‍🏭 Build App
-        run: yarn build
+      - name: ⏬ Download packaged app
+        uses: actions/download-artifact@v8
+        with:
+          name: packaged-app
+          path: ps5-mqtt/server/.packaged
 
       - name: 🔧 Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -283,7 +386,8 @@ jobs:
           IMAGE: ps5-mqtt
           TAGS: "${{ needs.version.outputs.version }} latest"
           PLATFORMS: linux/amd64,linux/arm64
-          SKIP_BUILD: "1"
+          SKIP_PACKAGE: "1"
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
         run: yarn workspace @ps5-mqtt/server publish
 
   release:
@@ -297,38 +401,87 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v6
+      # Deliberately not pinned to github.sha: the version-bump commit must
+      # apply on top of whatever main is when we get here.
+      - uses: actions/checkout@v7
         with:
           ref: main
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.16.0
 
       - name: 🧶 Enable Corepack
         run: corepack enable
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+          cache: yarn
+
       - name: ⏬ Install dependencies
         run: yarn install --immutable
 
+      - name: 🔖 Apply release version
+        run: yarn bump-version ${{ needs.version.outputs.version }}
+
+      - name: ⏭ Sync add-on docs
+        run: |
+          cp README.md add-ons/ps5-mqtt/README.md
+          cp docs/DOCS.md add-ons/ps5-mqtt/DOCS.md
+
+      - name: 📝 Draft release notes
+        id: notes
+        uses: release-drafter/release-drafter@v7
+        with:
+          config-name: release-drafter.yml
+          version: ${{ needs.version.outputs.version }}
+          tag: ${{ needs.version.outputs.tag }}
+          name: ${{ needs.version.outputs.tag }}
+          publish: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: ✍ Update changelog
         env:
-          RELEASE_NOTES: ${{ inputs.releaseNotes }}
+          RELEASE_NOTES: ${{ steps.notes.outputs.body }}
         run: yarn update-changelog ${{ needs.version.outputs.version }}
 
-      - name: 🙌 Commit updated changelog
+      - name: 🛡 Ensure main hasn't moved since this release started
+        if: ${{ !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          git fetch --quiet origin main
+          current=$(git rev-parse origin/main)
+          if [ "$current" != "${{ github.sha }}" ]; then
+            echo "::error::main has advanced from ${{ github.sha }} to $current since this release" \
+              "was dispatched. The published images were built from the older commit, so tagging now" \
+              "would produce a release whose tree doesn't match the shipped images. Re-run the workflow."
+            exit 1
+          fi
+
+      - name: 🙌 Commit release version bump
+        id: commit
+        if: ${{ !inputs.dry_run }}
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: main
           commit_message: >-
-            ✍ Update changelog for version ${{ needs.version.outputs.version }} [skip ci]
-          file_pattern: add-ons/ps5-mqtt/CHANGELOG.md
+            🔖 Release ${{ needs.version.outputs.tag }} [skip ci]
+          file_pattern: >-
+            package.json
+            add-ons/ps5-mqtt/config.yaml
+            add-ons/ps5-mqtt/CHANGELOG.md
+            add-ons/ps5-mqtt/README.md
+            add-ons/ps5-mqtt/DOCS.md
 
-      - name: 🚀 Create release
-        uses: softprops/action-gh-release@v3
+      - name: 🚀 Publish release via Release Drafter
+        if: ${{ !inputs.dry_run }}
+        uses: release-drafter/release-drafter@v7
         with:
-          tag_name: v${{ needs.version.outputs.version }}
-          name: v${{ needs.version.outputs.version }}
-          body: ${{ inputs.releaseNotes }}
-          target_commitish: main
+          config-name: release-drafter.yml
+          version: ${{ needs.version.outputs.version }}
+          tag: ${{ needs.version.outputs.tag }}
+          name: ${{ needs.version.outputs.tag }}
+          # Tag the version-bump commit we just pushed, not "whatever main
+          # happens to be" at publish time.
+          commitish: ${{ steps.commit.outputs.commit_hash }}
+          publish: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
