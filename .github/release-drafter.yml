@@ -11,16 +11,14 @@ categories:
   - title: "✨ New features"
     labels:
       - "new-feature"
+      - "enhancement"
+      - "performance"
   - title: "🐛 Bug fixes"
     labels:
       - "bugfix"
-  - title: "🚀 Enhancements"
-    labels:
-      - "enhancement"
-      - "refactor"
-      - "performance"
   - title: "🧰 Maintenance"
     labels:
+      - "refactor"
       - "maintenance"
       - "ci"
   - title: "📚 Documentation"
@@ -42,18 +40,30 @@ version-resolver:
     labels:
       - "minor"
       - "new-feature"
+      - "enhancement"
+      - "performance"
   patch:
     labels:
+      - "patch"
       - "bugfix"
       - "chore"
       - "ci"
       - "dependencies"
       - "documentation"
-      - "enhancement"
-      - "performance"
       - "refactor"
   default: patch
 
 template: |
   ## What’s changed
   $CHANGES
+
+autolabeler:
+  - label: "major"
+    title: ["/^break(ing)?[:(]/i"]
+    body: ["/BREAKING CHANGE/"]
+  - label: "minor"
+    branch: ['/^feat(ure)?\/.+/']
+    title: ["/^feat/i"]
+  - label: "patch"
+    branch: ['/^(fix|chore|docs)\/.+/']
+    title: ["/^(fix|chore|docs)/i"]

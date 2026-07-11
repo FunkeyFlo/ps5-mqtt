@@ -1,12 +1,7 @@
 {
-    "compilerOptions": {
-        "module": "ES2022",
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "jsx": "react"
-    },
-    "exclude": [
-        "node_modules"
-    ]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.build.json" },
+    { "path": "./tsconfig.config.json" }
+  ]
 }

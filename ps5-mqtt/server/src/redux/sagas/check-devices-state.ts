@@ -1,81 +1,80 @@
-import createDebugger from "debug";
-import { stdout } from "process";
-import { getContext, put, select } from "redux-saga/effects";
-import sh from "shelljs";
-import { Settings, SETTINGS } from "../../services";
-import { createErrorLogger } from "../../util/error-logger";
-import { updateHomeAssistant } from "../action-creators";
-import { getDeviceList } from "../selectors";
-import type { Device } from "../types";
+import createDebugger from "debug"
+import { getContext, put, select } from "redux-saga/effects"
+import sh from "shelljs"
+import { Settings, SETTINGS } from "../../services"
+import { createErrorLogger } from "../../util/error-logger"
+import { updateHomeAssistant } from "../action-creators"
+import { getDeviceList } from "../selectors"
+import type { Device } from "../types"
 
-const debug = createDebugger("@ha:ps5:checkDevicesState");
-const errorLogger = createErrorLogger();
+const debug = createDebugger("@ha:ps5:checkDevicesState")
+const errorLogger = createErrorLogger()
 
 function* checkDevicesState() {
-    const { credentialStoragePath }: Settings = yield getContext(SETTINGS);
+  const { credentialStoragePath }: Settings = yield getContext(SETTINGS)
 
-    const devices: Device[] = yield select(getDeviceList);
-    for (const device of devices) {
-        try {
-            const { stdout, stderr } = sh.exec(
-                `playactor check --ip ${device.address.address} --machine-friendly`
-                + ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth`
-                + ` -c ${credentialStoragePath}`,
-                { silent: true, timeout: 15000 }
-            );
+  const devices: Device[] = yield select(getDeviceList)
+  for (const device of devices) {
+    try {
+      const { code, stdout, stderr } = sh.exec(
+        `playactor check --ip ${device.address.address} --machine-friendly` +
+          ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth` +
+          ` -c ${credentialStoragePath}`,
+        { silent: true, timeout: 15000 },
+      )
 
-            if (stderr) {
-                throw new Error(stderr)
-            }
+      if (code > 1 && stderr) {
+        throw new Error(stderr)
+      }
 
-            if (!stdout) {
-                throw "No data received from Playstation. If this error continues, " +
-                    "your Playstation is likely powered off or unreachable - it will " +
-                    "not be available until it is in either rest mode/powered on and reachable.";
-            }
-        
-            const updatedDevice: Device = JSON.parse(stdout);
+      if (!stdout) {
+        throw (
+          "No data received from Playstation. If this error continues, " +
+          "your Playstation is likely powered off or unreachable - it will " +
+          "not be available until it is in either rest mode/powered on and reachable."
+        )
+      }
 
-            if (
-                device.transitioning
-            ) {
-                debug(
-                    "Device is transitioning",
-                    device.transitioning,
-                    updatedDevice.status
-                );
-                break;
-            }
+      const updatedDevice: Device = JSON.parse(stdout)
 
-            // only send updates if ps5 is truly changing states or when ps5 has become available
-            if (device.status !== updatedDevice.status || !device.available) {
-                debug("Update HA");
-                yield put(
-                    updateHomeAssistant({
-                        ...device,
-                        status: updatedDevice.status,
-                        activity: updatedDevice.status !== 'AWAKE'
-                            ? undefined
-                            : updatedDevice.activity,
-                        available: true,
-                    })
-                );
-            }
-        } catch (e) {
-            // previously available ps5 cannot be located
-            yield put(
-                updateHomeAssistant({
-                    ...device,
-                    status: "UNKNOWN",
-                    available: false,
-                    activity: undefined,
-                })
-            );
+      if (device.transitioning) {
+        debug(
+          "Device is transitioning",
+          device.transitioning,
+          updatedDevice.status,
+        )
+        break
+      }
 
-            errorLogger(e);
-        }
+      // only send updates if ps5 is truly changing states or when ps5 has become available
+      if (device.status !== updatedDevice.status || !device.available) {
+        debug("Update HA")
+        yield put(
+          updateHomeAssistant({
+            ...device,
+            status: updatedDevice.status,
+            activity:
+              updatedDevice.status !== "AWAKE"
+                ? undefined
+                : updatedDevice.activity,
+            available: true,
+          }),
+        )
+      }
+    } catch (e) {
+      // previously available ps5 cannot be located
+      yield put(
+        updateHomeAssistant({
+          ...device,
+          status: "UNKNOWN",
+          available: false,
+          activity: undefined,
+        }),
+      )
+
+      errorLogger(e)
     }
+  }
 }
 
-export { checkDevicesState };
-
+export { checkDevicesState }

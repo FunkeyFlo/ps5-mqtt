@@ -1,0 +1,6 @@
+{
+  "watch": ["dist"],
+  "ext": "js",
+  "delay": 500,
+  "exec": "yarn node dist/index.js"
+}

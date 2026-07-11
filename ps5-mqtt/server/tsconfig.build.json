@@ -1,19 +1,15 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "rootDir": "./src",
-        "declaration": false,
-        "outDir": "./dist",
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "sourceMap": true,
-        "moduleResolution": "node",
-        "lib": [
-            "ES2020"
-        ]
-    },
-    "exclude": [
-        "node_modules",
-        "**/*.test.ts"
-    ]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src",
+    "declaration": true,
+    "outDir": "./dist",
+    "sourceMap": true,
+    "noEmit": false,
+    "lib": ["ES2020"],
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "**/__tests__/*.test.ts"]
 }

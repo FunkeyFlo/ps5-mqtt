@@ -1,0 +1,14 @@
+{
+  "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "tsdk": ".yarn/sdks/typescript/lib"
+        },
+        "javascript": {
+          "tsdk": ".yarn/sdks/typescript/lib"
+        }
+      }
+    }
+  }
+}

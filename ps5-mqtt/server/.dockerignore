@@ -1,0 +1,5 @@
+# The standalone image only needs the pre-built application tree produced by
+# `yarn package` (.packaged/) plus the Dockerfile. Keep everything else out of
+# the build context.
+*
+!.packaged
