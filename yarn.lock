@@ -1171,7 +1171,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ps5-mqtt/client@workspace:ps5-mqtt/client"
   dependencies:
-    "@rspack/cli": "npm:^2.0.8"
+    "@rspack/cli": "npm:^2.1.3"
     "@rspack/core": "npm:^2.0.8"
     "@rspack/dev-server": "npm:^2.0.3"
     "@rspack/plugin-react-refresh": "npm:^2.0.2"
@@ -1203,7 +1203,7 @@ __metadata:
   dependencies:
     "@jest/globals": "npm:30.4.1"
     "@reduxjs/toolkit": "npm:^2.12.0"
-    "@rspack/cli": "npm:^2.0.8"
+    "@rspack/cli": "npm:^2.1.3"
     "@rspack/core": "npm:^2.0.8"
     "@types/debug": "npm:^4.1.13"
     "@types/express": "npm:^4.17.25"
@@ -1425,9 +1425,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rspack/cli@npm:^2.0.8":
-  version: 2.0.8
-  resolution: "@rspack/cli@npm:2.0.8"
+"@rspack/cli@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "@rspack/cli@npm:2.1.3"
   peerDependencies:
     "@rspack/core": ^2.0.0-0
     "@rspack/dev-server": ^2.0.0-0
@@ -1436,7 +1436,7 @@ __metadata:
       optional: true
   bin:
     rspack: ./bin/rspack.js
-  checksum: 10c0/7b4928a82ce0d9346c0c9cf8f80ff6d7b1196a6a9e8425523215b1287c36199a9d4117c4aed494d381a988d86f292086e544d6fe248024a15baef33134bf9e85
+  checksum: 10c0/15f96011cc131cb7c5d688d81a81c5933ece72cd3a2f37a032d5e578d88f2271a7c3e46d3ea25659fe422fbe3d0e6d81a6caf69ea598305f47d15099462dbda0
   languageName: node
   linkType: hard
 

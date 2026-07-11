@@ -1869,7 +1869,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./ps5-mqtt/client/",\
         "packageDependencies": [\
           ["@ps5-mqtt/client", "workspace:ps5-mqtt/client"],\
-          ["@rspack/cli", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.8"],\
+          ["@rspack/cli", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.1.3"],\
           ["@rspack/core", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.8"],\
           ["@rspack/dev-server", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.3"],\
           ["@rspack/plugin-react-refresh", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.2"],\
@@ -1906,7 +1906,7 @@ const RAW_RUNTIME_STATE =
           ["@jest/globals", "npm:30.4.1"],\
           ["@ps5-mqtt/server", "workspace:ps5-mqtt/server"],\
           ["@reduxjs/toolkit", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.12.0"],\
-          ["@rspack/cli", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.0.8"],\
+          ["@rspack/cli", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.1.3"],\
           ["@rspack/core", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.8"],\
           ["@types/debug", "npm:4.1.13"],\
           ["@types/express", "npm:4.17.25"],\
@@ -2148,17 +2148,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@rspack/cli", [\
-      ["npm:2.0.8", {\
-        "packageLocation": "./.yarn/cache/@rspack-cli-npm-2.0.8-0344dfe496-7b4928a82c.zip/node_modules/@rspack/cli/",\
+      ["npm:2.1.3", {\
+        "packageLocation": "./.yarn/cache/@rspack-cli-npm-2.1.3-6b95464acb-15f96011cc.zip/node_modules/@rspack/cli/",\
         "packageDependencies": [\
-          ["@rspack/cli", "npm:2.0.8"]\
+          ["@rspack/cli", "npm:2.1.3"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.0.8", {\
-        "packageLocation": "./.yarn/__virtual__/@rspack-cli-virtual-1b65757ae0/0/cache/@rspack-cli-npm-2.0.8-0344dfe496-7b4928a82c.zip/node_modules/@rspack/cli/",\
+      ["virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.1.3", {\
+        "packageLocation": "./.yarn/__virtual__/@rspack-cli-virtual-f6824db470/0/cache/@rspack-cli-npm-2.1.3-6b95464acb-15f96011cc.zip/node_modules/@rspack/cli/",\
         "packageDependencies": [\
-          ["@rspack/cli", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.0.8"],\
+          ["@rspack/cli", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.1.3"],\
           ["@rspack/core", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.8"],\
           ["@rspack/dev-server", null],\
           ["@types/rspack__core", null],\
@@ -2172,10 +2172,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.8", {\
-        "packageLocation": "./.yarn/__virtual__/@rspack-cli-virtual-e047fd202d/0/cache/@rspack-cli-npm-2.0.8-0344dfe496-7b4928a82c.zip/node_modules/@rspack/cli/",\
+      ["virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.1.3", {\
+        "packageLocation": "./.yarn/__virtual__/@rspack-cli-virtual-21c8833c06/0/cache/@rspack-cli-npm-2.1.3-6b95464acb-15f96011cc.zip/node_modules/@rspack/cli/",\
         "packageDependencies": [\
-          ["@rspack/cli", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.8"],\
+          ["@rspack/cli", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.1.3"],\
           ["@rspack/core", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.8"],\
           ["@rspack/dev-server", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.3"],\
           ["@types/rspack__core", null],\
