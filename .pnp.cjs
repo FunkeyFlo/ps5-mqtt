@@ -53,7 +53,7 @@ const RAW_RUNTIME_STATE =
           ["prettier", "npm:3.8.4"],\
           ["ps5-mqtt", "workspace:."],\
           ["rimraf", "npm:6.1.3"],\
-          ["semver", "npm:7.8.4"],\
+          ["semver", "npm:7.8.5"],\
           ["ts-node", "virtual:74d38cd7853367e83ff18cb097b315b481b75e7359f4eaf9fadf1396ca6f16613e34f669c4679b9633e3c3c98a80249df8c5c900a79c2bae953672843694b991#npm:10.9.2"],\
           ["tslib", "npm:2.8.1"],\
           ["tsx", "npm:4.22.4"],\
@@ -8454,7 +8454,7 @@ const RAW_RUNTIME_STATE =
           ["prettier", "npm:3.8.4"],\
           ["ps5-mqtt", "workspace:."],\
           ["rimraf", "npm:6.1.3"],\
-          ["semver", "npm:7.8.4"],\
+          ["semver", "npm:7.8.5"],\
           ["ts-node", "virtual:74d38cd7853367e83ff18cb097b315b481b75e7359f4eaf9fadf1396ca6f16613e34f669c4679b9633e3c3c98a80249df8c5c900a79c2bae953672843694b991#npm:10.9.2"],\
           ["tslib", "npm:2.8.1"],\
           ["tsx", "npm:4.22.4"],\
@@ -8968,6 +8968,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/semver-npm-7.8.4-9c59dc7144-81b7c296fd.zip/node_modules/semver/",\
         "packageDependencies": [\
           ["semver", "npm:7.8.4"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:7.8.5", {\
+        "packageLocation": "./.yarn/cache/semver-npm-7.8.5-785968bbf9-b1f3127a5b.zip/node_modules/semver/",\
+        "packageDependencies": [\
+          ["semver", "npm:7.8.5"]\
         ],\
         "linkType": "HARD"\
       }]\
