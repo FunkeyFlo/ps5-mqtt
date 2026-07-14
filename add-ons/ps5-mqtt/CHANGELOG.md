@@ -1,3 +1,17 @@
+## 1.4.1 - 2026-07-14
+
+## What’s changed
+- fix: removal of intermediate packages @andrew-codes (#650)
+- chore(ci): GH release is the trigger for a release @andrew-codes (#651)
+
+## 🐛 Bug fixes
+
+- Modernize toolchain, restructure build/packaging, and overhaul CI/CD @andrew-codes (#640)
+
+## 🧰 Maintenance
+
+- fix: PR autolabeler using an invalid release-drafter input @andrew-codes (#649)
+
 ## 1.4.0 - 2024-08-06
 
 ### What’s changed
