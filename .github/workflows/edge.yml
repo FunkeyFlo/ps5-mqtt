@@ -268,11 +268,11 @@ jobs:
         # The per-arch and combined -build images only exist so imagetools can
         # stitch the multi-arch manifest; once promoted they're dead weight and
         # should never be visible to users. Cleanup failure must not fail the
-        # build (requires the repo to have admin on the packages, which
-        # GITHUB_TOKEN-published packages grant automatically).
+        # build. Package deletion is not supported by GITHUB_TOKEN, so this
+        # needs a classic PAT with read:packages + delete:packages scopes.
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.DELETE_INTERMEDIATE_PACKAGES_TOKEN }}
         run: |
           set -euo pipefail
           pkgs=$(gh api "/users/${GITHUB_REPOSITORY_OWNER}/packages?package_type=container" \
