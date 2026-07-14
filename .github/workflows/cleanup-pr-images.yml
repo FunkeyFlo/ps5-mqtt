@@ -16,9 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 🧹 Delete pr-${{ github.event.pull_request.number }} image tags
+        # Package/version deletion is not supported by GITHUB_TOKEN, so this
+        # needs a classic PAT with read:packages + delete:packages scopes.
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.DELETE_INTERMEDIATE_PACKAGES_TOKEN }}
           TAG: pr-${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
