@@ -27,6 +27,7 @@
     "format": "prettier --write .",
     "format/check": "prettier --check .",
     "lint": "eslint .",
+    "resolve-release-version": "tsx scripts/resolve-release-version.ts",
     "start": "bash scripts/start.sh",
     "test/unit": "yarn workspaces foreach -A run test/unit",
     "typecheck": "tsc -p tsconfig.json && yarn workspaces foreach -A run typecheck",

@@ -1,12 +1,13 @@
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Run the full pipeline but don't push images, commit, or release"
-        type: boolean
-        default: false
+  release:
+    types: [published]
+  # Manual runs exercise the full pipeline (build, test, package images) but
+  # never push, commit, or move a release tag — there's no published release
+  # to anchor those side effects to. To actually ship, publish a GitHub
+  # release (draft-release.yml keeps one up to date with the next version).
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -30,67 +31,31 @@ jobs:
       # Single source of truth: every other job takes the version from here.
       version: ${{ steps.version.outputs.version }} # e.g. 1.5.0 (images, config.yaml, changelog)
       tag: ${{ steps.version.outputs.tag }} # e.g. v1.5.0 (git tag, GitHub release)
-      level: ${{ steps.bump.outputs.level }}
-      last_tag: ${{ steps.bump.outputs.last_tag }}
+      # true only when this run was triggered by publishing a GitHub release;
+      # workflow_dispatch runs build/test everything but never ship it.
+      should_publish: ${{ steps.version.outputs.should_publish }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Resolve bump from merged PR labels
-        id: bump
+      - name: 🧶 Enable Corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+          cache: yarn
+
+      - name: ⏬ Install dependencies
+        run: yarn install --immutable
+
+      - name: 🧮 Resolve version
+        id: version
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-
-          last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -n "$last_tag" ]; then
-            since=$(git log -1 --format=%cI "$last_tag")
-          else
-            since="1970-01-01T00:00:00Z"
-          fi
-          echo "last_tag=$last_tag" >> "$GITHUB_OUTPUT"
-
-          labels=$(gh pr list --state merged --base "${{ github.ref_name }}" \
-            --search "merged:>$since" \
-            --json labels --jq '.[].labels[].name' | tr '[:upper:]' '[:lower:]')
-
-          major="major breaking-change"
-          minor="minor new-feature enhancement performance"
-          patch="patch bugfix chore ci dependencies documentation refactor"
-
-          match() { for l in $2; do echo "$1" | grep -qx "$l" && return 0; done; return 1; }
-
-          level=patch
-          if match "$labels" "$major"; then level=major
-          elif match "$labels" "$minor"; then level=minor
-          elif match "$labels" "$patch"; then level=patch
-          fi
-          echo "level=$level" >> "$GITHUB_OUTPUT"
-          echo "Resolved bump: $level (since ${last_tag:-beginning})"
-
-      - name: Compute next version
-        id: version
-        run: |
-          set -euo pipefail
-          base="${{ steps.bump.outputs.last_tag }}"
-          if [ -z "$base" ]; then
-            # No tag reachable from this ref (e.g. first release on a fork):
-            # fall back to the version the codebase itself declares.
-            base="v$(node -p "require('./package.json').version")"
-            echo "No reachable git tag; using package.json version as base ($base)"
-          fi
-          ver="${base#v}"
-          IFS=. read -r MA MI PA <<< "$ver"
-          case "${{ steps.bump.outputs.level }}" in
-            major) MA=$((MA+1)); MI=0; PA=0 ;;
-            minor) MI=$((MI+1)); PA=0 ;;
-            patch) PA=$((PA+1)) ;;
-          esac
-          echo "version=${MA}.${MI}.${PA}" >> "$GITHUB_OUTPUT"
-          echo "tag=v${MA}.${MI}.${PA}" >> "$GITHUB_OUTPUT"
-          echo "Next version: ${MA}.${MI}.${PA}"
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+        run: yarn resolve-release-version
 
   static-analysis:
     name: ✅ Static Analysis
@@ -272,7 +237,7 @@ jobs:
             ${{ needs.version.outputs.version }}
             latest
           version: ${{ needs.version.outputs.version }}
-          push: ${{ inputs.dry_run && 'false' || 'true' }}
+          push: ${{ needs.version.outputs.should_publish == 'true' }}
 
   manifest:
     name: 📦 Publish multi-arch manifest
@@ -283,7 +248,7 @@ jobs:
       packages: write
     steps:
       - name: 📦 Publish multi-arch manifest
-        if: ${{ !inputs.dry_run }}
+        if: ${{ needs.version.outputs.should_publish == 'true' }}
         uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
         with:
           architectures: ${{ env.ARCHITECTURES }}
@@ -295,7 +260,7 @@ jobs:
             latest
 
       - name: 🏷️ Promote multi-arch manifest
-        if: ${{ !inputs.dry_run }}
+        if: ${{ needs.version.outputs.should_publish == 'true' }}
         run: |
           # GHCR namespaces must be lowercase; github.repository_owner may not be.
           REGISTRY_PREFIX="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}"
@@ -313,12 +278,12 @@ jobs:
           cosign sign --yes "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tags[0]}"
 
       - name: 🧹 Delete intermediate -build packages
-        if: ${{ !inputs.dry_run }}
         # The per-arch and combined -build images only exist so imagetools can
         # stitch the multi-arch manifest; once promoted they're dead weight and
         # should never be visible to users. Cleanup failure must not fail the
         # release. Package deletion is not supported by GITHUB_TOKEN, so this
         # needs a classic PAT with read:packages + delete:packages scopes.
+        if: ${{ needs.version.outputs.should_publish == 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.DELETE_INTERMEDIATE_PACKAGES_TOKEN }}
@@ -387,11 +352,11 @@ jobs:
           TAGS: "${{ needs.version.outputs.version }} latest"
           PLATFORMS: linux/amd64,linux/arm64
           SKIP_PACKAGE: "1"
-          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          DRY_RUN: ${{ needs.version.outputs.should_publish == 'true' && '0' || '1' }}
         run: yarn workspace @ps5-mqtt/server publish
 
   release:
-    name: 🚀 Create GitHub release
+    name: 🚀 Finalize release
     needs:
       - version
       - build
@@ -426,8 +391,11 @@ jobs:
           cp README.md add-ons/ps5-mqtt/README.md
           cp docs/DOCS.md add-ons/ps5-mqtt/DOCS.md
 
+      # Only needed to exercise changelog generation on a workflow_dispatch
+      # dry run; a real run already has notes from the published release.
       - name: 📝 Draft release notes
         id: notes
+        if: ${{ github.event_name != 'release' }}
         uses: release-drafter/release-drafter@v7
         with:
           config-name: release-drafter.yml
@@ -440,25 +408,26 @@ jobs:
 
       - name: ✍ Update changelog
         env:
-          RELEASE_NOTES: ${{ steps.notes.outputs.body }}
+          RELEASE_NOTES: ${{ github.event_name == 'release' && github.event.release.body || steps.notes.outputs.body }}
         run: yarn update-changelog ${{ needs.version.outputs.version }}
 
-      - name: 🛡 Ensure main hasn't moved since this release started
-        if: ${{ !inputs.dry_run }}
+      - name: 🛡 Ensure main hasn't moved since this release was published
+        if: ${{ needs.version.outputs.should_publish == 'true' }}
         run: |
           set -euo pipefail
           git fetch --quiet origin main
           current=$(git rev-parse origin/main)
           if [ "$current" != "${{ github.sha }}" ]; then
             echo "::error::main has advanced from ${{ github.sha }} to $current since this release" \
-              "was dispatched. The published images were built from the older commit, so tagging now" \
-              "would produce a release whose tree doesn't match the shipped images. Re-run the workflow."
+              "was published. The published images were built from the older commit, so moving the" \
+              "release tag now would point it at a tree that doesn't match the shipped images." \
+              "Publish a new release instead."
             exit 1
           fi
 
       - name: 🙌 Commit release version bump
         id: commit
-        if: ${{ !inputs.dry_run }}
+        if: ${{ needs.version.outputs.should_publish == 'true' }}
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: main
@@ -471,17 +440,14 @@ jobs:
             add-ons/ps5-mqtt/README.md
             add-ons/ps5-mqtt/DOCS.md
 
-      - name: 🚀 Publish release via Release Drafter
-        if: ${{ !inputs.dry_run }}
-        uses: release-drafter/release-drafter@v7
-        with:
-          config-name: release-drafter.yml
-          version: ${{ needs.version.outputs.version }}
-          tag: ${{ needs.version.outputs.tag }}
-          name: ${{ needs.version.outputs.tag }}
-          # Tag the version-bump commit we just pushed, not "whatever main
-          # happens to be" at publish time.
-          commitish: ${{ steps.commit.outputs.commit_hash }}
-          publish: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Publishing the release already created the tag, pointed at whatever
+      # main was at publish time — before this run built anything. Move it
+      # onto the version-bump commit so the tag (and the release's "Source
+      # code" download) matches the tree the published images were built
+      # from.
+      - name: 🏷 Move release tag onto the version-bump commit
+        if: ${{ needs.version.outputs.should_publish == 'true' }}
+        run: |
+          set -euo pipefail
+          git tag -f ${{ needs.version.outputs.tag }} ${{ steps.commit.outputs.commit_hash }}
+          git push --force origin ${{ needs.version.outputs.tag }}
