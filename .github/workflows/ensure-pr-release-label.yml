@@ -26,10 +26,9 @@ jobs:
       pull-requests: write
     steps:
       - name: 🏷 Apply autolabeler rules
-        uses: release-drafter/release-drafter@v7
+        uses: release-drafter/release-drafter/autolabeler@v7
         with:
           config-name: release-drafter.yml
-          disable-releaser: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
