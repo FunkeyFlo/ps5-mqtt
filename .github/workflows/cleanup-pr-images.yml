@@ -25,14 +25,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Consumer packages that CI pushes PR tags to, plus any -build
-          # intermediates a failed run may have left behind.
-          packages="ps5-mqtt ps5-mqtt-home-assistant-add-on-edge"
-          leftovers=$(gh api "/users/${GITHUB_REPOSITORY_OWNER}/packages?package_type=container" \
-            --paginate --jq '.[].name' \
-            | grep -F "ps5-mqtt-home-assistant-add-on-edge-build" || true)
+          # ps5-mqtt is the only consumer package CI pushes PR tags to; the HA
+          # add-on is only ever pulled by the version pinned in its
+          # config.yaml, so CI never pushes a pr-N tag for it.
+          packages="ps5-mqtt"
 
-          for pkg in $packages $leftovers; do
+          for pkg in $packages; do
             enc=$(jq -rn --arg p "$pkg" '$p|@uri')
             ids=$(gh api "/users/${GITHUB_REPOSITORY_OWNER}/packages/container/${enc}/versions" \
               --paginate \
