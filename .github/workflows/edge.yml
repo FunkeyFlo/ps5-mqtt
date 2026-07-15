@@ -14,7 +14,7 @@ concurrency:
 
 env:
   ARCHITECTURES: '["amd64", "aarch64"]'
-  IMAGE_NAME: ps5-mqtt-home-assistant-add-on-edge
+  IMAGE_NAME: ps5-mqtt-home-assistant-add-on
   BUILD_IMAGE_NAME: ps5-mqtt-home-assistant-add-on-edge-build
 
 jobs:

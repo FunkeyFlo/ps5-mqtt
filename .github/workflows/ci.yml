@@ -19,7 +19,6 @@ concurrency:
 
 env:
   ARCHITECTURES: '["amd64", "aarch64"]'
-  IMAGE_NAME: ps5-mqtt-home-assistant-add-on-edge
   BUILD_IMAGE_NAME: ps5-mqtt-home-assistant-add-on-edge-build
 
 jobs:
@@ -192,8 +191,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-      id-token: write
-      packages: write
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
@@ -208,6 +205,10 @@ jobs:
           path: add-ons/ps5-mqtt-edge
 
       - name: 🏭 Build ${{ matrix.arch }} add-on - ${{ needs.init.outputs.tag }}
+        # The HA add-on is only ever pulled by the exact version pinned in its
+        # config.yaml (ps5-mqtt / ps5-mqtt-edge), so a pr-N tag would never be
+        # reachable from Home Assistant. Build it here to validate the image
+        # still builds for each arch, but never push it.
         uses: home-assistant/builder/actions/build-image@2026.06.0
         with:
           arch: ${{ matrix.arch }}
@@ -219,68 +220,8 @@ jobs:
           image-tags: |
             ${{ needs.init.outputs.tag }}
           version: ${{ needs.init.outputs.tag }}
-          push: ${{ needs.init.outputs.push }}
-          cosign: ${{ needs.init.outputs.push }}
-
-  manifest:
-    name: 📦 Publish multi-arch manifest - ${{ needs.init.outputs.tag }}
-    if: needs.init.outputs.push == 'true'
-    needs: [init, build]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      packages: write
-    steps:
-      - name: 📦 Publish multi-arch manifest
-        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
-        with:
-          architectures: ${{ env.ARCHITECTURES }}
-          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
-          image-name: ${{ env.BUILD_IMAGE_NAME }}
-          registry-prefix: ${{ needs.init.outputs.registry-prefix }}
-          image-tags: |
-            ${{ needs.init.outputs.tag }}
-
-      - name: 🏷️ Promote multi-arch manifest
-        run: |
-          # GHCR namespaces must be lowercase; github.repository_owner may not be.
-          REGISTRY_PREFIX="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}"
-          tags=("${{ needs.init.outputs.tag }}")
-
-          tag_args=()
-          for tag in "${tags[@]}"; do
-            tag_args+=("--tag" "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}")
-          done
-
-          metadata_file="$(mktemp)"
-
-          docker buildx imagetools create \
-            --metadata-file "${metadata_file}" \
-            "${tag_args[@]}" \
-            "${REGISTRY_PREFIX}/${BUILD_IMAGE_NAME}:${tags[0]}"
-
-          digest="$(jq -r '.["containerimage.descriptor"].digest' "${metadata_file}")"
-          cosign sign --yes "${REGISTRY_PREFIX}/${IMAGE_NAME}@${digest}"
-
-      - name: 🧹 Delete intermediate -build packages
-        # The per-arch and combined -build images only exist so imagetools can
-        # stitch the multi-arch manifest; once promoted they're dead weight and
-        # should never be visible to users. Cleanup failure must not fail the
-        # build. Package deletion is not supported by GITHUB_TOKEN, so this
-        # needs a classic PAT with read:packages + delete:packages scopes.
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.DELETE_INTERMEDIATE_PACKAGES_TOKEN }}
-        run: |
-          set -euo pipefail
-          pkgs=$(gh api "/users/${GITHUB_REPOSITORY_OWNER}/packages?package_type=container" \
-            --paginate --jq '.[].name' | grep -F "${BUILD_IMAGE_NAME}" || true)
-          [ -z "$pkgs" ] && { echo "No -build packages found"; exit 0; }
-          while IFS= read -r pkg; do
-            enc=$(jq -rn --arg p "$pkg" '$p|@uri')
-            echo "Deleting intermediate package ${pkg}"
-            gh api -X DELETE "/users/${GITHUB_REPOSITORY_OWNER}/packages/container/${enc}"
-          done <<< "$pkgs"
+          push: "false"
+          cosign: "false"
 
   standalone:
     name: 🐳 Build standalone image - ${{ needs.init.outputs.tag }}
