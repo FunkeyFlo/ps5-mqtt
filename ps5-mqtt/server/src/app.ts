@@ -85,6 +85,8 @@ export async function run() {
       path.join(os.homedir(), ".config", "playactor", "credentials.json"),
     allowPs4Devices: appConfig.include_ps4_devices ?? true,
 
+    loginPasscode: appConfig.login_passcode,
+
     deviceDiscoveryBroadcastAddress:
       appConfig.device_discovery_broadcast_address,
 
