@@ -1,3 +1,14 @@
+## 1.5.0 - 2026-07-20
+
+## What’s changed
+- chore: better logging around missing configuration @andrew-codes (#653)
+- chore(ci): unify HA add-on image name, drop PR tags for it @andrew-codes (#654)
+- feat: add optional login_passcode for passcode-protected profiles @bayan9 (#663)
+
+## ⬆️ Dependency updates
+
+- chore: security dependencies' updates @andrew-codes (#655)
+
 ## 1.4.1 - 2026-07-14
 
 ## What’s changed

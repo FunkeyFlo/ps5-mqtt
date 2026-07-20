@@ -13,8 +13,6 @@ device_discovery_interval: 60000    # Recommended interval for discovering 'new'
 
 include_ps4_devices: false          # Only enable if you only require awake/standby functionality
 
-login_passcode: '!secret my_ps5_passcode'  # [optional] Profile login passcode; required if the console profile is passcode-protected
-
 psn_accounts:                       # [optional] Add PSN accounts to match online activity to your devices
   - username: MyPsnUser
     npsso: '!secret my_npsso'       # NPSSO token (expires after two months 😢)
@@ -92,24 +90,6 @@ IP address the addon will use for UDP broadcasting which is required for device 
 If your devices are located on a VLAN you must use this option to point the addon to the broadcast ip of the VLAN your devices are located on.
 
 _NOTE: only one broadcast address is supported. So all devices will need to be on the same VLAN._
-
-### `login_passcode` _optional_
-
-The login passcode of the PlayStation user profile used for the pairing/registration.
-
-Set this **only if that profile is protected by a login passcode**. When the profile is passcode-protected, `standby`/`wake` will otherwise fail with `PASSCODE_IS_NEEDED` (often intermittently, depending on the console's state), and the device will not turn on/off. Providing the passcode here forwards it to `playactor` so the commands succeed.
-
-The value is either the numeric passcode (e.g. `2292`) or a space-separated string of controller key names (e.g. `up up down down`), matching `playactor`'s `--pass-code` option.
-
-```yaml
-login_passcode: "!secret my_ps5_passcode"
-```
-
-_NOTE 1: A single passcode is applied to all managed devices. Multiple consoles with different profile passcodes are not yet supported._
-
-_NOTE 2: This is a credential — use a `!secret` as shown._
-
-_NOTE 3: Alternatively, disable the passcode requirement on the console (Settings → Users and Accounts → Login Settings) and leave this unset._
 
 <!-- LINKS -->
 
