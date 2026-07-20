@@ -18,6 +18,10 @@ export interface AppConfig {
   include_ps4_devices: boolean
   device_discovery_broadcast_address: string
 
+  // Optional PS5 profile login passcode (numeric passcode or a space-separated
+  // string of key names) forwarded to playactor for standby/wake.
+  login_passcode?: string
+
   psn_accounts: AppConfig.PsnAccountInfo[]
 
   account_check_interval: number
@@ -89,6 +93,8 @@ function getEnvConfig(): Partial<AppConfig> {
 
     CREDENTIAL_STORAGE_PATH,
 
+    LOGIN_PASSCODE,
+
     INCLUDE_PS4_DEVICES,
 
     DEVICE_DISCOVERY_BROADCAST_ADDRESS,
@@ -125,6 +131,8 @@ function getEnvConfig(): Partial<AppConfig> {
       : undefined,
 
     device_discovery_broadcast_address: DEVICE_DISCOVERY_BROADCAST_ADDRESS,
+
+    login_passcode: LOGIN_PASSCODE,
 
     credentialsStoragePath: CREDENTIAL_STORAGE_PATH,
     frontendPort: FRONTEND_PORT,

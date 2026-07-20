@@ -46,5 +46,6 @@ schema:
   device_discovery_interval: int
   account_check_interval: int
   include_ps4_devices: bool
+  login_passcode: str?
 stdin: true
 image: ghcr.io/funkeyflo/ps5-mqtt-home-assistant-add-on

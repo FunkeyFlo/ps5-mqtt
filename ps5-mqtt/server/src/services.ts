@@ -10,6 +10,11 @@ export interface Settings {
   credentialStoragePath: string
   allowPs4Devices: boolean
 
+  // Optional PS5 login passcode, forwarded to playactor as `--pass-code` so
+  // standby/wake still work when the console profile is passcode-protected
+  // (otherwise playactor fails with PASSCODE_IS_NEEDED).
+  loginPasscode?: string
+
   deviceDiscoveryBroadcastAddress: string
 
   discoveryTopic: string

@@ -66,6 +66,8 @@ services:
 
       - INCLUDE_PS4_DEVICES=false
 
+      - LOGIN_PASSCODE=2292 # [optional] profile login passcode; only needed if the console profile is passcode-protected (else standby/wake fail with PASSCODE_IS_NEEDED)
+
       - FRONTEND_PORT=8645
 
       - CREDENTIAL_STORAGE_PATH=/config/credentials.json
