@@ -63,6 +63,7 @@ services:
       - ACCOUNT_CHECK_INTERVAL=5000
 
       - 'PSN_ACCOUNTS=[{"username": "MyPsnUser", "npsso":"npsso_value"}]'
+      - PSN_AUTH_STORE_DIR=/config # [optional] where persisted PSN OAuth tokens are stored; defaults to ~/.config/ps5-mqtt, which won't survive the container being recreated unless you point it at a mounted volume like this
 
       - INCLUDE_PS4_DEVICES=false
 
