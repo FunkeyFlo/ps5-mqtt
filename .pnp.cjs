@@ -1954,7 +1954,6 @@ const RAW_RUNTIME_STATE =
           ["psn-api", "npm:2.18.0"],\
           ["redux", "npm:5.0.1"],\
           ["redux-saga", "npm:1.5.0"],\
-          ["redux-saga-testing", "npm:2.0.2"],\
           ["rimraf", "npm:6.1.3"],\
           ["shelljs", "npm:0.10.0"],\
           ["ts-jest", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:29.4.11"],\
@@ -8757,15 +8756,6 @@ const RAW_RUNTIME_STATE =
           ["@babel/runtime", "npm:7.29.7"],\
           ["@redux-saga/core", "npm:1.5.0"],\
           ["redux-saga", "npm:1.5.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["redux-saga-testing", [\
-      ["npm:2.0.2", {\
-        "packageLocation": "./.yarn/cache/redux-saga-testing-npm-2.0.2-ac4a981696-7f786e703d.zip/node_modules/redux-saga-testing/",\
-        "packageDependencies": [\
-          ["redux-saga-testing", "npm:2.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
