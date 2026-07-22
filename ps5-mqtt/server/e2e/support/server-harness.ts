@@ -25,6 +25,8 @@ export interface StartServerOptions {
   deviceStatus?: "STANDBY" | "AWAKE"
   /** How often check-devices-state polls. Defaults to effectively never. */
   deviceCheckInterval?: number
+  /** Forwarded to playactor as `--pass-code` when set. */
+  loginPasscode?: string
 }
 
 export interface ServerHandle {
@@ -95,6 +97,10 @@ export async function startServer(
     DEVICE_CHECK_INTERVAL: String(options.deviceCheckInterval ?? 3600000),
     // 0 -> an ephemeral port, so parallel-safe even if run mode changes later.
     FRONTEND_PORT: "0",
+  }
+
+  if (options.loginPasscode !== undefined) {
+    env.LOGIN_PASSCODE = options.loginPasscode
   }
 
   const child = spawn(process.execPath, ["dist/index.js"], {
