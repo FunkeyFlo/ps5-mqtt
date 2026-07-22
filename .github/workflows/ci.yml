@@ -110,7 +110,7 @@ jobs:
         run: yarn install --immutable
 
       - name: 🔁 Run e2e tests
-        run: yarn test/e2e
+        run: yarn run test/e2e
 
   init:
     name: 🧮 Prepare build matrix
