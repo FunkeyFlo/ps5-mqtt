@@ -1,23 +1,19 @@
-import createDebugger from "debug"
 import lodash from "lodash"
-import { getContext, put } from "redux-saga/effects"
-import sh from "shelljs"
-import { Settings, SETTINGS } from "../../services"
+import { call, getContext, put } from "redux-saga/effects"
+import type { PlayactorClient } from "../../playactor/client"
+import { PLAYACTOR_CLIENT } from "../../services"
 import { createErrorLogger } from "../../util/error-logger"
-import { buildPassCodeArg } from "../../util/pass-code"
 import { setTransitioning, updateHomeAssistant } from "../action-creators"
 import type { ChangePowerModeAction } from "../types"
 
-const debug = createDebugger("@ha:ps5:turnOffDevice")
 const debugError = createErrorLogger()
 
 function* turnOffDevice(action: ChangePowerModeAction) {
-  const { credentialStoragePath, loginPasscode }: Settings =
-    yield getContext(SETTINGS)
-
   if (action.payload.mode !== "STANDBY") {
     return
   }
+
+  const playactor: PlayactorClient = yield getContext(PLAYACTOR_CLIENT)
 
   yield put(
     setTransitioning(
@@ -25,18 +21,10 @@ function* turnOffDevice(action: ChangePowerModeAction) {
     ),
   )
   try {
-    const { stdout, stderr } = sh.exec(
-      `playactor standby --ip ${action.payload.device.address.address}` +
-        ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
-        buildPassCodeArg(loginPasscode) +
-        ` -c ${credentialStoragePath}`,
-      { silent: true, timeout: 5000 },
+    yield call(
+      [playactor, playactor.standby],
+      action.payload.device.address.address,
     )
-
-    if (stderr) {
-      throw stderr
-    }
-    debug(stdout)
 
     yield put(
       updateHomeAssistant({

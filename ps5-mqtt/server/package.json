@@ -11,8 +11,9 @@
     "package": "tsx scripts/package.ts",
     "publish": "tsx scripts/publish.ts",
     "start": "MQTT_HOST=localhost MQTT_PORT=1883 concurrently -n rspack,app -c blue,green \"rspack build --mode development --watch\" \"nodemon\"",
+    "test/e2e": "jest --config jest.e2e.config.js",
     "test/unit": "jest",
-    "typecheck": "tsc --noEmit -p ./tsconfig.build.json && tsc --noEmit -p ./tsconfig.test.json && tsc --noEmit -p ./tsconfig.scripts.json && tsc --noEmit -p ./tsconfig.config.json"
+    "typecheck": "tsc --noEmit -p ./tsconfig.build.json && tsc --noEmit -p ./tsconfig.test.json && tsc --noEmit -p ./tsconfig.e2e.json && tsc --noEmit -p ./tsconfig.scripts.json && tsc --noEmit -p ./tsconfig.config.json"
   },
   "author": {
     "name": "FunkeyFlo",

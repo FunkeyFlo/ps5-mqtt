@@ -3,6 +3,7 @@ import * as process from "process"
 import lodash from "lodash"
 import createDebugger from "debug"
 
+import type { Device } from "./redux/types"
 import { createErrorLogger } from "./util/error-logger"
 
 const logError = createErrorLogger()
@@ -25,6 +26,8 @@ export interface AppConfig {
   psn_accounts: AppConfig.PsnAccountInfo[]
 
   account_check_interval: number
+
+  static_devices?: Device[]
 
   // non yml options
   credentialsStoragePath: string
@@ -104,6 +107,8 @@ function getEnvConfig(): Partial<AppConfig> {
     ACCOUNT_CHECK_INTERVAL,
 
     PSN_ACCOUNTS,
+
+    STATIC_DEVICES,
   } = process.env
 
   return {
@@ -136,6 +141,8 @@ function getEnvConfig(): Partial<AppConfig> {
 
     credentialsStoragePath: CREDENTIAL_STORAGE_PATH,
     frontendPort: FRONTEND_PORT,
+
+    static_devices: STATIC_DEVICES ? JSON.parse(STATIC_DEVICES) : undefined,
   } as Partial<
     AppConfig & {
       mqtt: Partial<AppConfig.MqttConfig>

@@ -1,5 +1,6 @@
 export const MQTT_CLIENT = "MQTT"
 export const SETTINGS = "SETTINGS"
+export const PLAYACTOR_CLIENT = "PLAYACTOR_CLIENT"
 
 export interface Settings {
   // polling intervals

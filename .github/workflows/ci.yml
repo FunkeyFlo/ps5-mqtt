@@ -87,6 +87,31 @@ jobs:
       - name: 🧪 Run tests
         run: yarn run test/unit
 
+  # Non-blocking on PRs: no other job depends on this, and it is intentionally
+  # not a required status check. It spins up mosquitto (dev-services), builds the
+  # server, and drives it over real MQTT with a fake `playactor`. The
+  # authoritative gate lives in the release workflow.
+  test-e2e:
+    name: 🔁 E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵ Check out repository
+        uses: actions/checkout@v7
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+          cache: yarn
+
+      - name: ⏬ Install dependencies
+        run: yarn install --immutable
+
+      - name: 🔁 Run e2e tests
+        run: yarn test/e2e
+
   init:
     name: 🧮 Prepare build matrix
     runs-on: ubuntu-latest
