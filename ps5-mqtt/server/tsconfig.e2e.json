@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    // e2e tooling runs only on Node 24; ES2022 gives us Error `cause`.
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "noEmit": false,
+    "declaration": true,
+    "outDir": "./.ts-build/e2e",
+    "rootDir": "./",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "types": ["node", "jest"]
+  },
+  "include": ["e2e/**/*.ts", "src/**/*.ts"]
+}

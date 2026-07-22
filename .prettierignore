@@ -3,3 +3,7 @@ coverage
 .yarn
 .pnp.cjs
 .pnp.loader.mjs
+
+# Fake `playactor` executable used by the e2e suite: an extensionless CJS
+# binary whose shebang/permissions matter more than its formatting.
+ps5-mqtt/server/e2e/fake-playactor/playactor
