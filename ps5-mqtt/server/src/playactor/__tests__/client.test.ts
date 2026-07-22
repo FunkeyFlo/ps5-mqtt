@@ -1,3 +1,4 @@
+import lodash from "lodash"
 import sh from "shelljs"
 
 import type { Device } from "../../redux/types"
@@ -8,11 +9,6 @@ jest.mock("shelljs")
 const mockExec = jest.mocked(sh.exec)
 
 type ExecReturn = ReturnType<typeof sh.exec>
-
-const execResult = (
-  over: Partial<{ code: number; stdout: string; stderr: string }> = {},
-): ExecReturn =>
-  ({ code: 0, stdout: "", stderr: "", ...over }) as unknown as ExecReturn
 
 const CREDENTIAL_PATH = "/tmp/creds.json"
 const IP = "192.168.0.10"
@@ -31,19 +27,6 @@ const CHECK_CMD =
   `playactor check --ip ${IP} --machine-friendly` +
   ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth` +
   ` -c ${CREDENTIAL_PATH}`
-
-const mockDevice: Device = {
-  address: { address: IP, port: 80 },
-  available: true,
-  id: "mock-id-1",
-  name: "mock-ps5-1",
-  normalizedName: "mock_ps5_1",
-  status: "AWAKE",
-  systemVersion: "",
-  transitioning: false,
-  type: "PS5",
-  activity: undefined,
-}
 
 describe("PlayactorClient", () => {
   beforeEach(() => {
@@ -111,10 +94,10 @@ describe("PlayactorClient", () => {
   describe("check", () => {
     test("builds the correct command and returns the parsed device", async () => {
       mockExec.mockReturnValue(
-        execResult({ code: 0, stdout: JSON.stringify(mockDevice) }),
+        execResult({ code: 0, stdout: JSON.stringify(makeDevice()) }),
       )
 
-      await expect(client.check(IP)).resolves.toEqual(mockDevice)
+      await expect(client.check(IP)).resolves.toEqual(makeDevice())
       expect(mockExec).toHaveBeenCalledWith(CHECK_CMD, {
         silent: true,
         timeout: 15000,
@@ -129,10 +112,14 @@ describe("PlayactorClient", () => {
 
     test("does not treat exit code > 1 without stderr as an error", async () => {
       mockExec.mockReturnValue(
-        execResult({ code: 2, stdout: JSON.stringify(mockDevice), stderr: "" }),
+        execResult({
+          code: 2,
+          stdout: JSON.stringify(makeDevice()),
+          stderr: "",
+        }),
       )
 
-      await expect(client.check(IP)).resolves.toEqual(mockDevice)
+      await expect(client.check(IP)).resolves.toEqual(makeDevice())
     })
 
     test("throws the 'no data' message when stdout is empty", async () => {
@@ -150,3 +137,28 @@ describe("PlayactorClient", () => {
     })
   })
 })
+
+// --- helpers ---
+
+const DEFAULT_DEVICE: Device = {
+  address: { address: IP, port: 80 },
+  available: true,
+  id: "mock-id-1",
+  name: "mock-ps5-1",
+  normalizedName: "mock_ps5_1",
+  status: "AWAKE",
+  systemVersion: "",
+  transitioning: false,
+  type: "PS5",
+  activity: undefined,
+}
+
+function makeDevice(overrides: Partial<Device> = {}): Device {
+  return lodash.merge({}, DEFAULT_DEVICE, overrides)
+}
+
+function execResult(
+  over: Partial<{ code: number; stdout: string; stderr: string }> = {},
+): ExecReturn {
+  return { code: 0, stdout: "", stderr: "", ...over } as unknown as ExecReturn
+}

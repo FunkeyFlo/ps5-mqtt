@@ -1930,6 +1930,8 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@jest/globals", "npm:30.4.1"],\
           ["@ps5-mqtt/server", "workspace:ps5-mqtt/server"],\
+          ["@redux-saga/is", "npm:1.2.1"],\
+          ["@redux-saga/symbols", "npm:1.2.1"],\
           ["@reduxjs/toolkit", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.12.0"],\
           ["@rspack/cli", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:2.1.4"],\
           ["@rspack/core", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.1.4"],\
@@ -1954,6 +1956,7 @@ const RAW_RUNTIME_STATE =
           ["psn-api", "npm:2.18.0"],\
           ["redux", "npm:5.0.1"],\
           ["redux-saga", "npm:1.5.0"],\
+          ["redux-saga-test-plan", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:4.0.6"],\
           ["rimraf", "npm:6.1.3"],\
           ["shelljs", "npm:0.10.0"],\
           ["ts-jest", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:29.4.11"],\
@@ -5636,6 +5639,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["fsm-iterator", [\
+      ["npm:1.1.0", {\
+        "packageLocation": "./.yarn/cache/fsm-iterator-npm-1.1.0-30837569da-9d86936d1a.zip/node_modules/fsm-iterator/",\
+        "packageDependencies": [\
+          ["fsm-iterator", "npm:1.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["function-bind", [\
       ["npm:1.1.2", {\
         "packageLocation": "./.yarn/cache/function-bind-npm-1.1.2-7a55be9b03-d8680ee1e5.zip/node_modules/function-bind/",\
@@ -7446,6 +7458,24 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["lodash.isequal", [\
+      ["npm:4.5.0", {\
+        "packageLocation": "./.yarn/cache/lodash.isequal-npm-4.5.0-f8b0f64d63-dfdb2356db.zip/node_modules/lodash.isequal/",\
+        "packageDependencies": [\
+          ["lodash.isequal", "npm:4.5.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["lodash.ismatch", [\
+      ["npm:4.4.0", {\
+        "packageLocation": "./.yarn/cache/lodash.ismatch-npm-4.4.0-e538fd6c3d-8f96a5dc4b.zip/node_modules/lodash.ismatch/",\
+        "packageDependencies": [\
+          ["lodash.ismatch", "npm:4.4.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["lodash.memoize", [\
       ["npm:4.1.2", {\
         "packageLocation": "./.yarn/cache/lodash.memoize-npm-4.1.2-0e6250041f-c8713e51ec.zip/node_modules/lodash.memoize/",\
@@ -8756,6 +8786,39 @@ const RAW_RUNTIME_STATE =
           ["@babel/runtime", "npm:7.29.7"],\
           ["@redux-saga/core", "npm:1.5.0"],\
           ["redux-saga", "npm:1.5.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["redux-saga-test-plan", [\
+      ["npm:4.0.6", {\
+        "packageLocation": "./.yarn/cache/redux-saga-test-plan-npm-4.0.6-69b45008e0-0a2882d5cc.zip/node_modules/redux-saga-test-plan/",\
+        "packageDependencies": [\
+          ["redux-saga-test-plan", "npm:4.0.6"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:4.0.6", {\
+        "packageLocation": "./.yarn/__virtual__/redux-saga-test-plan-virtual-369abe0ae9/0/cache/redux-saga-test-plan-npm-4.0.6-69b45008e0-0a2882d5cc.zip/node_modules/redux-saga-test-plan/",\
+        "packageDependencies": [\
+          ["@redux-saga/is", "npm:1.2.1"],\
+          ["@redux-saga/symbols", "npm:1.2.1"],\
+          ["@types/redux-saga", null],\
+          ["@types/redux-saga__is", null],\
+          ["@types/redux-saga__symbols", null],\
+          ["fsm-iterator", "npm:1.1.0"],\
+          ["lodash.isequal", "npm:4.5.0"],\
+          ["lodash.ismatch", "npm:4.4.0"],\
+          ["redux-saga", "npm:1.5.0"],\
+          ["redux-saga-test-plan", "virtual:bc7986c84f22f108e9f05e513731bfc8ba6395a70a40aae47878f7bd4cc6ddeebabca3dc806c262e1e66a1e05e9e8fc6c57f8018ad74624bd44e2db2a8aea31d#npm:4.0.6"]\
+        ],\
+        "packagePeers": [\
+          "@redux-saga/is",\
+          "@redux-saga/symbols",\
+          "@types/redux-saga",\
+          "@types/redux-saga__is",\
+          "@types/redux-saga__symbols",\
+          "redux-saga"\
         ],\
         "linkType": "HARD"\
       }]\
