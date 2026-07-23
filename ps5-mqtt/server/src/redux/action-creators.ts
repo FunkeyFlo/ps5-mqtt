@@ -13,8 +13,10 @@ import type {
   CheckPsnPresenceAction,
   PollPsnPresenceAction,
   UpdateAccountAction,
+  PersistProvisionalPsnTokensAction,
   Account,
 } from "./types"
+import type { PsnAccountAuthenticationInfo } from "../psn-account"
 
 const discoverDevices = (): DiscoverDevicesAction => ({
   type: "DISCOVER_DEVICES",
@@ -79,6 +81,15 @@ const updateAccount = (account: Account): UpdateAccountAction => ({
   payload: account,
 })
 
+const persistProvisionalPsnTokens = (
+  npsso: string,
+  authInfo: PsnAccountAuthenticationInfo,
+  accountName?: string,
+): PersistProvisionalPsnTokensAction => ({
+  type: "PERSIST_PROVISIONAL_PSN_TOKENS",
+  payload: { npsso, authInfo, accountName },
+})
+
 export {
   addDevice,
   registerDevice,
@@ -92,4 +103,5 @@ export {
   checkPsnPresence,
   pollPsnPresence,
   updateAccount,
+  persistProvisionalPsnTokens,
 }

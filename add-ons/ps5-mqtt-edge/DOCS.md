@@ -79,9 +79,24 @@ Follow [these steps][psn-api-auth] to get an NPSSO token. You can copy the below
 
 _NOTE 1: The add-on does a best effort match to map PSN account activity to a device. This means that if you have multiple devices **and** you use the same account to game on both devices at the same time the add-on will match the activity to only one device._
 
-_NOTE 2: Unfortunatly, NPSSO tokens expire after two months which means you'll have to periodically get a new one._
+_NOTE 2: The NPSSO token itself expires after two months, but the add-on only needs it to bootstrap an account. Once authenticated, the underlying PSN access/refresh tokens are persisted to disk (see [`PSN_AUTH_STORE_DIR`](#psn_auth_store_dir-optional) below) and automatically refreshed on every restart, so in practice you should only need to provide a fresh NPSSO the first time, or after the add-on has been powered off for more than ~60 days (long enough for the persisted refresh token to expire). If both the persisted tokens and the configured NPSSO have expired, the add-on logs a clear message asking you to generate a new NPSSO instead of crashing — device discovery and control keep working regardless._
 
 _NOTE 3: You don't have to use a `!secret` for the `npsso` token. But it is highly advised as it's basically a password._
+
+### `PSN_AUTH_STORE_DIR` _optional_, _advanced_, _environment variable only_
+
+Directory where the persisted PSN OAuth tokens (`psn-auth.json`) are stored between restarts. Not exposed as a `psn_accounts`/add-on config option; set it as an environment variable if you need to override the default.
+
+- On the Home Assistant add-on, this defaults to `/data`, which is private, add-on-specific storage that already survives add-on restarts and updates — no configuration needed.
+- Outside of the add-on (plain Docker/standalone), it falls back to `~/.config/ps5-mqtt` if unset. That directory typically lives inside the container's writable layer, so it **will not** survive the container being recreated (e.g. `docker compose up --force-recreate`, image updates). For durable persistence in that setup, point `PSN_AUTH_STORE_DIR` at a volume you already mount, e.g. the same one used for `CREDENTIAL_STORAGE_PATH`:
+
+  ```yaml
+  environment:
+    - CREDENTIAL_STORAGE_PATH=/config/credentials.json
+    - PSN_AUTH_STORE_DIR=/config
+  ```
+
+The file is written with `0600` permissions (owner read/write only) and only ever contains token material, never logged in plaintext.
 
 ### `device_discovery_broadcast_address` _optional_
 

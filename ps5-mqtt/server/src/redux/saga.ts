@@ -1,4 +1,12 @@
-import { all, call, fork, race, take, takeLatest } from "redux-saga/effects"
+import {
+  all,
+  call,
+  fork,
+  race,
+  take,
+  takeEvery,
+  takeLatest,
+} from "redux-saga/effects"
 import * as sagas from "./sagas"
 
 function* discoverDevicesSaga() {
@@ -41,6 +49,17 @@ function* updateAccountSaga() {
   yield takeLatest("UPDATE_PSN_ACCOUNT", sagas.updateAccount)
 }
 
+function* persistPsnAccountSaga() {
+  // takeEvery (not takeLatest): if two accounts update in quick succession,
+  // takeLatest would cancel the first account's in-flight persistence before
+  // it writes, silently dropping it. Every account's update must persist
+  // regardless of timing.
+  yield takeEvery(
+    ["UPDATE_PSN_ACCOUNT", "PERSIST_PROVISIONAL_PSN_TOKENS"],
+    sagas.persistPsnAccount,
+  )
+}
+
 function* pollPs5StatesSaga() {
   yield takeLatest("POLL_DEVICES", function* pollingRace() {
     yield race({
@@ -69,6 +88,7 @@ function* saga() {
       pollDisoverySaga,
       pollPsnPresenceSaga,
       updateAccountSaga,
+      persistPsnAccountSaga,
     ].map((saga) => fork(saga)),
   )
 }

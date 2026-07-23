@@ -1,5 +1,5 @@
 import { Playstation } from "../device"
-import { PsnAccount } from "../psn-account"
+import { PsnAccount, PsnAccountAuthenticationInfo } from "../psn-account"
 
 export type Device = Playstation &
   DeviceState & {
@@ -92,6 +92,21 @@ export type UpdateAccountAction = {
   payload: Account
 }
 
+// Dispatched right after a fresh NPSSO exchange yields tokens but before the
+// profile fetch resolves an accountId, so a crash in that window doesn't
+// strand the freshly obtained tokens unpersisted. There's no full Account
+// yet at that point, hence the narrower payload (vs UpdateAccountAction).
+export type PersistProvisionalPsnTokensAction = {
+  type: "PERSIST_PROVISIONAL_PSN_TOKENS"
+  payload: {
+    npsso: string
+    authInfo: PsnAccountAuthenticationInfo
+    accountName?: string
+  }
+}
+
+export type Dispatch = (action: AnyAction) => void
+
 export type AnyAction =
   | RegisterDeviceAction
   | PersistDevicesAction
@@ -107,6 +122,7 @@ export type AnyAction =
   | CheckPsnPresenceAction
   | PollPsnPresenceAction
   | UpdateAccountAction
+  | PersistProvisionalPsnTokensAction
 
 export type State = {
   devices: Record<string, Device>
