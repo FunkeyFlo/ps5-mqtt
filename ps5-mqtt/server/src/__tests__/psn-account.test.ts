@@ -18,9 +18,6 @@ const mockedGetProfileFromUserName = jest.mocked(
 )
 
 const mockedFindByNpsso = jest.mocked(PsnAuthStore.findByNpsso)
-const mockedResolveKey = jest.mocked(PsnAuthStore.resolveKey)
-const mockedHashNpsso = jest.mocked(PsnAuthStore.hashNpsso)
-const mockedSave = jest.mocked(PsnAuthStore.save)
 
 const npsso = "npsso-value"
 
@@ -35,6 +32,8 @@ const authTokensResponse: psnApi.AuthTokensResponse = {
 }
 
 describe("PsnAccount", () => {
+  const dispatch = jest.fn()
+
   beforeEach(() => {
     jest.clearAllMocks()
 
@@ -42,11 +41,6 @@ describe("PsnAccount", () => {
       status: 404,
       statusText: "Not Found",
     }) as unknown as typeof fetch
-
-    mockedResolveKey.mockImplementation((accountId, rawNpsso) =>
-      accountId ? accountId : `hash(${rawNpsso})`,
-    )
-    mockedHashNpsso.mockImplementation((rawNpsso) => `hash(${rawNpsso})`)
 
     mockedExchangeNpssoForCode.mockResolvedValue("access-code")
     mockedExchangeCodeForAccessToken.mockResolvedValue(authTokensResponse)
@@ -60,9 +54,13 @@ describe("PsnAccount", () => {
 
   describe("exchangeNpssoForPsnAccount", () => {
     test("performs the full NPSSO exchange when there are no persisted tokens", async () => {
-      mockedFindByNpsso.mockReturnValue(undefined)
+      mockedFindByNpsso.mockResolvedValue(undefined)
 
-      const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso)
+      const account = await PsnAccount.exchangeNpssoForPsnAccount(
+        npsso,
+        undefined,
+        dispatch,
+      )
 
       expect(mockedExchangeNpssoForCode).toHaveBeenCalledWith(npsso)
       expect(mockedExchangeRefreshTokenForAuthTokens).not.toHaveBeenCalled()
@@ -70,18 +68,25 @@ describe("PsnAccount", () => {
       expect(account.accountName).toBe("MyPsnUser")
       expect(account.authInfo.accessToken).toBe("fresh-access-token")
 
-      // persisted once provisionally (keyed by NPSSO hash) and once more
-      // after the accountId becomes known
-      expect(mockedSave).toHaveBeenCalledTimes(2)
-      expect(mockedSave).toHaveBeenLastCalledWith(
-        "account-1",
-        expect.objectContaining({ accountId: "account-1" }),
-        expect.any(String),
+      // dispatched once, provisionally, before accountId is known (in case
+      // the profile fetch that follows fails); the caller is responsible
+      // for dispatching UPDATE_PSN_ACCOUNT once this resolves
+      expect(dispatch).toHaveBeenCalledTimes(1)
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "PERSIST_PROVISIONAL_PSN_TOKENS",
+          payload: expect.objectContaining({
+            npsso,
+            authInfo: expect.objectContaining({
+              accessToken: "fresh-access-token",
+            }),
+          }),
+        }),
       )
     })
 
     test("prefers a persisted, still-valid refresh token over the NPSSO", async () => {
-      mockedFindByNpsso.mockReturnValue({
+      mockedFindByNpsso.mockResolvedValue({
         npssoHash: "hash(npsso-value)",
         accountId: "account-1",
         accountName: "MyPsnUser",
@@ -94,7 +99,11 @@ describe("PsnAccount", () => {
         updatedAt: "2024-01-01",
       })
 
-      const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso)
+      const account = await PsnAccount.exchangeNpssoForPsnAccount(
+        npsso,
+        undefined,
+        dispatch,
+      )
 
       expect(mockedExchangeNpssoForCode).not.toHaveBeenCalled()
       expect(mockedExchangeRefreshTokenForAuthTokens).toHaveBeenCalledWith(
@@ -105,11 +114,13 @@ describe("PsnAccount", () => {
         "me",
       )
       expect(account.accountId).toBe("account-1")
-      expect(mockedSave).toHaveBeenCalledTimes(1)
+      // the stored-token path never lacks an accountId, so there's nothing
+      // provisional to dispatch here — the caller dispatches UPDATE_PSN_ACCOUNT
+      expect(dispatch).not.toHaveBeenCalled()
     })
 
     test("falls back to the NPSSO when the persisted refresh token has expired", async () => {
-      mockedFindByNpsso.mockReturnValue({
+      mockedFindByNpsso.mockResolvedValue({
         npssoHash: "hash(npsso-value)",
         accountId: "account-1",
         authInfo: {
@@ -121,7 +132,11 @@ describe("PsnAccount", () => {
         updatedAt: "2024-01-01",
       })
 
-      const account = await PsnAccount.exchangeNpssoForPsnAccount(npsso)
+      const account = await PsnAccount.exchangeNpssoForPsnAccount(
+        npsso,
+        undefined,
+        dispatch,
+      )
 
       expect(mockedExchangeRefreshTokenForAuthTokens).not.toHaveBeenCalled()
       expect(mockedExchangeNpssoForCode).toHaveBeenCalledWith(npsso)
@@ -129,7 +144,7 @@ describe("PsnAccount", () => {
     })
 
     test("throws when both the persisted tokens and the NPSSO have expired", async () => {
-      mockedFindByNpsso.mockReturnValue({
+      mockedFindByNpsso.mockResolvedValue({
         npssoHash: "hash(npsso-value)",
         accountId: "account-1",
         authInfo: {
@@ -145,7 +160,7 @@ describe("PsnAccount", () => {
       )
 
       await expect(
-        PsnAccount.exchangeNpssoForPsnAccount(npsso),
+        PsnAccount.exchangeNpssoForPsnAccount(npsso, undefined, dispatch),
       ).rejects.toThrow("NPSSO expired")
     })
   })
@@ -163,15 +178,14 @@ describe("PsnAccount", () => {
       },
     }
 
-    test("does not refresh or persist when the access token is still valid", async () => {
+    test("does not refresh when the access token is still valid", async () => {
       const account = await PsnAccount.updateAccount(baseAccount)
 
       expect(mockedExchangeRefreshTokenForAuthTokens).not.toHaveBeenCalled()
-      expect(mockedSave).not.toHaveBeenCalled()
       expect(account.authInfo).toEqual(baseAccount.authInfo)
     })
 
-    test("refreshes and persists when the access token has expired", async () => {
+    test("refreshes when the access token has expired", async () => {
       const expiredAccount: PsnAccount = {
         ...baseAccount,
         authInfo: {
@@ -186,12 +200,6 @@ describe("PsnAccount", () => {
         "current-refresh-token",
       )
       expect(account.authInfo.accessToken).toBe("fresh-access-token")
-      expect(mockedSave).toHaveBeenCalledTimes(1)
-      expect(mockedSave).toHaveBeenCalledWith(
-        "account-1",
-        expect.objectContaining({ accountId: "account-1" }),
-        undefined,
-      )
     })
   })
 })

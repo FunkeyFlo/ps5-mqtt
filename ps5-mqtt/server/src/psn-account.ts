@@ -2,9 +2,13 @@ import * as psnApi from "psn-api"
 import createDebugger from "debug"
 import { createErrorLogger } from "./util/error-logger"
 import { PsnAuthStore } from "./psn-auth-store"
+import { persistProvisionalPsnTokens } from "./redux/action-creators"
+import type { AnyAction } from "./redux/types"
 
 const debug = createDebugger("@ha:ps5:psn-api")
 const logError = createErrorLogger()
+
+export type Dispatch = (action: AnyAction) => void
 
 export namespace PsnAccount {
   export interface AccountActivity {
@@ -32,12 +36,18 @@ export namespace PsnAccount {
    * OAuth tokens for this NPSSO (refreshing them if needed) so a still-valid
    * refresh token chain survives add-on restarts. Only falls back to a full
    * NPSSO exchange when there are no usable persisted tokens.
+   *
+   * This module never touches disk itself: it only computes account/token
+   * state and (for the narrow pre-accountId bootstrap window, see getAccount)
+   * dispatches it. The persist-psn-account saga is the only thing that
+   * mirrors that state to psn-auth.json.
    */
   export async function exchangeNpssoForPsnAccount(
     npsso: string,
-    username?: string,
+    username: string | undefined,
+    dispatch: Dispatch,
   ): Promise<PsnAccount> {
-    const stored = PsnAuthStore.findByNpsso(npsso)
+    const stored = await PsnAuthStore.findByNpsso(npsso)
 
     if (stored !== undefined) {
       try {
@@ -51,7 +61,7 @@ export namespace PsnAccount {
     }
 
     try {
-      return await getAccount(npsso, username)
+      return await getAccount(npsso, username, dispatch)
     } catch (e) {
       logError(
         `Unable to authenticate with PSN for account '${username ?? "unknown"}'. ` +
@@ -125,17 +135,18 @@ interface BasicPresenceResponse {
 
 async function getAccount(
   npsso: string,
-  username?: string,
+  username: string | undefined,
+  dispatch: Dispatch,
 ): Promise<PsnAccount> {
   const accessCode = await psnApi.exchangeNpssoForCode(npsso)
 
   const authorization = await psnApi.exchangeCodeForAccessToken(accessCode)
   const authInfo = convertAuthResponseToAuthInfo(authorization)
 
-  // accountId isn't known yet, so persist under the NPSSO's hash first; this
-  // way a profile-fetch failure below doesn't strand the freshly obtained
-  // tokens unpersisted.
-  const provisionalKey = persistAuthInfo(npsso, authInfo, undefined, username)
+  // accountId isn't known yet, so the persist saga will store this under the
+  // NPSSO's hash; this way a profile-fetch failure below doesn't strand the
+  // freshly obtained tokens unpersisted.
+  dispatch(persistProvisionalPsnTokens(npsso, authInfo, username))
 
   const { profile } = await psnApi.getProfileFromUserName(authorization, "me")
 
@@ -145,14 +156,6 @@ async function getAccount(
     npsso,
     authInfo,
   }
-
-  persistAuthInfo(
-    npsso,
-    authInfo,
-    account.accountId,
-    account.accountName,
-    provisionalKey,
-  )
 
   return {
     ...account,
@@ -186,41 +189,10 @@ async function getAccountFromStoredAuthInfo(
     authInfo,
   }
 
-  persistAuthInfo(
-    npsso,
-    authInfo,
-    account.accountId,
-    account.accountName,
-    PsnAuthStore.resolveKey(stored.accountId, npsso),
-  )
-
   return {
     ...account,
     activity: await getAccountActivity(account),
   }
-}
-
-function persistAuthInfo(
-  npsso: string,
-  authInfo: PsnAccountAuthenticationInfo,
-  accountId?: string,
-  accountName?: string,
-  previousKey?: string,
-): string {
-  const key = PsnAuthStore.resolveKey(accountId, npsso)
-
-  PsnAuthStore.save(
-    key,
-    {
-      npssoHash: PsnAuthStore.hashNpsso(npsso),
-      accountId,
-      accountName,
-      authInfo,
-    },
-    previousKey,
-  )
-
-  return key
 }
 
 async function getAccountActivity({
@@ -269,28 +241,21 @@ async function getAccountActivity({
 async function getRefreshedAccountAuthInfo({
   authInfo,
   npsso,
-  accountId,
-  accountName,
 }: PsnAccount): Promise<PsnAccountAuthenticationInfo> {
   if (Date.now() < authInfo.accessTokenExpiration) {
     return authInfo
   }
 
-  let refreshedAuthInfo: PsnAccountAuthenticationInfo
   if (Date.now() < authInfo.refreshTokenExpiration) {
     const authResponse = await psnApi.exchangeRefreshTokenForAuthTokens(
       authInfo.refreshToken,
     )
-    refreshedAuthInfo = convertAuthResponseToAuthInfo(authResponse)
-  } else {
-    const accessCode = await psnApi.exchangeNpssoForCode(npsso)
-    const authResponse = await psnApi.exchangeCodeForAccessToken(accessCode)
-    refreshedAuthInfo = convertAuthResponseToAuthInfo(authResponse)
+    return convertAuthResponseToAuthInfo(authResponse)
   }
 
-  persistAuthInfo(npsso, refreshedAuthInfo, accountId, accountName)
-
-  return refreshedAuthInfo
+  const accessCode = await psnApi.exchangeNpssoForCode(npsso)
+  const authResponse = await psnApi.exchangeCodeForAccessToken(accessCode)
+  return convertAuthResponseToAuthInfo(authResponse)
 }
 
 function convertAuthResponseToAuthInfo(
