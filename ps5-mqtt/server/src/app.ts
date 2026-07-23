@@ -18,7 +18,7 @@ import reducer, {
   setPowerMode,
   updateAccount,
 } from "./redux"
-import { Account, SwitchStatus } from "./redux/types"
+import { SwitchStatus } from "./redux/types"
 import { MQTT_CLIENT, PLAYACTOR_CLIENT, Settings, SETTINGS } from "./services"
 import { createErrorLogger } from "./util/error-logger"
 import { setupWebserver } from "./web-server"
@@ -144,7 +144,7 @@ export async function run() {
     createDebugger("@ha:ps5-sensitive:registered-accounts")(
       store.getState().accounts,
     )
-    
+
     // Seed any statically-configured devices so they're controllable without
     // waiting on (or requiring) UDP-broadcast discovery. Real discovery still
     // runs and will register anything else it finds.
