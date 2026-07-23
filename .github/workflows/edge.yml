@@ -109,6 +109,27 @@ jobs:
       - name: 🧪 Run tests
         run: yarn run test/unit
 
+  test-e2e:
+    name: 🔁 E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵ Check out repository
+        uses: actions/checkout@v7
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+          cache: yarn
+
+      - name: ⏬ Install dependencies
+        run: yarn install --immutable
+
+      - name: 🔁 Run e2e tests
+        run: yarn run test/e2e
+
   init:
     name: 🧮 Prepare build matrix
     runs-on: ubuntu-latest
@@ -136,6 +157,7 @@ jobs:
     needs:
       - static-analysis
       - test
+      - test-e2e
     runs-on: ubuntu-latest
     steps:
       - name: ⤵ Check out repository
