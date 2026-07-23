@@ -1,3 +1,14 @@
+## 1.6.0 - 2026-07-23
+
+## What’s changed
+- improved e2e release confidence @andrew-codes (#667)
+- feat(server): persist PSN OAuth tokens to disk so NPSSO only needs renewing after long downtime @wizardmelon (#665)
+
+## ⬆️ Dependency updates
+
+- Bump tar from 7.5.16 to 7.5.20 @[dependabot[bot]](https://github.com/apps/dependabot) (#668)
+- Bump brace-expansion from 1.1.15 to 1.1.16 @[dependabot[bot]](https://github.com/apps/dependabot) (#666)
+
 ## 1.5.0 - 2026-07-20
 
 ## What’s changed
