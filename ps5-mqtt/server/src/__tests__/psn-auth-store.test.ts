@@ -5,15 +5,36 @@ import path from "path"
 import type { PsnAccountAuthenticationInfo } from "../psn-account"
 import { PsnAuthStore } from "../psn-auth-store"
 
-jest.mock("fs")
+// fs.promises is a lazily-defined getter on the real "fs" module, which
+// jest.mock("fs")'s automock doesn't populate (fs.promises ends up
+// undefined). Preserve the rest of the real module (e.g. fs.constants) and
+// only replace the promises API with mocks.
+jest.mock("fs", () => ({
+  ...jest.requireActual<typeof import("fs")>("fs"),
+  promises: {
+    readFile: jest.fn(),
+    writeFile: jest.fn(),
+    rename: jest.fn(),
+    chmod: jest.fn(),
+    mkdir: jest.fn(),
+    access: jest.fn(),
+  },
+}))
 
-const mockedExistsSync = (fs as jest.Mocked<typeof fs>).existsSync
-const mockedReadFileSync = (fs as jest.Mocked<typeof fs>).readFileSync
-const mockedWriteFileSync = (fs as jest.Mocked<typeof fs>).writeFileSync
-const mockedRenameSync = (fs as jest.Mocked<typeof fs>).renameSync
-const mockedMkdirSync = (fs as jest.Mocked<typeof fs>).mkdirSync
-const mockedChmodSync = (fs as jest.Mocked<typeof fs>).chmodSync
-const mockedAccessSync = (fs as jest.Mocked<typeof fs>).accessSync
+const mockedReadFile = (fs.promises as jest.Mocked<typeof fs.promises>)
+  .readFile
+const mockedWriteFile = (fs.promises as jest.Mocked<typeof fs.promises>)
+  .writeFile
+const mockedRename = (fs.promises as jest.Mocked<typeof fs.promises>).rename
+const mockedMkdir = (fs.promises as jest.Mocked<typeof fs.promises>).mkdir
+const mockedChmod = (fs.promises as jest.Mocked<typeof fs.promises>).chmod
+const mockedAccess = (fs.promises as jest.Mocked<typeof fs.promises>).access
+
+function enoent(): NodeJS.ErrnoException {
+  return Object.assign(new Error("ENOENT: no such file or directory"), {
+    code: "ENOENT",
+  })
+}
 
 const authInfo: PsnAccountAuthenticationInfo = {
   accessToken: "access-token-value",
@@ -28,8 +49,12 @@ describe("PsnAuthStore", () => {
   beforeEach(() => {
     jest.clearAllMocks()
     process.env.PSN_AUTH_STORE_DIR = "/store"
-    mockedAccessSync.mockImplementation(() => undefined)
-    mockedExistsSync.mockReturnValue(false)
+    mockedAccess.mockResolvedValue(undefined)
+    mockedReadFile.mockRejectedValue(enoent())
+    mockedMkdir.mockResolvedValue(undefined)
+    mockedWriteFile.mockResolvedValue(undefined)
+    mockedRename.mockResolvedValue(undefined)
+    mockedChmod.mockResolvedValue(undefined)
   })
 
   afterAll(() => {
@@ -68,41 +93,40 @@ describe("PsnAuthStore", () => {
   })
 
   describe("getStoreDir", () => {
-    test("uses PSN_AUTH_STORE_DIR when set", () => {
+    test("uses PSN_AUTH_STORE_DIR when set", async () => {
       process.env.PSN_AUTH_STORE_DIR = "/custom-dir"
-      expect(PsnAuthStore.getStoreDir()).toBe("/custom-dir")
+      await expect(PsnAuthStore.getStoreDir()).resolves.toBe("/custom-dir")
     })
 
-    test("falls back to /data when writable and no env var is set", () => {
+    test("falls back to /data when writable and no env var is set", async () => {
       delete process.env.PSN_AUTH_STORE_DIR
-      mockedAccessSync.mockImplementation(() => undefined)
+      mockedAccess.mockResolvedValue(undefined)
 
-      expect(PsnAuthStore.getStoreDir()).toBe("/data")
+      await expect(PsnAuthStore.getStoreDir()).resolves.toBe("/data")
     })
 
-    test("falls back to the user's config directory when /data isn't writable", () => {
+    test("falls back to the user's config directory when /data isn't writable", async () => {
       delete process.env.PSN_AUTH_STORE_DIR
-      mockedAccessSync.mockImplementation(() => {
-        throw new Error("EACCES: permission denied")
-      })
+      mockedAccess.mockRejectedValue(new Error("EACCES: permission denied"))
 
-      expect(PsnAuthStore.getStoreDir()).toBe(
+      await expect(PsnAuthStore.getStoreDir()).resolves.toBe(
         path.join(os.homedir(), ".config", "ps5-mqtt"),
       )
     })
   })
 
   describe("findByNpsso", () => {
-    test("returns undefined when the store file doesn't exist", () => {
-      mockedExistsSync.mockReturnValue(false)
+    test("returns undefined when the store file doesn't exist", async () => {
+      mockedReadFile.mockRejectedValue(enoent())
 
-      expect(PsnAuthStore.findByNpsso("npsso-value")).toBeUndefined()
+      await expect(
+        PsnAuthStore.findByNpsso("npsso-value"),
+      ).resolves.toBeUndefined()
     })
 
-    test("returns the entry whose NPSSO hash matches", () => {
+    test("returns the entry whose NPSSO hash matches", async () => {
       const npssoHash = PsnAuthStore.hashNpsso("npsso-value")
-      mockedExistsSync.mockReturnValue(true)
-      mockedReadFileSync.mockReturnValue(
+      mockedReadFile.mockResolvedValue(
         JSON.stringify({
           version: 1,
           accounts: {
@@ -117,15 +141,14 @@ describe("PsnAuthStore", () => {
         }),
       )
 
-      const result = PsnAuthStore.findByNpsso("npsso-value")
+      const result = await PsnAuthStore.findByNpsso("npsso-value")
 
       expect(result?.accountId).toBe("account-1")
       expect(result?.authInfo).toEqual(authInfo)
     })
 
-    test("returns undefined when no entry matches the NPSSO hash (rotated NPSSO)", () => {
-      mockedExistsSync.mockReturnValue(true)
-      mockedReadFileSync.mockReturnValue(
+    test("returns undefined when no entry matches the NPSSO hash (rotated NPSSO)", async () => {
+      mockedReadFile.mockResolvedValue(
         JSON.stringify({
           version: 1,
           accounts: {
@@ -139,21 +162,23 @@ describe("PsnAuthStore", () => {
         }),
       )
 
-      expect(PsnAuthStore.findByNpsso("npsso-value")).toBeUndefined()
+      await expect(
+        PsnAuthStore.findByNpsso("npsso-value"),
+      ).resolves.toBeUndefined()
     })
 
-    test("returns undefined and does not throw on corrupt store contents", () => {
-      mockedExistsSync.mockReturnValue(true)
-      mockedReadFileSync.mockReturnValue("{ not valid json")
+    test("returns undefined and does not throw on corrupt store contents", async () => {
+      mockedReadFile.mockResolvedValue("{ not valid json")
 
-      expect(PsnAuthStore.findByNpsso("npsso-value")).toBeUndefined()
+      await expect(
+        PsnAuthStore.findByNpsso("npsso-value"),
+      ).resolves.toBeUndefined()
     })
   })
 
   describe("findByAccountId", () => {
-    test("returns the entry stored under the given accountId", () => {
-      mockedExistsSync.mockReturnValue(true)
-      mockedReadFileSync.mockReturnValue(
+    test("returns the entry stored under the given accountId", async () => {
+      mockedReadFile.mockResolvedValue(
         JSON.stringify({
           version: 1,
           accounts: {
@@ -167,37 +192,39 @@ describe("PsnAuthStore", () => {
         }),
       )
 
-      expect(PsnAuthStore.findByAccountId("account-1")?.accountId).toBe(
-        "account-1",
-      )
-      expect(PsnAuthStore.findByAccountId("unknown")).toBeUndefined()
+      await expect(
+        PsnAuthStore.findByAccountId("account-1"),
+      ).resolves.toEqual(expect.objectContaining({ accountId: "account-1" }))
+      await expect(
+        PsnAuthStore.findByAccountId("unknown"),
+      ).resolves.toBeUndefined()
     })
   })
 
   describe("save", () => {
-    test("writes atomically (tmp file + rename) with 0o600 permissions", () => {
-      PsnAuthStore.save("account-1", {
+    test("writes atomically (tmp file + rename) with 0o600 permissions", async () => {
+      await PsnAuthStore.save("account-1", {
         npssoHash: PsnAuthStore.hashNpsso("npsso-value"),
         accountId: "account-1",
         accountName: "MyUser",
         authInfo,
       })
 
-      expect(mockedMkdirSync).toHaveBeenCalledWith(
+      expect(mockedMkdir).toHaveBeenCalledWith(
         "/store",
         expect.objectContaining({ recursive: true }),
       )
 
-      expect(mockedWriteFileSync).toHaveBeenCalledTimes(1)
-      const [tmpPath, contents, options] = mockedWriteFileSync.mock.calls[0]
+      expect(mockedWriteFile).toHaveBeenCalledTimes(1)
+      const [tmpPath, contents, options] = mockedWriteFile.mock.calls[0]
       expect(tmpPath).toMatch(/psn-auth\.json\..*\.tmp$/)
       expect(options).toEqual(expect.objectContaining({ mode: 0o600 }))
 
-      expect(mockedRenameSync).toHaveBeenCalledWith(
+      expect(mockedRename).toHaveBeenCalledWith(
         tmpPath,
         path.join("/store", "psn-auth.json"),
       )
-      expect(mockedChmodSync).toHaveBeenCalledWith(
+      expect(mockedChmod).toHaveBeenCalledWith(
         path.join("/store", "psn-auth.json"),
         0o600,
       )
@@ -210,10 +237,9 @@ describe("PsnAuthStore", () => {
       )
     })
 
-    test("migrates away from the previous key when the account key changes", () => {
+    test("migrates away from the previous key when the account key changes", async () => {
       const npssoHash = PsnAuthStore.hashNpsso("npsso-value")
-      mockedExistsSync.mockReturnValue(true)
-      mockedReadFileSync.mockReturnValue(
+      mockedReadFile.mockResolvedValue(
         JSON.stringify({
           version: 1,
           accounts: {
@@ -222,13 +248,13 @@ describe("PsnAuthStore", () => {
         }),
       )
 
-      PsnAuthStore.save(
+      await PsnAuthStore.save(
         "account-1",
         { npssoHash, accountId: "account-1", authInfo },
         npssoHash,
       )
 
-      const [, contents] = mockedWriteFileSync.mock.calls[0]
+      const [, contents] = mockedWriteFile.mock.calls[0]
       const written = JSON.parse(contents as string)
       expect(written.accounts[npssoHash]).toBeUndefined()
       expect(written.accounts["account-1"]).toBeDefined()
@@ -236,9 +262,8 @@ describe("PsnAuthStore", () => {
   })
 
   describe("remove", () => {
-    test("deletes the entry for the given key", () => {
-      mockedExistsSync.mockReturnValue(true)
-      mockedReadFileSync.mockReturnValue(
+    test("deletes the entry for the given key", async () => {
+      mockedReadFile.mockResolvedValue(
         JSON.stringify({
           version: 1,
           accounts: {
@@ -252,20 +277,20 @@ describe("PsnAuthStore", () => {
         }),
       )
 
-      PsnAuthStore.remove("account-1")
+      await PsnAuthStore.remove("account-1")
 
-      expect(mockedWriteFileSync).toHaveBeenCalledTimes(1)
-      const [, contents] = mockedWriteFileSync.mock.calls[0]
+      expect(mockedWriteFile).toHaveBeenCalledTimes(1)
+      const [, contents] = mockedWriteFile.mock.calls[0]
       const written = JSON.parse(contents as string)
       expect(written.accounts["account-1"]).toBeUndefined()
     })
 
-    test("is a no-op when the key isn't present", () => {
-      mockedExistsSync.mockReturnValue(false)
+    test("is a no-op when the key isn't present", async () => {
+      mockedReadFile.mockRejectedValue(enoent())
 
-      PsnAuthStore.remove("account-1")
+      await PsnAuthStore.remove("account-1")
 
-      expect(mockedWriteFileSync).not.toHaveBeenCalled()
+      expect(mockedWriteFile).not.toHaveBeenCalled()
     })
   })
 })

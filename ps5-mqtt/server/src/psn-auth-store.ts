@@ -37,7 +37,7 @@ export namespace PsnAuthStore {
     return accountId ? accountId : hashNpsso(npsso)
   }
 
-  export function getStoreDir(): string {
+  export async function getStoreDir(): Promise<string> {
     const envDir = process.env.PSN_AUTH_STORE_DIR
     if (envDir) {
       return envDir
@@ -45,34 +45,36 @@ export namespace PsnAuthStore {
 
     // /data is always mounted for Home Assistant add-ons and survives
     // add-on restarts/updates, regardless of the add-on's `map` config.
-    if (isWritableDirectory("/data")) {
+    if (await isWritableDirectory("/data")) {
       return "/data"
     }
 
     return path.join(os.homedir(), ".config", "ps5-mqtt")
   }
 
-  export function findByNpsso(
+  export async function findByNpsso(
     npsso: string,
-  ): StoredAccountAuthInfo | undefined {
+  ): Promise<StoredAccountAuthInfo | undefined> {
     const npssoHash = hashNpsso(npsso)
-    return Object.values(readStore().accounts).find(
+    const store = await readStore()
+    return Object.values(store.accounts).find(
       (entry) => entry.npssoHash === npssoHash,
     )
   }
 
-  export function findByAccountId(
+  export async function findByAccountId(
     accountId: string,
-  ): StoredAccountAuthInfo | undefined {
-    return readStore().accounts[accountId]
+  ): Promise<StoredAccountAuthInfo | undefined> {
+    const store = await readStore()
+    return store.accounts[accountId]
   }
 
-  export function save(
+  export async function save(
     key: string,
     entry: Omit<StoredAccountAuthInfo, "updatedAt">,
     previousKey?: string,
-  ): void {
-    const store = readStore()
+  ): Promise<void> {
+    const store = await readStore()
 
     if (previousKey && previousKey !== key) {
       delete store.accounts[previousKey]
@@ -80,14 +82,14 @@ export namespace PsnAuthStore {
 
     store.accounts[key] = { ...entry, updatedAt: new Date().toISOString() }
 
-    writeStore(store)
+    await writeStore(store)
   }
 
-  export function remove(key: string): void {
-    const store = readStore()
+  export async function remove(key: string): Promise<void> {
+    const store = await readStore()
     if (key in store.accounts) {
       delete store.accounts[key]
-      writeStore(store)
+      await writeStore(store)
     }
   }
 }
@@ -97,28 +99,24 @@ interface StoreFile {
   accounts: Record<string, PsnAuthStore.StoredAccountAuthInfo>
 }
 
-function getStoreFilePath(): string {
-  return path.join(PsnAuthStore.getStoreDir(), STORE_FILE_NAME)
+async function getStoreFilePath(): Promise<string> {
+  return path.join(await PsnAuthStore.getStoreDir(), STORE_FILE_NAME)
 }
 
-function isWritableDirectory(dir: string): boolean {
+async function isWritableDirectory(dir: string): Promise<boolean> {
   try {
-    fs.accessSync(dir, fs.constants.W_OK)
+    await fs.promises.access(dir, fs.constants.W_OK)
     return true
   } catch {
     return false
   }
 }
 
-function readStore(): StoreFile {
-  const filePath = getStoreFilePath()
+async function readStore(): Promise<StoreFile> {
+  const filePath = await getStoreFilePath()
 
   try {
-    if (!fs.existsSync(filePath)) {
-      return { version: STORE_VERSION, accounts: {} }
-    }
-
-    const raw = fs.readFileSync(filePath, { encoding: "utf-8" })
+    const raw = await fs.promises.readFile(filePath, { encoding: "utf-8" })
     const parsed = JSON.parse(raw)
 
     return {
@@ -126,25 +124,29 @@ function readStore(): StoreFile {
       accounts: parsed.accounts ?? {},
     }
   } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+      return { version: STORE_VERSION, accounts: {} }
+    }
+
     logError(`Unable to read PSN auth store at '${filePath}'.`, e)
     return { version: STORE_VERSION, accounts: {} }
   }
 }
 
-function writeStore(store: StoreFile): void {
-  const filePath = getStoreFilePath()
+async function writeStore(store: StoreFile): Promise<void> {
+  const filePath = await getStoreFilePath()
   const dir = path.dirname(filePath)
 
   try {
-    fs.mkdirSync(dir, { recursive: true, mode: 0o700 })
+    await fs.promises.mkdir(dir, { recursive: true, mode: 0o700 })
 
     const tmpPath = `${filePath}.${process.pid}.tmp`
-    fs.writeFileSync(tmpPath, JSON.stringify(store, null, 2), {
+    await fs.promises.writeFile(tmpPath, JSON.stringify(store, null, 2), {
       encoding: "utf-8",
       mode: 0o600,
     })
-    fs.renameSync(tmpPath, filePath)
-    fs.chmodSync(filePath, 0o600)
+    await fs.promises.rename(tmpPath, filePath)
+    await fs.promises.chmod(filePath, 0o600)
 
     debug(`Persisted PSN auth store to '${filePath}'.`)
   } catch (e) {
