@@ -3,12 +3,10 @@ import createDebugger from "debug"
 import { createErrorLogger } from "./util/error-logger"
 import { PsnAuthStore } from "./psn-auth-store"
 import { persistProvisionalPsnTokens } from "./redux/action-creators"
-import type { AnyAction } from "./redux/types"
+import type { Dispatch } from "./redux/types"
 
 const debug = createDebugger("@ha:ps5:psn-api")
 const logError = createErrorLogger()
-
-export type Dispatch = (action: AnyAction) => void
 
 export namespace PsnAccount {
   export interface AccountActivity {

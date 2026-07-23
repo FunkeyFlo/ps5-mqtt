@@ -105,6 +105,8 @@ export type PersistProvisionalPsnTokensAction = {
   }
 }
 
+export type Dispatch = (action: AnyAction) => void
+
 export type AnyAction =
   | RegisterDeviceAction
   | PersistDevicesAction

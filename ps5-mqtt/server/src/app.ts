@@ -7,7 +7,7 @@ import createSagaMiddleware from "redux-saga"
 
 import { AppConfig, getAppConfig } from "./config"
 import { createPlayactorClient } from "./playactor/client"
-import { Dispatch, PsnAccount } from "./psn-account"
+import { PsnAccount } from "./psn-account"
 import reducer, {
   getDeviceRegistry,
   pollDevices,
@@ -18,7 +18,7 @@ import reducer, {
   setPowerMode,
   updateAccount,
 } from "./redux"
-import { SwitchStatus } from "./redux/types"
+import { Dispatch, SwitchStatus } from "./redux/types"
 import { MQTT_CLIENT, PLAYACTOR_CLIENT, Settings, SETTINGS } from "./services"
 import { createErrorLogger } from "./util/error-logger"
 import { setupWebserver } from "./web-server"
