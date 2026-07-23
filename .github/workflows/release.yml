@@ -109,6 +109,31 @@ jobs:
       - name: 🧪 Run tests
         run: yarn run test/unit
 
+  # Release gate: `prepare` (and therefore every image/publish job) depends on
+  # this, so a failing e2e run blocks the entire release before anything ships.
+  test-e2e:
+    name: 🔁 E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+
+      - name: 🧶 Enable Corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.16.0
+          cache: yarn
+
+      - name: ⏬ Install dependencies
+        run: yarn install --immutable
+
+      - name: 🔁 Run e2e tests
+        run: yarn run test/e2e
+
   init:
     name: 🧮 Prepare build matrix
     runs-on: ubuntu-latest
@@ -137,6 +162,7 @@ jobs:
       - version
       - static-analysis
       - test
+      - test-e2e
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
@@ -451,3 +477,41 @@ jobs:
           set -euo pipefail
           git tag -f ${{ needs.version.outputs.tag }} ${{ steps.commit.outputs.commit_hash }}
           git push --force origin ${{ needs.version.outputs.tag }}
+
+  # If any part of a real (published-release) run fails, roll the release back
+  # entirely: unpublish it (revert to draft) and delete the tag, so a failed
+  # release leaves no trace of a published-but-unshipped version. A future
+  # re-publish of the same version starts fully clean (draft-release.yml will
+  # recreate the draft; publishing it recreates the tag).
+  rollback:
+    name: ↩️ Roll back failed release
+    needs:
+      - version
+      - test-e2e
+      - prepare
+      - build
+      - manifest
+      - standalone
+      - release
+    if: ${{ failure() && github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: ↩️ Unpublish the GitHub release (revert to draft)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit "${{ github.event.release.tag_name }}" \
+            --draft \
+            --repo "${{ github.repository }}"
+
+      - name: 🏷 Delete the release tag
+        # Best-effort: the tag may not exist yet if failure happened before the
+        # "Move release tag" step ever ran.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X DELETE \
+            "repos/${{ github.repository }}/git/refs/tags/${{ github.event.release.tag_name }}"

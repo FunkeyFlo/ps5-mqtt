@@ -1,7 +1,7 @@
 import createDebugger from "debug"
-import { getContext, put, select } from "redux-saga/effects"
-import sh from "shelljs"
-import { Settings, SETTINGS } from "../../services"
+import { call, getContext, put, select } from "redux-saga/effects"
+import type { PlayactorClient } from "../../playactor/client"
+import { PLAYACTOR_CLIENT } from "../../services"
 import { createErrorLogger } from "../../util/error-logger"
 import { updateHomeAssistant } from "../action-creators"
 import { getDeviceList } from "../selectors"
@@ -11,31 +11,15 @@ const debug = createDebugger("@ha:ps5:checkDevicesState")
 const errorLogger = createErrorLogger()
 
 function* checkDevicesState() {
-  const { credentialStoragePath }: Settings = yield getContext(SETTINGS)
+  const playactor: PlayactorClient = yield getContext(PLAYACTOR_CLIENT)
 
   const devices: Device[] = yield select(getDeviceList)
   for (const device of devices) {
     try {
-      const { code, stdout, stderr } = sh.exec(
-        `playactor check --ip ${device.address.address} --machine-friendly` +
-          ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth` +
-          ` -c ${credentialStoragePath}`,
-        { silent: true, timeout: 15000 },
+      const updatedDevice: Device = yield call(
+        [playactor, playactor.check],
+        device.address.address,
       )
-
-      if (code > 1 && stderr) {
-        throw new Error(stderr)
-      }
-
-      if (!stdout) {
-        throw (
-          "No data received from Playstation. If this error continues, " +
-          "your Playstation is likely powered off or unreachable - it will " +
-          "not be available until it is in either rest mode/powered on and reachable."
-        )
-      }
-
-      const updatedDevice: Device = JSON.parse(stdout)
 
       if (device.transitioning) {
         debug(

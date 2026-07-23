@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+"use strict"
+
+// Fake `playactor` CLI used by the e2e suite. It is placed first on PATH when
+// the server process is spawned, so the real `sh.exec("playactor ...")` calls
+// resolve here instead of the real binary — exercising the whole command
+// build -> child process -> stdout/exit-code parse path without a real PS5.
+//
+// Behavior is driven by files in PLAYACTOR_FIXTURE_DIR:
+//   - <subcommand>.json  -> { exitCode, stdout, stderr } returned for that call
+//   - invocations.log    -> append-only JSON-lines record of every invocation,
+//                           so tests can assert the exact args playactor got.
+//
+// Deliberately plain CommonJS using only Node built-ins: no TS, no tsx, no
+// package resolution — so it runs identically under Yarn PnP and in CI.
+
+const fs = require("fs")
+const path = require("path")
+
+const argv = process.argv.slice(2)
+const subcommand = argv[0] || "unknown"
+const fixtureDir = process.env.PLAYACTOR_FIXTURE_DIR
+
+if (fixtureDir) {
+  try {
+    fs.appendFileSync(
+      path.join(fixtureDir, "invocations.log"),
+      JSON.stringify({ subcommand, argv }) + "\n",
+    )
+  } catch {
+    // Recording is best-effort; never fail the fake because of it.
+  }
+}
+
+let response = { exitCode: 0, stdout: "", stderr: "" }
+if (fixtureDir) {
+  const fixturePath = path.join(fixtureDir, `${subcommand}.json`)
+  try {
+    response = { ...response, ...JSON.parse(fs.readFileSync(fixturePath, "utf-8")) }
+  } catch {
+    // No fixture configured for this subcommand -> default empty success.
+  }
+}
+
+if (response.stdout) {
+  process.stdout.write(response.stdout)
+}
+if (response.stderr) {
+  process.stderr.write(response.stderr)
+}
+process.exit(response.exitCode)

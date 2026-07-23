@@ -6,18 +6,20 @@ import path from "path"
 import createSagaMiddleware from "redux-saga"
 
 import { AppConfig, getAppConfig } from "./config"
+import { createPlayactorClient } from "./playactor/client"
 import { Dispatch, PsnAccount } from "./psn-account"
 import reducer, {
   getDeviceRegistry,
   pollDevices,
   pollDiscovery,
   pollPsnPresence,
+  registerDevice,
   saga,
   setPowerMode,
   updateAccount,
 } from "./redux"
-import { SwitchStatus } from "./redux/types"
-import { MQTT_CLIENT, Settings, SETTINGS } from "./services"
+import { Account, SwitchStatus } from "./redux/types"
+import { MQTT_CLIENT, PLAYACTOR_CLIENT, Settings, SETTINGS } from "./services"
 import { createErrorLogger } from "./util/error-logger"
 import { setupWebserver } from "./web-server"
 
@@ -105,11 +107,17 @@ export async function run() {
     discoveryTopic: appConfig.mqtt.discovery_topic,
   }
 
+  const playactorClient = createPlayactorClient({
+    credentialStoragePath: settings.credentialStoragePath,
+    loginPasscode: settings.loginPasscode,
+  })
+
   try {
     const sagaMiddleware = createSagaMiddleware({
       context: {
         [MQTT_CLIENT]: mqtt,
         [SETTINGS]: settings,
+        [PLAYACTOR_CLIENT]: playactorClient,
       },
     })
     const store = configureStore({
@@ -136,6 +144,25 @@ export async function run() {
     createDebugger("@ha:ps5-sensitive:registered-accounts")(
       store.getState().accounts,
     )
+    
+    // Seed any statically-configured devices so they're controllable without
+    // waiting on (or requiring) UDP-broadcast discovery. Real discovery still
+    // runs and will register anything else it finds.
+    for (const device of appConfig.static_devices ?? []) {
+      store.dispatch(
+        registerDevice({
+          ...device,
+          available: device.available ?? true,
+          activity: undefined,
+          normalizedName:
+            device.normalizedName ??
+            device.name
+              .replace(/[^a-zA-Z\d\s-_:]/g, "")
+              .replace(/[\s-]/g, "_")
+              .toLowerCase(),
+        }),
+      )
+    }
 
     const cmdTopicRegEx = /^ps5-mqtt\/([^/]*)\/set\/(.*)$/
 

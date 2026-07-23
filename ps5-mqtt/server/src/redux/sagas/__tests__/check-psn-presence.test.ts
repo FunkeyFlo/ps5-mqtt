@@ -1,4 +1,5 @@
-import { runSaga } from "redux-saga"
+import lodash from "lodash"
+import { expectSaga } from "redux-saga-test-plan"
 
 import { PsnAccount } from "../../../psn-account"
 import { updateAccount } from "../../action-creators"
@@ -6,12 +7,28 @@ import { Account, State } from "../../types"
 import { checkPsnPresence } from "../check-psn-presence"
 
 jest.mock("../../../psn-account")
-jest.mock("../../action-creators")
 
 const mockPsnUpdateAccount = jest.mocked(PsnAccount.updateAccount)
-const mockUpdateAccount = jest.mocked(updateAccount)
 
-const mockAccount: Account = {
+describe("Check PSN Presence saga", () => {
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test("can detect new account activity", async () => {
+    const mockAccount = makeAccount()
+    mockPsnUpdateAccount.mockResolvedValue(mockAccount)
+
+    await expectSaga(checkPsnPresence)
+      .withState(<State>{ accounts: { "0": mockAccount }, devices: {} })
+      .put(updateAccount(mockAccount))
+      .run()
+  })
+})
+
+// --- helpers ---
+
+const DEFAULT_ACCOUNT: Account = {
   accountId: "0000000000",
   accountName: "TestUser",
   authInfo: {
@@ -25,29 +42,6 @@ const mockAccount: Account = {
   preferredDevices: {},
 }
 
-// https://redux-saga.js.org/docs/advanced/Testing/
-describe("Check PSN Presence saga", () => {
-  afterEach(() => {
-    mockPsnUpdateAccount.mockClear()
-    mockUpdateAccount.mockClear()
-  })
-
-  test("can detect new account activity", async () => {
-    mockPsnUpdateAccount.mockReturnValue(Promise.resolve(mockAccount))
-
-    await runSaga(
-      {
-        dispatch: () => {},
-        getState: () =>
-          <Partial<State>>{
-            accounts: {
-              "0": mockAccount,
-            },
-          },
-      },
-      checkPsnPresence,
-    ).toPromise()
-
-    expect(mockUpdateAccount).toHaveBeenCalledWith(mockAccount)
-  })
-})
+function makeAccount(overrides: Partial<Account> = {}): Account {
+  return lodash.merge({}, DEFAULT_ACCOUNT, overrides)
+}

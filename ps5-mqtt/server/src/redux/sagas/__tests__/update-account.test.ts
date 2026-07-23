@@ -1,21 +1,11 @@
-import { runSaga } from "redux-saga"
+import lodash from "lodash"
+import { expectSaga } from "redux-saga-test-plan"
+import type { PutEffect } from "redux-saga/effects"
 
 import { PsnAccount } from "../../../psn-account"
-import { Account, Device, State } from "../../types"
+import { updateHomeAssistant } from "../../action-creators"
+import { Account, Device, State, UpdateAccountAction } from "../../types"
 import { updateAccount } from "../update-account"
-
-jest.mock("../../action-creators", () => {
-  const originalModule = jest.requireActual("../../action-creators")
-
-  return {
-    __esModule: true, // Use it when dealing with esModules
-    ...originalModule,
-    updateHomeAssistant: jest.fn((device) => ({
-      type: "UPDATE_HOME_ASSISTANT",
-      payload: device,
-    })),
-  }
-})
 
 describe("Check PSN Presence saga", () => {
   afterEach(() => {
@@ -23,802 +13,325 @@ describe("Check PSN Presence saga", () => {
   })
 
   test("can match account activity to a single device", async () => {
-    //#region MOCKS
-    const mockAccount: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-      activity: {
-        launchPlatform: "PS5",
-        platform: "PS5",
-        titleId: "Game 1",
-        titleImage: "http://somegameurl.net/path-to-game1-image",
-        titleName: "GAME1ID",
-      },
-      preferredDevices: {},
-    }
+    const activity = makeActivity()
+    const mockAccount = makeAccount({ activity })
+    const mockDevice = makeDevice()
 
-    const mockDevice: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-    //#endregion MOCKS
+    const { effects } = await expectSaga(updateAccount, action(mockAccount))
+      .withState(stateWith(mockDevice))
+      .run()
 
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [mockDevice.id]: mockDevice,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    expect(
-      jest.requireMock("../../action-creators").updateHomeAssistant,
-    ).toHaveBeenCalledWith(<Device>{
-      ...mockDevice,
-      activity: {
-        ...mockAccount.activity,
-        activePlayers: [mockAccount.accountName],
-      },
-    })
+    expect(putActions(effects.put)).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          activity: { ...activity, activePlayers: [mockAccount.accountName] },
+        }),
+      ),
+    )
   })
 
   test("will, by default, match account activity only to the first available device of the same type", async () => {
-    //#region MOCKS
-    const mockAccount: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-      activity: {
-        launchPlatform: "PS5",
-        platform: "PS5",
-        titleId: "Game 1",
-        titleImage: "http://somegameurl.net/path-to-game1-image",
-        titleName: "GAME1ID",
-      },
-      preferredDevices: {},
-    }
+    const activity = makeActivity()
+    const mockAccount = makeAccount({ activity })
+    const ps5Device1 = makeDevice()
+    const ps5Device2 = makeDevice(SECOND_DEVICE)
 
-    const ps5Device1: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
+    const { effects } = await expectSaga(updateAccount, action(mockAccount))
+      .withState(stateWith(ps5Device1, ps5Device2))
+      .run()
 
-    const ps5Device2: Device = {
-      address: { address: "192.168.0.11", port: 80 },
-      available: true,
-      id: "mock-id-2",
-      name: "mock-ps5-2",
-      normalizedName: "mock_ps5_2",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-    //#endregion MOCKS
-
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [ps5Device1.id]: ps5Device1,
-              [ps5Device2.id]: ps5Device2,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    const mockedUpdateHa = jest.requireMock(
-      "../../action-creators",
-    ).updateHomeAssistant
-
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      ...ps5Device1,
-      activity: {
-        ...mockAccount.activity,
-        activePlayers: [mockAccount.accountName],
-      },
-    })
-    expect(mockedUpdateHa).toHaveBeenCalledTimes(1)
+    const dispatched = putActions(effects.put)
+    expect(dispatched).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          activity: { ...activity, activePlayers: [mockAccount.accountName] },
+        }),
+      ),
+    )
+    expect(dispatched).toHaveLength(1)
   })
 
   test("will match account activity to a preferred device when specified", async () => {
-    //#region MOCKS
-    const mockAccount: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-      activity: {
-        launchPlatform: "PS5",
-        platform: "PS5",
-        titleId: "Game 1",
-        titleImage: "http://somegameurl.net/path-to-game1-image",
-        titleName: "GAME1ID",
-      },
-      preferredDevices: {
-        ps5: "mock-id-2",
-      },
-    }
-
-    const ps5Device1: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-
-    const ps5Device2: Device = {
-      address: { address: "192.168.0.11", port: 80 },
-      available: true,
-      id: "mock-id-2",
-      name: "mock-ps5-2",
-      normalizedName: "mock_ps5_2",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-    //#endregion MOCKS
-
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [ps5Device1.id]: ps5Device1,
-              [ps5Device2.id]: ps5Device2,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    const mockedUpdateHa = jest.requireMock(
-      "../../action-creators",
-    ).updateHomeAssistant
-
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      ...ps5Device2,
-      activity: {
-        ...mockAccount.activity,
-        activePlayers: [mockAccount.accountName],
-      },
+    const activity = makeActivity()
+    const mockAccount = makeAccount({
+      activity,
+      preferredDevices: { ps5: "mock-id-2" },
     })
-    expect(mockedUpdateHa).toHaveBeenCalledTimes(1)
+    const ps5Device1 = makeDevice()
+    const ps5Device2 = makeDevice(SECOND_DEVICE)
+
+    const { effects } = await expectSaga(updateAccount, action(mockAccount))
+      .withState(stateWith(ps5Device1, ps5Device2))
+      .run()
+
+    const dispatched = putActions(effects.put)
+    expect(dispatched).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          ...SECOND_DEVICE,
+          activity: { ...activity, activePlayers: [mockAccount.accountName] },
+        }),
+      ),
+    )
+    expect(dispatched).toHaveLength(1)
   })
 
   test("will match account activity to the first available device when a preferred device is not 'Awake'", async () => {
-    //#region MOCKS
-    const mockAccount: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-      activity: {
-        launchPlatform: "PS5",
-        platform: "PS5",
-        titleId: "Game 1",
-        titleImage: "http://somegameurl.net/path-to-game1-image",
-        titleName: "GAME1ID",
-      },
-      preferredDevices: {
-        ps5: "mock-id-2",
-      },
-    }
-
-    const ps5Device1: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-
-    const ps5Device2: Device = {
-      address: { address: "192.168.0.11", port: 80 },
-      available: true,
-      id: "mock-id-2",
-      name: "mock-ps5-2",
-      normalizedName: "mock_ps5_2",
-      status: "STANDBY",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-    //#endregion MOCKS
-
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [ps5Device1.id]: ps5Device1,
-              [ps5Device2.id]: ps5Device2,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    const mockedUpdateHa = jest.requireMock(
-      "../../action-creators",
-    ).updateHomeAssistant
-
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      ...ps5Device1,
-      activity: {
-        ...mockAccount.activity,
-        activePlayers: [mockAccount.accountName],
-      },
+    const activity = makeActivity()
+    const mockAccount = makeAccount({
+      activity,
+      preferredDevices: { ps5: "mock-id-2" },
     })
-    expect(mockedUpdateHa).toHaveBeenCalledTimes(1)
+    const ps5Device1 = makeDevice()
+    const ps5Device2 = makeDevice({ ...SECOND_DEVICE, status: "STANDBY" })
+
+    const { effects } = await expectSaga(updateAccount, action(mockAccount))
+      .withState(stateWith(ps5Device1, ps5Device2))
+      .run()
+
+    const dispatched = putActions(effects.put)
+    expect(dispatched).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          activity: { ...activity, activePlayers: [mockAccount.accountName] },
+        }),
+      ),
+    )
+    expect(dispatched).toHaveLength(1)
   })
 
   test("will match account activity only to a device that's 'Awake'", async () => {
-    //#region MOCKS
-    const mockAccount: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-      activity: {
-        launchPlatform: "PS5",
-        platform: "PS5",
-        titleId: "Game 1",
-        titleImage: "http://somegameurl.net/path-to-game1-image",
-        titleName: "GAME1ID",
-      },
-      preferredDevices: {},
-    }
+    const activity = makeActivity()
+    const mockAccount = makeAccount({ activity })
+    const ps5Device1 = makeDevice({ status: "STANDBY" })
+    const ps5Device2 = makeDevice(SECOND_DEVICE)
 
-    const ps5Device1: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "STANDBY",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
+    const { effects } = await expectSaga(updateAccount, action(mockAccount))
+      .withState(stateWith(ps5Device1, ps5Device2))
+      .run()
 
-    const ps5Device2: Device = {
-      address: { address: "192.168.0.11", port: 80 },
-      available: true,
-      id: "mock-id-2",
-      name: "mock-ps5-2",
-      normalizedName: "mock_ps5_2",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-    //#endregion MOCKS
-
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [ps5Device1.id]: ps5Device1,
-              [ps5Device2.id]: ps5Device2,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    const mockedUpdateHa = jest.requireMock(
-      "../../action-creators",
-    ).updateHomeAssistant
-
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      ...ps5Device2,
-      activity: {
-        ...mockAccount.activity,
-        activePlayers: [mockAccount.accountName],
-      },
-    })
-    expect(mockedUpdateHa).toHaveBeenCalledTimes(1)
+    const dispatched = putActions(effects.put)
+    expect(dispatched).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          ...SECOND_DEVICE,
+          activity: { ...activity, activePlayers: [mockAccount.accountName] },
+        }),
+      ),
+    )
+    expect(dispatched).toHaveLength(1)
   })
 
   test("will add player to existing activity when another player is already active on the console", async () => {
-    //#region MOCKS
-    const mockActivity: PsnAccount.AccountActivity = {
-      launchPlatform: "PS5",
-      platform: "PS5",
-      titleId: "Game 1",
-      titleImage: "http://somegameurl.net/path-to-game1-image",
-      titleName: "GAME1ID",
-    }
-
-    const mockAccountBase = {
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-      preferredDevices: {},
-    }
-
-    const mockAccount1: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      activity: mockActivity,
-      ...mockAccountBase,
-    }
-
-    const mockAccount2: Account = {
+    const activity = makeActivity()
+    const mockAccount1 = makeAccount({ activity })
+    const mockAccount2 = makeAccount({
       accountId: "mock-account-id-2",
       accountName: "TestUser2",
-      activity: mockActivity,
-      ...mockAccountBase,
-    }
-
-    const mockDevice: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: {
-        ...mockActivity,
-        activePlayers: [mockAccount1.accountName],
-      },
-    }
-    //#endregion MOCKS
-
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [mockDevice.id]: mockDevice,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount2,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    const mockedUpdateHa = jest.requireMock(
-      "../../action-creators",
-    ).updateHomeAssistant
-
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: {
-        ...mockActivity,
-        activePlayers: [mockAccount1.accountName, mockAccount2.accountName],
-      },
+      activity,
     })
-    expect(mockedUpdateHa).toHaveBeenCalledTimes(1)
+    const mockDevice = makeDevice({
+      activity: { ...activity, activePlayers: [mockAccount1.accountName] },
+    })
+
+    const { effects } = await expectSaga(updateAccount, action(mockAccount2))
+      .withState(stateWith(mockDevice))
+      .run()
+
+    const dispatched = putActions(effects.put)
+    expect(dispatched).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          activity: {
+            ...activity,
+            activePlayers: [mockAccount1.accountName, mockAccount2.accountName],
+          },
+        }),
+      ),
+    )
+    expect(dispatched).toHaveLength(1)
   })
 
   test("will match each player to their preferred device", async () => {
-    //#region MOCKS
-    const mockActivity1: PsnAccount.AccountActivity = {
-      launchPlatform: "PS5",
-      platform: "PS5",
-      titleId: "Game 1",
-      titleImage: "http://somegameurl.net/path-to-game1-image",
-      titleName: "GAME1ID",
-    }
-
-    const mockActivity2: PsnAccount.AccountActivity = {
-      launchPlatform: "PS5",
-      platform: "PS5",
+    const activity1 = makeActivity()
+    const activity2 = makeActivity({
       titleId: "Game 2",
       titleImage: "http://somegameurl.net/path-to-game2-image",
       titleName: "GAME2ID",
-    }
-
-    const mockAccountBase = {
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-    }
-
-    const mockAccount1: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      activity: mockActivity1,
-      preferredDevices: {
-        ps5: "mock-id-1",
-      },
-      ...mockAccountBase,
-    }
-
-    const mockAccount2: Account = {
+    })
+    const mockAccount1 = makeAccount({
+      activity: activity1,
+      preferredDevices: { ps5: "mock-id-1" },
+    })
+    const mockAccount2 = makeAccount({
       accountId: "mock-account-id-2",
       accountName: "TestUser2",
-      activity: mockActivity2,
-      preferredDevices: {
-        ps5: "mock-id-2",
-      },
-      ...mockAccountBase,
-    }
-
-    const mockDevice1: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-
-    const mockDevice2: Device = {
-      address: { address: "192.168.0.11", port: 80 },
-      available: true,
-      id: "mock-id-2",
-      name: "mock-ps5-2",
-      normalizedName: "mock_ps5_2",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
-    }
-    //#endregion MOCKS
-
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [mockDevice1.id]: mockDevice1,
-              [mockDevice2.id]: mockDevice2,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount1,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    const mockedUpdateHa = jest.requireMock(
-      "../../action-creators",
-    ).updateHomeAssistant
-
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      ...mockDevice1,
-      activity: {
-        ...mockActivity1,
-        activePlayers: [mockAccount1.accountName],
-      },
+      activity: activity2,
+      preferredDevices: { ps5: "mock-id-2" },
     })
+    const mockDevice1 = makeDevice()
+    const mockDevice2 = makeDevice(SECOND_DEVICE)
 
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [mockDevice1.id]: mockDevice1,
-              [mockDevice2.id]: mockDevice2,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount2,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
+    // Both invocations share the same device objects (as the original test did)
+    // so the second run observes mutations made by the first.
+    const state = stateWith(mockDevice1, mockDevice2)
 
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      ...mockDevice2,
-      activity: {
-        ...mockActivity2,
-        activePlayers: [mockAccount2.accountName],
-      },
-    })
-    expect(mockedUpdateHa).toHaveBeenCalledTimes(2)
+    const firstRun = await expectSaga(updateAccount, action(mockAccount1))
+      .withState(state)
+      .run()
+
+    expect(putActions(firstRun.effects.put)).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          activity: { ...activity1, activePlayers: [mockAccount1.accountName] },
+        }),
+      ),
+    )
+
+    const secondRun = await expectSaga(updateAccount, action(mockAccount2))
+      .withState(state)
+      .run()
+
+    expect(putActions(secondRun.effects.put)).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          ...SECOND_DEVICE,
+          activity: { ...activity2, activePlayers: [mockAccount2.accountName] },
+        }),
+      ),
+    )
+
+    expect(putActions(firstRun.effects.put)).toHaveLength(1)
+    expect(putActions(secondRun.effects.put)).toHaveLength(1)
   })
 
   test("will remove player from existing activity when another player is still active on the console", async () => {
-    //#region MOCKS
-    const mockActivity: PsnAccount.AccountActivity = {
-      launchPlatform: "PS5",
-      platform: "PS5",
-      titleId: "Game 1",
-      titleImage: "http://somegameurl.net/path-to-game1-image",
-      titleName: "GAME1ID",
-    }
-
-    const mockAccount: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-      preferredDevices: {},
-    }
-
-    const mockDevice: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
+    const activity = makeActivity()
+    const mockAccount = makeAccount()
+    const mockDevice = makeDevice({
       activity: {
-        ...mockActivity,
+        ...activity,
         activePlayers: [mockAccount.accountName, "other_user"],
       },
-    }
-    //#endregion MOCKS
-
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [mockDevice.id]: mockDevice,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    const mockedUpdateHa = jest.requireMock(
-      "../../action-creators",
-    ).updateHomeAssistant
-
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: {
-        ...mockActivity,
-        activePlayers: ["other_user"],
-      },
     })
-    expect(mockedUpdateHa).toHaveBeenCalledTimes(1)
+
+    const { effects } = await expectSaga(updateAccount, action(mockAccount))
+      .withState(stateWith(mockDevice))
+      .run()
+
+    const dispatched = putActions(effects.put)
+    expect(dispatched).toContainEqual(
+      updateHomeAssistant(
+        makeDevice({
+          activity: { ...activity, activePlayers: ["other_user"] },
+        }),
+      ),
+    )
+    expect(dispatched).toHaveLength(1)
   })
 
   test("will remove activity from device when no players are active on the console", async () => {
-    //#region MOCKS
-    const mockActivity: PsnAccount.AccountActivity = {
-      launchPlatform: "PS5",
-      platform: "PS5",
-      titleId: "Game 1",
-      titleImage: "http://somegameurl.net/path-to-game1-image",
-      titleName: "GAME1ID",
-    }
-
-    const mockAccount: Account = {
-      accountId: "mock-account-id-1",
-      accountName: "TestUser1",
-      authInfo: {
-        accessToken: "",
-        accessTokenExpiration: 0,
-        refreshToken: "",
-        refreshTokenExpiration: 0,
-      },
-      npsso: "----",
-      preferredDevices: {},
-    }
-
-    const mockDevice: Device = {
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: {
-        ...mockActivity,
-        activePlayers: [mockAccount.accountName],
-      },
-    }
-    //#endregion MOCKS
-
-    const dispatched = []
-    await runSaga(
-      {
-        dispatch: (action) => {
-          return dispatched.push(action)
-        },
-        getState: () =>
-          <Partial<State>>{
-            devices: {
-              [mockDevice.id]: mockDevice,
-            },
-          },
-      },
-      updateAccount,
-      {
-        payload: mockAccount,
-        type: "UPDATE_PSN_ACCOUNT",
-      },
-    ).toPromise()
-
-    const mockedUpdateHa = jest.requireMock(
-      "../../action-creators",
-    ).updateHomeAssistant
-
-    expect(mockedUpdateHa).toHaveBeenCalledWith(<Device>{
-      address: { address: "192.168.0.10", port: 80 },
-      available: true,
-      id: "mock-id-1",
-      name: "mock-ps5-1",
-      normalizedName: "mock_ps5_1",
-      status: "AWAKE",
-      systemVersion: "",
-      transitioning: false,
-      type: "PS5",
-      activity: undefined,
+    const activity = makeActivity()
+    const mockAccount = makeAccount()
+    const mockDevice = makeDevice({
+      activity: { ...activity, activePlayers: [mockAccount.accountName] },
     })
-    expect(mockedUpdateHa).toHaveBeenCalledTimes(1)
+
+    const { effects } = await expectSaga(updateAccount, action(mockAccount))
+      .withState(stateWith(mockDevice))
+      .run()
+
+    const dispatched = putActions(effects.put)
+    expect(dispatched).toContainEqual(
+      updateHomeAssistant(makeDevice({ activity: undefined })),
+    )
+    expect(dispatched).toHaveLength(1)
   })
 })
+
+// --- helpers ---
+
+type DispatchedAction = { type: string; payload?: unknown }
+
+// Deep-partial so overrides can reach into nested objects (e.g. just
+// `address.address`) and let lodash.merge fill in the rest of the defaults.
+type DeepPartial<T> = T extends (infer U)[]
+  ? U[]
+  : T extends object
+    ? { [P in keyof T]?: DeepPartial<T[P]> }
+    : T
+
+const DEFAULT_ACTIVITY: PsnAccount.AccountActivity = {
+  launchPlatform: "PS5",
+  platform: "PS5",
+  titleId: "Game 1",
+  titleImage: "http://somegameurl.net/path-to-game1-image",
+  titleName: "GAME1ID",
+}
+
+const DEFAULT_DEVICE: Device = {
+  address: { address: "192.168.0.10", port: 80 },
+  available: true,
+  id: "mock-id-1",
+  name: "mock-ps5-1",
+  normalizedName: "mock_ps5_1",
+  status: "AWAKE",
+  systemVersion: "",
+  transitioning: false,
+  type: "PS5",
+  activity: undefined,
+}
+
+// Identity overrides for the second console used in multi-device tests.
+const SECOND_DEVICE: DeepPartial<Device> = {
+  id: "mock-id-2",
+  name: "mock-ps5-2",
+  normalizedName: "mock_ps5_2",
+  address: { address: "192.168.0.11" },
+}
+
+const DEFAULT_ACCOUNT: Account = {
+  accountId: "mock-account-id-1",
+  accountName: "TestUser1",
+  authInfo: {
+    accessToken: "",
+    accessTokenExpiration: 0,
+    refreshToken: "",
+    refreshTokenExpiration: 0,
+  },
+  npsso: "----",
+  activity: undefined,
+  preferredDevices: {},
+}
+
+function makeActivity(
+  overrides: DeepPartial<PsnAccount.AccountActivity> = {},
+): PsnAccount.AccountActivity {
+  return lodash.merge({}, DEFAULT_ACTIVITY, overrides)
+}
+
+function makeDevice(overrides: DeepPartial<Device> = {}): Device {
+  return lodash.merge({}, DEFAULT_DEVICE, overrides)
+}
+
+function makeAccount(overrides: DeepPartial<Account> = {}): Account {
+  return lodash.merge({}, DEFAULT_ACCOUNT, overrides)
+}
+
+function putActions(puts: PutEffect[] | undefined): DispatchedAction[] {
+  return (puts ?? []).map((effect) => effect.payload.action as DispatchedAction)
+}
+
+function stateWith(...devices: Device[]): State {
+  return <State>{
+    devices: Object.fromEntries(devices.map((d) => [d.id, d])),
+    accounts: {},
+  }
+}
+
+function action(account: Account): UpdateAccountAction {
+  return {
+    type: "UPDATE_PSN_ACCOUNT",
+    payload: account,
+  }
+}

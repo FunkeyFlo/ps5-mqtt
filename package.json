@@ -29,6 +29,7 @@
     "lint": "eslint .",
     "resolve-release-version": "tsx scripts/resolve-release-version.ts",
     "start": "bash scripts/start.sh",
+    "test/e2e": "bash scripts/test-e2e.sh",
     "test/unit": "yarn workspaces foreach -A run test/unit",
     "typecheck": "tsc -p tsconfig.json && yarn workspaces foreach -A run typecheck",
     "update-changelog": "tsx scripts/update-changelog.ts"
