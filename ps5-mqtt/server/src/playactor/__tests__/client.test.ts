@@ -20,7 +20,7 @@ const WAKE_CMD =
 
 const STANDBY_CMD =
   `playactor standby --ip ${IP}` +
-  ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
+  ` --timeout 10000 --connect-timeout 10000 --no-open-urls --no-auth` +
   ` -c ${CREDENTIAL_PATH}`
 
 const CHECK_CMD =
@@ -71,6 +71,30 @@ describe("PlayactorClient", () => {
 
       await expect(client.wake(IP)).rejects.toBe("boom")
     })
+
+    test("passes --ps5 when PS4 devices are excluded", async () => {
+      mockExec.mockReturnValue(execResult({ code: 0, stdout: "ok" }))
+      const ps5OnlyClient = createPlayactorClient({
+        credentialStoragePath: CREDENTIAL_PATH,
+        allowPs4Devices: false,
+      })
+
+      await ps5OnlyClient.wake(IP)
+
+      expect(mockExec).toHaveBeenCalledWith(
+        `playactor wake --ip ${IP}` +
+          ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
+          ` --ps5 -c ${CREDENTIAL_PATH}`,
+        { silent: true, timeout: 5000 },
+      )
+    })
+
+    // https://github.com/FunkeyFlo/ps5-mqtt/issues/675
+    test("rejects when killed by the shelljs timeout (no stderr, non-zero exit code)", async () => {
+      mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr: "" }))
+
+      await expect(client.wake(IP)).rejects.toThrow(/exited with code 1/)
+    })
   })
 
   describe("standby", () => {
@@ -80,7 +104,7 @@ describe("PlayactorClient", () => {
       await expect(client.standby(IP)).resolves.toBeUndefined()
       expect(mockExec).toHaveBeenCalledWith(STANDBY_CMD, {
         silent: true,
-        timeout: 5000,
+        timeout: 25000,
       })
     })
 
@@ -88,6 +112,39 @@ describe("PlayactorClient", () => {
       mockExec.mockReturnValue(execResult({ code: 0, stderr: "nope" }))
 
       await expect(client.standby(IP)).rejects.toBe("nope")
+    })
+
+    test("passes --ps5 when PS4 devices are excluded", async () => {
+      mockExec.mockReturnValue(execResult({ code: 0, stdout: "ok" }))
+      const ps5OnlyClient = createPlayactorClient({
+        credentialStoragePath: CREDENTIAL_PATH,
+        allowPs4Devices: false,
+      })
+
+      await ps5OnlyClient.standby(IP)
+
+      expect(mockExec).toHaveBeenCalledWith(
+        `playactor standby --ip ${IP}` +
+          ` --timeout 10000 --connect-timeout 10000 --no-open-urls --no-auth` +
+          ` --ps5 -c ${CREDENTIAL_PATH}`,
+        { silent: true, timeout: 25000 },
+      )
+    })
+
+    // https://github.com/FunkeyFlo/ps5-mqtt/issues/675
+    // Standby's full handshake (discovery, session init, login, passcode,
+    // then the standby request) can outlast a short shelljs timeout. When
+    // shelljs kills the process, it exits with code 1 and empty
+    // stdout/stderr - nothing throws, so the old stderr-only check never
+    // fired and the saga optimistically reported STANDBY even though the
+    // console never actually went to standby. Verified this is really how
+    // shelljs behaves on a timeout-kill (sh.exec("sleep N", { timeout:
+    // shortMs }) consistently returns { code: 1, stdout: "", stderr: "" });
+    // it could not be reproduced against real PS5 hardware.
+    test("rejects when killed by the shelljs timeout (no stderr, non-zero exit code)", async () => {
+      mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr: "" }))
+
+      await expect(client.standby(IP)).rejects.toThrow(/exited with code 1/)
     })
   })
 
