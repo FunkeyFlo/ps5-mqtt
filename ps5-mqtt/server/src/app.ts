@@ -110,6 +110,7 @@ export async function run() {
   const playactorClient = createPlayactorClient({
     credentialStoragePath: settings.credentialStoragePath,
     loginPasscode: settings.loginPasscode,
+    allowPs4Devices: settings.allowPs4Devices,
   })
 
   try {

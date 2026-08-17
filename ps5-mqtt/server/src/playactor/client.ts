@@ -9,7 +9,19 @@ const debug = createDebugger("@ha:ps5:playactor")
 export interface PlayactorClientSettings {
   credentialStoragePath: string
   loginPasscode?: string
+  allowPs4Devices?: boolean
 }
+
+// Standby requires a full Remote Play handshake (discovery, session init,
+// login, passcode, then the standby request itself), which can take much
+// longer than a simple wake. The shelljs timeout must safely exceed the sum
+// of the discovery/connect timeouts below so a slow but healthy handshake
+// isn't killed mid-flight. https://github.com/FunkeyFlo/ps5-mqtt/issues/675
+const STANDBY_DISCOVERY_TIMEOUT_MS = 10000
+const STANDBY_CONNECT_TIMEOUT_MS = 10000
+const STANDBY_SHELLJS_TIMEOUT_MS = 25000
+
+const WAKE_SHELLJS_TIMEOUT_MS = 5000
 
 /**
  * Thin wrapper around the `playactor` CLI. Centralizes the command building,
@@ -27,17 +39,25 @@ export interface PlayactorClient {
 export function createPlayactorClient({
   credentialStoragePath,
   loginPasscode,
+  allowPs4Devices,
 }: PlayactorClientSettings): PlayactorClient {
+  // Ignore non-PS5 devices during discovery when PS4 devices are excluded,
+  // shaving discovery latency off the timeout budget below.
+  const devicePs5Arg = allowPs4Devices === false ? " --ps5" : ""
+
   const buildWakeCommand = (ip: string): string =>
     `playactor wake --ip ${ip}` +
     ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
     buildPassCodeArg(loginPasscode) +
+    devicePs5Arg +
     ` -c ${credentialStoragePath}`
 
   const buildStandbyCommand = (ip: string): string =>
     `playactor standby --ip ${ip}` +
-    ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
+    ` --timeout ${STANDBY_DISCOVERY_TIMEOUT_MS}` +
+    ` --connect-timeout ${STANDBY_CONNECT_TIMEOUT_MS} --no-open-urls --no-auth` +
     buildPassCodeArg(loginPasscode) +
+    devicePs5Arg +
     ` -c ${credentialStoragePath}`
 
   const buildCheckCommand = (ip: string): string =>
@@ -45,23 +65,46 @@ export function createPlayactorClient({
     ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth` +
     ` -c ${credentialStoragePath}`
 
-  // wake/standby share identical exec + error handling; only the sub-command differs.
-  const runPowerCommand = async (command: string): Promise<void> => {
-    const { stdout, stderr } = sh.exec(command, { silent: true, timeout: 5000 })
+  // wake/standby share identical exec + error handling; only the sub-command
+  // and shelljs timeout differ.
+  const runPowerCommand = async (
+    command: string,
+    shelljsTimeoutMillis: number,
+  ): Promise<void> => {
+    const { code, stdout, stderr } = sh.exec(command, {
+      silent: true,
+      timeout: shelljsTimeoutMillis,
+    })
 
     if (stderr) {
       throw stderr
     }
+
+    // A shelljs timeout-kill produces no stderr, so `code` is the only
+    // remaining signal that the command didn't actually complete - without
+    // this check, a standby/wake killed mid-handshake looks identical to a
+    // successful one and gets optimistically reported to Home Assistant.
+    // https://github.com/FunkeyFlo/ps5-mqtt/issues/675
+    if (code !== 0) {
+      throw new Error(
+        `playactor exited with code ${code} without completing (it may ` +
+          "have been killed after exceeding the timeout)",
+      )
+    }
+
     debug(stdout)
   }
 
   return {
     async wake(ip: string): Promise<void> {
-      await runPowerCommand(buildWakeCommand(ip))
+      await runPowerCommand(buildWakeCommand(ip), WAKE_SHELLJS_TIMEOUT_MS)
     },
 
     async standby(ip: string): Promise<void> {
-      await runPowerCommand(buildStandbyCommand(ip))
+      await runPowerCommand(
+        buildStandbyCommand(ip),
+        STANDBY_SHELLJS_TIMEOUT_MS,
+      )
     },
 
     async check(ip: string): Promise<Device> {
