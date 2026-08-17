@@ -1,3 +1,13 @@
+## 1.7.0 - 2026-08-17
+
+## What’s changed
+- Fix power off (standby) reliability by detecting playactor timeout-kills @andrew-codes (#676)
+
+## ⬆️ Dependency updates
+
+- Bump tar from 7.5.20 to 7.5.22 @[dependabot[bot]](https://github.com/apps/dependabot) (#671)
+- Bump ip-address from 10.2.0 to 10.4.0 @[dependabot[bot]](https://github.com/apps/dependabot) (#672)
+
 ## 1.6.0 - 2026-07-23
 
 ## What’s changed
