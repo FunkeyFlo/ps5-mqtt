@@ -53,7 +53,7 @@
   },
   "resolutions": {
     "undici": "^6.27.0",
-    "js-yaml": "^3.15.0"
+    "js-yaml": "^3.15.1"
   },
   "packageManager": "yarn@4.16.0"
 }
