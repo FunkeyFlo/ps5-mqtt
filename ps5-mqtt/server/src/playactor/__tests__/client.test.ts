@@ -28,6 +28,17 @@ const CHECK_CMD =
   ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth` +
   ` -c ${CREDENTIAL_PATH}`
 
+// Every playactor invocation must carry the preload shim in NODE_OPTIONS
+// (see ../preload.ts); the exact path differs between ts-jest (src/) and the
+// built bundle (dist/), so only the file name is pinned here.
+const execOptions = (timeout: number) => ({
+  silent: true,
+  timeout,
+  env: expect.objectContaining({
+    NODE_OPTIONS: expect.stringContaining("playactor-preload.js"),
+  }),
+})
+
 describe("PlayactorClient", () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -42,10 +53,7 @@ describe("PlayactorClient", () => {
       mockExec.mockReturnValue(execResult({ code: 0, stdout: "ok" }))
 
       await expect(client.wake(IP)).resolves.toBeUndefined()
-      expect(mockExec).toHaveBeenCalledWith(WAKE_CMD, {
-        silent: true,
-        timeout: 5000,
-      })
+      expect(mockExec).toHaveBeenCalledWith(WAKE_CMD, execOptions(5000))
     })
 
     test("includes the --pass-code fragment when a passcode is configured", async () => {
@@ -62,7 +70,7 @@ describe("PlayactorClient", () => {
           ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
           ` --pass-code '1234'` +
           ` -c ${CREDENTIAL_PATH}`,
-        { silent: true, timeout: 5000 },
+        execOptions(5000),
       )
     })
 
@@ -85,7 +93,7 @@ describe("PlayactorClient", () => {
         `playactor wake --ip ${IP}` +
           ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
           ` --ps5 -c ${CREDENTIAL_PATH}`,
-        { silent: true, timeout: 5000 },
+        execOptions(5000),
       )
     })
 
@@ -102,10 +110,7 @@ describe("PlayactorClient", () => {
       mockExec.mockReturnValue(execResult({ code: 0, stdout: "ok" }))
 
       await expect(client.standby(IP)).resolves.toBeUndefined()
-      expect(mockExec).toHaveBeenCalledWith(STANDBY_CMD, {
-        silent: true,
-        timeout: 25000,
-      })
+      expect(mockExec).toHaveBeenCalledWith(STANDBY_CMD, execOptions(25000))
     })
 
     test("throws the raw stderr when playactor writes to stderr", async () => {
@@ -127,7 +132,7 @@ describe("PlayactorClient", () => {
         `playactor standby --ip ${IP}` +
           ` --timeout 10000 --connect-timeout 10000 --no-open-urls --no-auth` +
           ` --ps5 -c ${CREDENTIAL_PATH}`,
-        { silent: true, timeout: 25000 },
+        execOptions(25000),
       )
     })
 
@@ -155,10 +160,7 @@ describe("PlayactorClient", () => {
       )
 
       await expect(client.check(IP)).resolves.toEqual(makeDevice())
-      expect(mockExec).toHaveBeenCalledWith(CHECK_CMD, {
-        silent: true,
-        timeout: 15000,
-      })
+      expect(mockExec).toHaveBeenCalledWith(CHECK_CMD, execOptions(15000))
     })
 
     test("throws an Error when exit code > 1 and stderr is present", async () => {
