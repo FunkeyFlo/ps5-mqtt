@@ -1,4 +1,5 @@
 import createDebugger from "debug"
+import path from "path"
 import sh from "shelljs"
 
 import type { Device } from "../redux/types"
@@ -22,6 +23,20 @@ const STANDBY_CONNECT_TIMEOUT_MS = 10000
 const STANDBY_SHELLJS_TIMEOUT_MS = 25000
 
 const WAKE_SHELLJS_TIMEOUT_MS = 5000
+
+// Every playactor child gets the shim from ./preload.ts (built next to
+// index.js). Appended to NODE_OPTIONS, not replacing it: under Yarn PnP it
+// already carries the PnP loader the child needs to resolve `playactor`.
+// https://github.com/FunkeyFlo/ps5-mqtt/issues/678
+const PLAYACTOR_ENV: NodeJS.ProcessEnv = {
+  ...process.env,
+  NODE_OPTIONS: [
+    process.env.NODE_OPTIONS,
+    `--require "${path.join(__dirname, "playactor-preload.js")}"`,
+  ]
+    .filter(Boolean)
+    .join(" "),
+}
 
 /**
  * Thin wrapper around the `playactor` CLI. Centralizes the command building,
@@ -74,6 +89,7 @@ export function createPlayactorClient({
     const { code, stdout, stderr } = sh.exec(command, {
       silent: true,
       timeout: shelljsTimeoutMillis,
+      env: PLAYACTOR_ENV,
     })
 
     if (stderr) {
@@ -101,16 +117,14 @@ export function createPlayactorClient({
     },
 
     async standby(ip: string): Promise<void> {
-      await runPowerCommand(
-        buildStandbyCommand(ip),
-        STANDBY_SHELLJS_TIMEOUT_MS,
-      )
+      await runPowerCommand(buildStandbyCommand(ip), STANDBY_SHELLJS_TIMEOUT_MS)
     },
 
     async check(ip: string): Promise<Device> {
       const { code, stdout, stderr } = sh.exec(buildCheckCommand(ip), {
         silent: true,
         timeout: 15000,
+        env: PLAYACTOR_ENV,
       })
 
       if (code > 1 && stderr) {
