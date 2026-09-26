@@ -2,10 +2,7 @@ import os from "os"
 import { Discovery } from "playactor/dist/discovery"
 import { DeviceType, IDiscoveredDevice } from "playactor/dist/discovery/model"
 
-import {
-  discoverDevices,
-  getLocalSubnetBroadcastAddresses,
-} from "../discovery"
+import { discoverDevices, getLocalSubnetBroadcastAddresses } from "../discovery"
 
 jest.mock("os")
 jest.mock("playactor/dist/discovery")
@@ -13,7 +10,9 @@ jest.mock("playactor/dist/discovery")
 const mockNetworkInterfaces = jest.mocked(os.networkInterfaces)
 const MockDiscovery = jest.mocked(Discovery)
 
-const asyncIterableOf = (devices: IDiscoveredDevice[]): AsyncIterable<IDiscoveredDevice> => ({
+const asyncIterableOf = (
+  devices: IDiscoveredDevice[],
+): AsyncIterable<IDiscoveredDevice> => ({
   [Symbol.asyncIterator]: async function* () {
     for (const device of devices) {
       yield device
@@ -99,7 +98,8 @@ describe("discoverDevices", () => {
 
     const ps5 = device("ps5-1", DeviceType.PS5)
     MockDiscovery.mockImplementation(
-      () => ({ discover: () => asyncIterableOf([ps5]) }) as unknown as Discovery,
+      () =>
+        ({ discover: () => asyncIterableOf([ps5]) }) as unknown as Discovery,
     )
 
     await discoverDevices({
@@ -121,7 +121,9 @@ describe("discoverDevices", () => {
     const ps4 = device("ps4-1", DeviceType.PS4)
     MockDiscovery.mockImplementation(
       () =>
-        ({ discover: () => asyncIterableOf([ps5, ps4]) }) as unknown as Discovery,
+        ({
+          discover: () => asyncIterableOf([ps5, ps4]),
+        }) as unknown as Discovery,
     )
 
     const result = await discoverDevices({
@@ -139,7 +141,8 @@ describe("discoverDevices", () => {
 
     const ps5 = device("ps5-1", DeviceType.PS5)
     MockDiscovery.mockImplementation(
-      () => ({ discover: () => asyncIterableOf([ps5]) }) as unknown as Discovery,
+      () =>
+        ({ discover: () => asyncIterableOf([ps5]) }) as unknown as Discovery,
     )
 
     const result = await discoverDevices({

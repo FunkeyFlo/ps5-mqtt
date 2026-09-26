@@ -102,9 +102,9 @@ The file is written with `0600` permissions (owner read/write only) and only eve
 
 IP address the addon will use for UDP broadcasting which is required for device discovery.
 
-If your devices are located on a VLAN you must use this option to point the addon to the broadcast ip of the VLAN your devices are located on.
+By default the addon broadcasts on the global broadcast address as well as the subnet-directed broadcast address of every locally attached network interface, so devices are found even on a non-default-route subnet (e.g. a multihomed host bridged onto both a primary LAN and a secondary VLAN).
 
-_NOTE: only one broadcast address is supported. So all devices will need to be on the same VLAN._
+Set this option only to override that default and broadcast to a single, explicit address instead.
 
 <!-- LINKS -->
 
