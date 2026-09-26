@@ -3,14 +3,14 @@ import createDebugger from "debug"
 import express, { Express } from "express"
 import path from "path"
 
-import { Discovery } from "playactor/dist/discovery"
-import { DeviceType, IDiscoveredDevice } from "playactor/dist/discovery/model"
+import { IDiscoveredDevice } from "playactor/dist/discovery/model"
 import { IInputOutput } from "playactor/dist/cli/io"
 import { CredentialManager } from "playactor/dist/credentials"
 import { DiskCredentialsStorage } from "playactor/dist/credentials/disk-storage"
 import { OauthCredentialRequester } from "playactor/dist/credentials/oauth/requester"
 import { WriteOnlyStorage } from "playactor/dist/credentials/write-only-storage"
 
+import { discoverDevices } from "./playactor/discovery"
 import { Settings } from "./services"
 import { createErrorLogger } from "./util/error-logger"
 
@@ -43,19 +43,11 @@ export function setupWebserver(
 
   app.get("/api/discover", async (req, res) => {
     try {
-      const discovery = new Discovery({
+      const devices: IDiscoveredDevice[] = await discoverDevices({
+        allowPs4Devices,
+        deviceDiscoveryBroadcastAddress,
         timeoutMillis: 5000,
-        deviceIp: deviceDiscoveryBroadcastAddress,
       })
-
-      const devices: IDiscoveredDevice[] = []
-
-      for await (const device of discovery.discover()) {
-        // filter out PS4's if setting says so
-        if (!(!allowPs4Devices && device.type === DeviceType.PS4)) {
-          devices.push(device)
-        }
-      }
 
       res.send({
         devices,
