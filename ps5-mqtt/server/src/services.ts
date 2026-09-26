@@ -16,7 +16,7 @@ export interface Settings {
   // (otherwise playactor fails with PASSCODE_IS_NEEDED).
   loginPasscode?: string
 
-  deviceDiscoveryBroadcastAddress: string
+  deviceDiscoveryBroadcastAddress?: string
 
   discoveryTopic: string
 }
