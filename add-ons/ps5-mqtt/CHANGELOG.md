@@ -1,3 +1,8 @@
+## 1.7.2 - 2026-09-27
+
+## What’s changed
+- fix(playactor): reach every attached subnet during PS5 discovery @andrew-codes (#683)
+
 ## 1.7.0 - 2026-08-17
 
 ## What’s changed
