@@ -20,6 +20,7 @@ import reducer, {
 } from "./redux"
 import { Dispatch, SwitchStatus } from "./redux/types"
 import { MQTT_CLIENT, PLAYACTOR_CLIENT, Settings, SETTINGS } from "./services"
+import { registerShutdownHandlers } from "./shutdown"
 import { createErrorLogger } from "./util/error-logger"
 import { setupWebserver } from "./web-server"
 
@@ -87,6 +88,8 @@ export async function run() {
   debug("Establishing MQTT Connection...")
   const mqtt: MQTT.AsyncMqttClient = await createMqtt(appConfig)
   debug("Connected to MQTT Broker!")
+
+  registerShutdownHandlers({ cleanup: () => mqtt.end() })
 
   const settings: Settings = {
     // polling intervals
