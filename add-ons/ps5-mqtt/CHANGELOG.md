@@ -1,3 +1,8 @@
+## 1.7.3 - 2026-09-29
+
+## What’s changed
+- fix(server): exit cleanly on SIGTERM so stopping the add-on is not reported as an error @andrew-codes (#687)
+
 ## 1.7.2 - 2026-09-27
 
 ## What’s changed
