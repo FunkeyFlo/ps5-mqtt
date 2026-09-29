@@ -95,7 +95,6 @@ export async function run() {
   connectedMqtt = mqtt
   debug("Connected to MQTT Broker!")
 
-
   const settings: Settings = {
     // polling intervals
     checkDevicesInterval: appConfig.device_check_interval || 5000,
