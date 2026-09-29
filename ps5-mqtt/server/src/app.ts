@@ -82,8 +82,8 @@ async function bootstrapPsnAccounts(
 export async function run() {
   // Register first so a stop request during startup (e.g. while still waiting
   // on the MQTT broker) also exits cleanly instead of dying from the signal.
-  let connectedMqtt: MQTT.AsyncMqttClient | undefined
-  registerShutdownHandlers({ cleanup: () => connectedMqtt?.end() })
+  const connections: { mqtt?: MQTT.AsyncMqttClient } = {}
+  registerShutdownHandlers({ cleanup: () => connections.mqtt?.end() })
 
   const appConfig = getAppConfig()
   createDebugger("@ha:ps5-sensitive:parsed-config")(appConfig)
@@ -92,7 +92,7 @@ export async function run() {
 
   debug("Establishing MQTT Connection...")
   const mqtt: MQTT.AsyncMqttClient = await createMqtt(appConfig)
-  connectedMqtt = mqtt
+  connections.mqtt = mqtt
   debug("Connected to MQTT Broker!")
 
   const settings: Settings = {
