@@ -20,6 +20,7 @@ import reducer, {
 } from "./redux"
 import { Dispatch, SwitchStatus } from "./redux/types"
 import { MQTT_CLIENT, PLAYACTOR_CLIENT, Settings, SETTINGS } from "./services"
+import { registerShutdownHandlers } from "./shutdown"
 import { createErrorLogger } from "./util/error-logger"
 import { setupWebserver } from "./web-server"
 
@@ -79,6 +80,11 @@ async function bootstrapPsnAccounts(
 }
 
 export async function run() {
+  // Register first so a stop request during startup (e.g. while still waiting
+  // on the MQTT broker) also exits cleanly instead of dying from the signal.
+  const connections: { mqtt?: MQTT.AsyncMqttClient } = {}
+  registerShutdownHandlers({ cleanup: () => connections.mqtt?.end() })
+
   const appConfig = getAppConfig()
   createDebugger("@ha:ps5-sensitive:parsed-config")(appConfig)
 
@@ -86,6 +92,7 @@ export async function run() {
 
   debug("Establishing MQTT Connection...")
   const mqtt: MQTT.AsyncMqttClient = await createMqtt(appConfig)
+  connections.mqtt = mqtt
   debug("Connected to MQTT Broker!")
 
   const settings: Settings = {
