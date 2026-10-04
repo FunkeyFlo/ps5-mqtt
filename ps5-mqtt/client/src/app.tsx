@@ -46,7 +46,7 @@ export const App = () => {
       >
         <Grommet.Header pad="small" background={"dark-extra"}>
           <Grommet.Anchor
-            href="https://github.com/andrew-codes/ps5-mqtt/"
+            href="https://github.com/FunkeyFlo/ps5-mqtt/"
             icon={<GrommetIcons.Github />}
             target="_blank"
             label="PS5-MQTT"
