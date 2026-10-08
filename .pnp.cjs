@@ -5374,7 +5374,7 @@ const RAW_RUNTIME_STATE =
           ["on-finished", "npm:2.4.1"],\
           ["parseurl", "npm:1.3.3"],\
           ["path-to-regexp", "npm:0.1.13"],\
-          ["proxy-addr", "npm:2.0.7"],\
+          ["proxy-addr", "npm:2.0.8"],\
           ["qs", "npm:6.15.2"],\
           ["range-parser", "npm:1.2.1"],\
           ["safe-buffer", "npm:5.2.1"],\
@@ -8520,12 +8520,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["proxy-addr", [\
-      ["npm:2.0.7", {\
-        "packageLocation": "./.yarn/cache/proxy-addr-npm-2.0.7-dae6552872-c3eed99978.zip/node_modules/proxy-addr/",\
+      ["npm:2.0.8", {\
+        "packageLocation": "./.yarn/cache/proxy-addr-npm-2.0.8-a7f62630de-58398f36e5.zip/node_modules/proxy-addr/",\
         "packageDependencies": [\
           ["forwarded", "npm:0.2.0"],\
           ["ipaddr.js", "npm:1.9.1"],\
-          ["proxy-addr", "npm:2.0.7"]\
+          ["proxy-addr", "npm:2.0.8"]\
         ],\
         "linkType": "HARD"\
       }]\
