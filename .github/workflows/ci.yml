@@ -258,9 +258,6 @@ jobs:
     name: 🐳 Build standalone image - ${{ needs.init.outputs.tag }}
     needs: [init, prepare]
     runs-on: ubuntu-latest
-    # A runner that never starts the job otherwise hangs for the 6h default,
-    # leaving a published release un-finalized and never rolled back.
-    timeout-minutes: 45
     permissions:
       contents: read
       id-token: write
