@@ -8,7 +8,8 @@
  *   yarn check-repo-links [extra-file-or-dir ...]
  *
  * Generated and vendored files are skipped: CHANGELOG.md (auto-generated from
- * release notes), the yarn cache/PnP files and lockfile.
+ * release notes), the yarn cache/PnP files, lockfile and this script's test
+ * (which contains deliberately wrong links).
  */
 import { execFileSync } from "node:child_process"
 import { readdirSync, readFileSync, statSync } from "node:fs"
@@ -16,18 +17,20 @@ import { join, resolve } from "node:path"
 
 const ROOT_DIR = resolve(__dirname, "..")
 const OWNER = "funkeyflo"
-const REPO_LINK = /(github\.com|ghcr\.io)\/([A-Za-z0-9_.-]+)\/ps5-mqtt\b/gi
+const REPO_LINK =
+  /(?:github\.com|ghcr\.io|docker\.io|githubusercontent\.com|shields\.io\/github\/[a-z-]+)[/:](?:repos\/)?([A-Za-z0-9_.-]+)\/ps5-mqtt\b/gi
 
 const SKIPPED = [
   /^\.yarn\//,
   /^\.pnp\./,
   /^yarn\.lock$/,
   /(^|\/)CHANGELOG\.md$/,
+  /^scripts\/check-repo-links\.test\.ts$/,
 ]
 
 export function findWrongLinks(content: string): string[] {
   return [...content.matchAll(REPO_LINK)]
-    .filter((match) => match[2].toLowerCase() !== OWNER)
+    .filter((match) => match[1].toLowerCase() !== OWNER)
     .map((match) => match[0])
 }
 
