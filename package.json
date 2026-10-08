@@ -22,6 +22,7 @@
   },
   "scripts": {
     "build": "yarn workspaces foreach -A run build",
+    "check-repo-links": "tsx scripts/check-repo-links.ts",
     "bump-version": "tsx scripts/bump-version.ts",
     "clean": "yarn workspaces foreach -A run clean",
     "format": "prettier --write .",
