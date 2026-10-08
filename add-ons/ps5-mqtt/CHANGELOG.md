@@ -1,3 +1,8 @@
+## 1.7.4 - 2026-10-08
+
+## What’s changed
+- fix: update GitHub link in header to point to the correct repository @ShanuDey (#688)
+
 ## 1.7.3 - 2026-09-29
 
 ## What’s changed
