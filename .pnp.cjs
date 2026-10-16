@@ -44,7 +44,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@eslint/js", "virtual:74d38cd7853367e83ff18cb097b315b481b75e7359f4eaf9fadf1396ca6f16613e34f669c4679b9633e3c3c98a80249df8c5c900a79c2bae953672843694b991#npm:10.0.1"],\
-          ["@types/node", "npm:24.13.3"],\
+          ["@types/node", "npm:26.1.1"],\
           ["@types/semver", "npm:7.7.1"],\
           ["eslint", "virtual:74d38cd7853367e83ff18cb097b315b481b75e7359f4eaf9fadf1396ca6f16613e34f669c4679b9633e3c3c98a80249df8c5c900a79c2bae953672843694b991#npm:10.7.0"],\
           ["eslint-config-prettier", "virtual:74d38cd7853367e83ff18cb097b315b481b75e7359f4eaf9fadf1396ca6f16613e34f669c4679b9633e3c3c98a80249df8c5c900a79c2bae953672843694b991#npm:10.1.8"],\
@@ -1898,7 +1898,7 @@ const RAW_RUNTIME_STATE =
           ["@rspack/core", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.1.4"],\
           ["@rspack/dev-server", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.1.0"],\
           ["@rspack/plugin-react-refresh", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.0.2"],\
-          ["@types/node", "npm:24.13.3"],\
+          ["@types/node", "npm:26.1.1"],\
           ["@types/react", "npm:19.2.17"],\
           ["@types/react-dom", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:19.2.3"],\
           ["grommet", "virtual:d4f807efd23a5cd4736701b5d35b7cbaa79d35c08724c596029848daa71ff1714c5f33c8e5f65ccb665de53a15a170b8ed6dc1cfcd3c70c50f69654c5b09233a#npm:2.55.0"],\
@@ -1939,7 +1939,7 @@ const RAW_RUNTIME_STATE =
           ["@types/express", "npm:4.17.25"],\
           ["@types/jest", "npm:30.0.0"],\
           ["@types/lodash", "npm:4.17.24"],\
-          ["@types/node", "npm:24.13.3"],\
+          ["@types/node", "npm:26.1.1"],\
           ["@types/shelljs", "npm:0.10.0"],\
           ["async-mqtt", "npm:2.6.3"],\
           ["body-parser", "npm:2.3.0"],\
@@ -2704,19 +2704,19 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:24.13.3", {\
-        "packageLocation": "./.yarn/cache/@types-node-npm-24.13.3-b512a0bbeb-a5bc08f49b.zip/node_modules/@types/node/",\
-        "packageDependencies": [\
-          ["@types/node", "npm:24.13.3"],\
-          ["undici-types", "npm:7.18.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:25.9.3", {\
         "packageLocation": "./.yarn/cache/@types-node-npm-25.9.3-8c1909db0e-72d3aece9d.zip/node_modules/@types/node/",\
         "packageDependencies": [\
           ["@types/node", "npm:25.9.3"],\
           ["undici-types", "npm:7.24.6"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:26.1.1", {\
+        "packageLocation": "./.yarn/cache/@types-node-npm-26.1.1-7a7a9f32f4-25ac509319.zip/node_modules/@types/node/",\
+        "packageDependencies": [\
+          ["@types/node", "npm:26.1.1"],\
+          ["undici-types", "npm:8.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8535,7 +8535,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@eslint/js", "virtual:74d38cd7853367e83ff18cb097b315b481b75e7359f4eaf9fadf1396ca6f16613e34f669c4679b9633e3c3c98a80249df8c5c900a79c2bae953672843694b991#npm:10.0.1"],\
-          ["@types/node", "npm:24.13.3"],\
+          ["@types/node", "npm:26.1.1"],\
           ["@types/semver", "npm:7.7.1"],\
           ["eslint", "virtual:74d38cd7853367e83ff18cb097b315b481b75e7359f4eaf9fadf1396ca6f16613e34f669c4679b9633e3c3c98a80249df8c5c900a79c2bae953672843694b991#npm:10.7.0"],\
           ["eslint-config-prettier", "virtual:74d38cd7853367e83ff18cb097b315b481b75e7359f4eaf9fadf1396ca6f16613e34f669c4679b9633e3c3c98a80249df8c5c900a79c2bae953672843694b991#npm:10.1.8"],\
@@ -9886,7 +9886,7 @@ const RAW_RUNTIME_STATE =
           ["@tsconfig/node12", "npm:1.0.11"],\
           ["@tsconfig/node14", "npm:1.0.3"],\
           ["@tsconfig/node16", "npm:1.0.4"],\
-          ["@types/node", "npm:24.13.3"],\
+          ["@types/node", "npm:26.1.1"],\
           ["@types/swc__core", null],\
           ["@types/swc__wasm", null],\
           ["@types/typescript", null],\
@@ -10135,17 +10135,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["undici-types", [\
-      ["npm:7.18.2", {\
-        "packageLocation": "./.yarn/cache/undici-types-npm-7.18.2-3e6d69d829-85a7918911.zip/node_modules/undici-types/",\
-        "packageDependencies": [\
-          ["undici-types", "npm:7.18.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:7.24.6", {\
         "packageLocation": "./.yarn/cache/undici-types-npm-7.24.6-8759b28e34-d9cd8befb6.zip/node_modules/undici-types/",\
         "packageDependencies": [\
           ["undici-types", "npm:7.24.6"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:8.3.0", {\
+        "packageLocation": "./.yarn/cache/undici-types-npm-8.3.0-d34470de3e-c8aa7e2fbe.zip/node_modules/undici-types/",\
+        "packageDependencies": [\
+          ["undici-types", "npm:8.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
