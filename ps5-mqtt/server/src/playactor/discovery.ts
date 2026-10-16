@@ -1,6 +1,12 @@
 import os from "os"
 import { Discovery } from "playactor/dist/discovery"
-import { DeviceType, IDiscoveredDevice } from "playactor/dist/discovery/model"
+import {
+  DeviceType,
+  IDiscoveredDevice,
+  IDiscoveryNetwork,
+  IDiscoveryNetworkFactory,
+} from "playactor/dist/discovery/model"
+import { StandardDiscoveryNetworkFactory } from "playactor/dist/discovery/standard"
 
 const GLOBAL_BROADCAST_ADDRESS = "255.255.255.255"
 
@@ -39,6 +45,48 @@ function toBroadcastAddress(address: string, netmask: string): string {
     .join(".")
 }
 
+/**
+ * playactor's Discovery pings a single address and, per discover() call,
+ * attaches one "message" listener per protocol (PS4 + PS5) to a UDP socket
+ * that is shared process-wide. Running one Discovery per broadcast address
+ * (as this module once did) therefore stacks 2 x (1 + number of local
+ * interfaces) listeners on that one socket, which trips Node's default
+ * MaxListeners of 10 on hosts with five or more interfaces (HAOS with its
+ * docker bridges, for one) and logged a MaxListenersExceededWarning on every
+ * discovery cycle (https://github.com/FunkeyFlo/ps5-mqtt/issues/692).
+ * Pinging every target from one Discovery keeps the listener count at a
+ * constant two no matter how many interfaces the host has.
+ */
+function createMultiTargetNetworkFactory(
+  targets: string[],
+): IDiscoveryNetworkFactory {
+  const withMultiTargetPing = (
+    network: IDiscoveryNetwork,
+  ): IDiscoveryNetwork => ({
+    close: () => network.close(),
+    ping: async () => {
+      await Promise.all(targets.map((target) => network.ping(target)))
+    },
+    send: (...args) => network.send(...args),
+    sendBuffer: (...args) => network.sendBuffer(...args),
+  })
+
+  return {
+    createRawMessages: (config, onMessage) =>
+      withMultiTargetPing(
+        StandardDiscoveryNetworkFactory.createRawMessages(config, onMessage),
+      ),
+    createMessages: (config, onMessage) =>
+      withMultiTargetPing(
+        StandardDiscoveryNetworkFactory.createMessages(config, onMessage),
+      ),
+    createDevices: (config, onDevice) =>
+      withMultiTargetPing(
+        StandardDiscoveryNetworkFactory.createDevices(config, onDevice),
+      ),
+  }
+}
+
 export interface DiscoverDevicesConfig {
   allowPs4Devices: boolean
   deviceDiscoveryBroadcastAddress?: string
@@ -62,14 +110,13 @@ export async function discoverDevices({
     : [GLOBAL_BROADCAST_ADDRESS, ...getLocalSubnetBroadcastAddresses()]
 
   const discoveredById = new Map<string, IDiscoveredDevice>()
-  await Promise.all(
-    broadcastAddresses.map(async (deviceIp) => {
-      const discovery = new Discovery({ deviceIp, timeoutMillis })
-      for await (const device of discovery.discover()) {
-        discoveredById.set(device.id, device)
-      }
-    }),
+  const discovery = new Discovery(
+    { timeoutMillis },
+    createMultiTargetNetworkFactory(broadcastAddresses),
   )
+  for await (const device of discovery.discover()) {
+    discoveredById.set(device.id, device)
+  }
 
   const devices = [...discoveredById.values()]
   return allowPs4Devices
