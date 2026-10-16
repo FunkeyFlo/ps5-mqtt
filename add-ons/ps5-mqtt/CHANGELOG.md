@@ -1,3 +1,8 @@
+## 1.7.5 - 2026-10-16
+
+## What’s changed
+- fix(server): stop discovery stacking message listeners on the shared UDP socket @andrew-codes (#693)
+
 ## 1.7.4 - 2026-10-08
 
 ## What’s changed
