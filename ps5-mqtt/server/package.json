@@ -28,7 +28,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
     "async-mqtt": "^2.6.3",
-    "body-parser": "^2.3.0",
+    "body-parser": "^2.4.0",
     "debug": "^4.4.3",
     "express": "^4.22.2",
     "lodash": "^4.18.1",
