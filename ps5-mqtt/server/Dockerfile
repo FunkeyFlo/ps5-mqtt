@@ -11,7 +11,7 @@ FROM alpine:3.21
 
 ENV LANG=C.UTF-8
 
-RUN apk add --no-cache nodejs npm
+RUN apk add --no-cache "nodejs>=22.23.4" npm
 
 RUN mkdir -p ~/.config/playactor
 

@@ -18,7 +18,7 @@
   ],
   "private": true,
   "engines": {
-    "node": "24.16.0"
+    "node": "24.22.1"
   },
   "scripts": {
     "build": "yarn workspaces foreach -A run build",
