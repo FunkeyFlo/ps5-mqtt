@@ -6,7 +6,7 @@ ARG BUILD_VERSION
 
 RUN apk add --no-cache --virtual .build-dependencies \
     make gcc g++ linux-headers udev git python3 && \
-    apk add --no-cache nodejs-current npm
+    apk add --no-cache "nodejs>=22.23.4" npm
 
 RUN npm i -g playactor
 RUN mkdir -p ~/.config/playactor
