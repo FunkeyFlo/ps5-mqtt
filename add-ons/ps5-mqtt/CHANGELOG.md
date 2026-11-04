@@ -1,3 +1,8 @@
+## 1.8.1 - 2026-11-04
+
+## What’s changed
+- fix: resolve high and critical dependabot alerts in lockfile @andrew-codes (#700)
+
 ## 1.8.0 - 2026-10-31
 
 ## What’s changed
