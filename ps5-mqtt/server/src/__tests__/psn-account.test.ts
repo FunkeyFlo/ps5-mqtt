@@ -393,6 +393,22 @@ describe("PsnAccount", () => {
           launchPlatform: "PS5",
         })
       })
+
+      test("keeps presence when a game title lacks format and launchPlatform", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            primaryPlatformInfo: { onlineStatus: "online", platform: "PS5" },
+            gameTitleInfoList: [
+              { npTitleId: "PPSA01521_00", titleName: "Horizon" },
+            ],
+          },
+        })
+
+        const account = await PsnAccount.updateAccount(baseAccount)
+
+        expect(account.presenceAvailable).toBe(true)
+        expect(account.presence).toMatchObject({ online: true, platform: "PS5" })
+      })
     })
   })
 })

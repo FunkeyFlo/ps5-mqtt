@@ -287,9 +287,9 @@ function getActivity(
       titleId: activeTitle.npTitleId,
       titleImage: activeTitle.npTitleIconUrl ?? activeTitle.conceptIconUrl,
       titleName: activeTitle.titleName,
-      platform: activeTitle.format.toUpperCase() as NormalizedDeviceType,
+      platform: activeTitle.format?.toUpperCase() as NormalizedDeviceType,
       launchPlatform:
-        activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
+        activeTitle.launchPlatform?.toUpperCase() as NormalizedDeviceType,
     }
   }
 
