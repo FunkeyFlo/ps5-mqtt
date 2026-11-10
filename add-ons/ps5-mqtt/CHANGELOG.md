@@ -1,3 +1,10 @@
+## 1.9.0 - 2026-11-10
+
+## What’s changed
+- feat(server): publish PSN account online status, last online and platform @andrew-codes (#705)
+- fix(server): keep PSN presence when game title fields are missing @andrew-codes (#707)
+- fix(server): retry PS5 standby on control session 403 and recheck after unconfirmed wake @andrew-codes (#706)
+
 ## 1.8.2 - 2026-11-10
 
 ## What’s changed
