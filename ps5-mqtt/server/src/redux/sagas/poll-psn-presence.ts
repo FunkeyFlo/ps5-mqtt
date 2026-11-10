@@ -8,21 +8,28 @@ import { Device } from "../types"
 const debugError = createErrorLogger()
 
 function* pollPsnPresence() {
-  const { checkAccountInterval }: Settings = yield getContext(SETTINGS)
+  const { checkAccountInterval, checkAccountIdleInterval }: Settings =
+    yield getContext(SETTINGS)
 
   while (true) {
+    let interval = checkAccountIdleInterval
+
     try {
       const devices: Device[] = yield select(getDeviceList)
 
-      // no need to check accounts if no devices are turned on
+      // Account presence comes from PSN's servers, so it is polled whether or
+      // not a console is awake. Activity matching is only useful while a
+      // console is awake, so only then poll at the faster interval.
       if (devices.some((d) => d.status === "AWAKE")) {
-        yield put(checkPsnPresence())
+        interval = checkAccountInterval
       }
 
-      yield delay(checkAccountInterval)
+      yield put(checkPsnPresence())
     } catch (e) {
       debugError(e)
     }
+
+    yield delay(interval)
   }
 }
 

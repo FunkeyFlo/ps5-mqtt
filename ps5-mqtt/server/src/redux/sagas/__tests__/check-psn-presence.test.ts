@@ -2,7 +2,7 @@ import lodash from "lodash"
 import { expectSaga } from "redux-saga-test-plan"
 
 import { PsnAccount } from "../../../psn-account"
-import { updateAccount } from "../../action-creators"
+import { psnPresenceUnavailable, updateAccount } from "../../action-creators"
 import { Account, State } from "../../types"
 import { checkPsnPresence } from "../check-psn-presence"
 
@@ -22,6 +22,51 @@ describe("Check PSN Presence saga", () => {
     await expectSaga(checkPsnPresence)
       .withState(<State>{ accounts: { "0": mockAccount }, devices: {} })
       .put(updateAccount(mockAccount))
+      .run()
+  })
+
+  test("one account failing neither stops other accounts nor reports it offline", async () => {
+    const failing = makeAccount({ accountId: "1", accountName: "Failing" })
+    const healthy = makeAccount({ accountId: "2", accountName: "Healthy" })
+    const healthyUpdated = makeAccount({
+      accountId: "2",
+      accountName: "Healthy",
+      presenceAvailable: true,
+    })
+    mockPsnUpdateAccount.mockImplementation(async (account) => {
+      if (account.accountId === "1") {
+        throw new Error("token refresh failed")
+      }
+      return healthyUpdated
+    })
+
+    await expectSaga(checkPsnPresence)
+      .withState(<State>{
+        accounts: { "1": failing, "2": healthy },
+        devices: {},
+      })
+      .put(psnPresenceUnavailable("1"))
+      .put(updateAccount(healthyUpdated))
+      .run()
+  })
+
+  test("a failing account listed last does not undo earlier accounts", async () => {
+    const healthy = makeAccount({ accountId: "1", presenceAvailable: true })
+    const failing = makeAccount({ accountId: "2" })
+    mockPsnUpdateAccount.mockImplementation(async (account) => {
+      if (account.accountId === "2") {
+        throw new Error("boom")
+      }
+      return healthy
+    })
+
+    await expectSaga(checkPsnPresence)
+      .withState(<State>{
+        accounts: { "1": healthy, "2": failing },
+        devices: {},
+      })
+      .put(updateAccount(healthy))
+      .put(psnPresenceUnavailable("2"))
       .run()
   })
 })

@@ -20,6 +20,7 @@ psn_accounts:                       # [optional] Add PSN accounts to match onlin
     preferred_ps4: 60E899D600B0     # ID of the PS4 that will be preferred when activity can be matched to multiple PS4's
 
 account_check_interval: 5000        # Recommended interval for checking account state (don't go lower than 3000!)
+account_idle_check_interval: 60000  # Interval for checking account state while none of your consoles is awake
 ```
 
 ### `mqtt` _optional_
@@ -56,6 +57,16 @@ Value in miliseconds that lets you change the frequency of checking the online s
 
 _Be carefult! the PSN API's have a rate limit of 300 requests per 15 minutes. So don't go lower than 3000ms!_
 
+This interval is used while at least one of your consoles is awake. While none are awake, `account_idle_check_interval` is used instead.
+
+### `account_idle_check_interval`
+
+Value in miliseconds that lets you change the frequency of checking the online status of a PSN account while none of your consoles is awake (default: `60000`).
+
+Account presence is retrieved from PSN's servers, not from your console, so it keeps updating when your console is in rest mode or switched off.
+
+_The rate limit described under `account_check_interval` applies here too, per account._
+
 ### `include_ps4_devices` _optional_
 
 If enabled (`true`) the add-on will also discover / allow the registration of Playstation 4 devices.
@@ -82,6 +93,21 @@ _NOTE 1: The add-on does a best effort match to map PSN account activity to a de
 _NOTE 2: The NPSSO token itself expires after two months, but the add-on only needs it to bootstrap an account. Once authenticated, the underlying PSN access/refresh tokens are persisted to disk (see [`PSN_AUTH_STORE_DIR`](#psn_auth_store_dir-optional) below) and automatically refreshed on every restart, so in practice you should only need to provide a fresh NPSSO the first time, or after the add-on has been powered off for more than ~60 days (long enough for the persisted refresh token to expire). If both the persisted tokens and the configured NPSSO have expired, the add-on logs a clear message asking you to generate a new NPSSO instead of crashing — device discovery and control keep working regardless._
 
 _NOTE 3: You don't have to use a `!secret` for the `npsso` token. But it is highly advised as it's basically a password._
+
+### Account presence entities
+
+For every PSN account in `psn_accounts` the add-on creates a Home Assistant device named `PSN <account>` with three entities (e.g. for `MyPsnUser`):
+
+| Entity                               | Meaning                                                                                         |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `binary_sensor.psn_mypsnuser_online` | Whether PSN reports the account as online.                                                      |
+| `sensor.psn_mypsnuser_last_online`   | Timestamp PSN reports for when the account was last online. Unknown when PSN doesn't supply it. |
+| `sensor.psn_mypsnuser_platform`      | Platform the account is currently online on (e.g. `PS5`). Unknown while the account is offline. |
+
+These come from PSN's servers, not from your console, so they are independent of console availability and power state and are polled even when no console is awake (see `account_check_interval` and `account_idle_check_interval`).
+
+- A failed PSN request (network, PSN outage, expired tokens) makes the entities **unavailable**; it never turns the account "off". The last known values return once a poll succeeds again.
+- The values are exactly what PSN reports. If the account has set itself to "Appear Offline", or isn't signed in to PSN anywhere (a console in rest mode may not keep its user signed in), PSN reports it as offline.
 
 ### `PSN_AUTH_STORE_DIR` _optional_, _advanced_, _environment variable only_
 

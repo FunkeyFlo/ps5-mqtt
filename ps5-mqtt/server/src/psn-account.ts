@@ -30,6 +30,23 @@ export namespace PsnAccount {
   }
 
   /**
+   * What PSN last reported about the account itself, independent of any
+   * console the add-on tracks locally.
+   */
+  export interface AccountPresence {
+    online: boolean
+
+    /** ISO timestamp, or null when PSN did not supply a usable one. */
+    lastOnline: string | null
+
+    /** Platform PSN reports for the account, e.g. "PS5", or null when absent. */
+    platform: string | null
+
+    /** Epoch millis of the successful poll this presence came from. */
+    polledAt: number
+  }
+
+  /**
    * Bootstraps a PSN account on app startup. Prefers previously persisted
    * OAuth tokens for this NPSSO (refreshing them if needed) so a still-valid
    * refresh token chain survives add-on restarts. Only falls back to a full
@@ -82,10 +99,7 @@ export namespace PsnAccount {
       authInfo,
     }
 
-    return {
-      ...refreshedAccount,
-      activity: await getAccountActivity(refreshedAccount),
-    }
+    return withPolledPresence(refreshedAccount)
   }
 }
 
@@ -96,6 +110,18 @@ export interface PsnAccount {
   npsso: string
   authInfo: PsnAccountAuthenticationInfo
   activity?: PsnAccount.AccountActivity
+
+  /**
+   * Last successfully polled account presence. Kept (not cleared) when a
+   * later poll fails so the last known values stay available as stale data.
+   */
+  presence?: PsnAccount.AccountPresence
+
+  /**
+   * Whether the most recent presence poll succeeded. false means the account's
+   * status is unknown, which is not the same as the account being offline.
+   */
+  presenceAvailable?: boolean
 }
 
 type NormalizedDeviceType = "PS4" | "PS5"
@@ -108,28 +134,32 @@ export interface PsnAccountAuthenticationInfo {
   accessTokenExpiration: number
 }
 
+// Every field is treated as optional: PSN omits fields depending on privacy
+// settings, platform and whether the account is currently online.
 interface BasicPresenceResponse {
-  basicPresence: {
-    availability: "unavailable" | "availableToPlay"
-    lastAvailableDate: string
-    primaryPlatformInfo: {
-      onlineStatus: "offline"
-      platform: "ps4" | "PS5"
-      lastOnlineDate: string
+  basicPresence?: {
+    availability?: "unavailable" | "availableToPlay"
+    lastAvailableDate?: string
+    primaryPlatformInfo?: {
+      onlineStatus?: "offline" | "online"
+      platform?: string
+      lastOnlineDate?: string
     }
-    lastOnlineDate: string
-    onlineStatus: "offline" | "online"
-    platform: "ps4" | "PS5"
-    gameTitleInfoList: {
+    lastOnlineDate?: string
+    onlineStatus?: "offline" | "online"
+    platform?: string
+    gameTitleInfoList?: {
       format: "ps4" | "PS5"
       launchPlatform: "ps4" | "PS5"
-      npTitleIconUrl: string
-      conceptIconUrl: string
+      npTitleIconUrl?: string
+      conceptIconUrl?: string
       npTitleId: string
       titleName: string
     }[]
   }
 }
+
+const PRESENCE_REQUEST_TIMEOUT_MS = 15_000
 
 async function getAccount(
   npsso: string,
@@ -155,10 +185,7 @@ async function getAccount(
     authInfo,
   }
 
-  return {
-    ...account,
-    activity: await getAccountActivity(account),
-  }
+  return withPolledPresence(account)
 }
 
 async function getAccountFromStoredAuthInfo(
@@ -187,16 +214,36 @@ async function getAccountFromStoredAuthInfo(
     authInfo,
   }
 
+  return withPolledPresence(account)
+}
+
+async function withPolledPresence(account: PsnAccount): Promise<PsnAccount> {
+  const { activity, presence } = await pollAccountPresence(account)
+
   return {
     ...account,
-    activity: await getAccountActivity(account),
+    activity,
+    presence: presence ?? account.presence,
+    presenceAvailable: presence !== undefined,
   }
 }
 
-async function getAccountActivity({
+/**
+ * One request to PSN's cloud presence API supplies the activity, online
+ * status, last-online date and platform, so none of it depends on the local
+ * console being reachable or awake.
+ *
+ * presence is undefined whenever PSN did not give a trustworthy answer (network
+ * error, HTTP error, malformed body or no online status). Callers must treat
+ * that as "unknown", never as "offline".
+ */
+async function pollAccountPresence({
   accountId,
   authInfo,
-}: PsnAccount): Promise<PsnAccount.AccountActivity | undefined> {
+}: PsnAccount): Promise<{
+  activity: PsnAccount.AccountActivity | undefined
+  presence: PsnAccount.AccountPresence | undefined
+}> {
   try {
     const response = await fetch(
       `https://m.np.playstation.com/api/` +
@@ -206,6 +253,7 @@ async function getAccountActivity({
         headers: {
           Authorization: "Bearer " + authInfo.accessToken,
         },
+        signal: AbortSignal.timeout(PRESENCE_REQUEST_TIMEOUT_MS),
       },
     )
 
@@ -213,27 +261,76 @@ async function getAccountActivity({
       debug(
         `Unable to retrieve PSN information. API response: "${response.status}:${response.statusText}"`,
       )
-    } else {
-      const { basicPresence } = (await response.json()) as BasicPresenceResponse
+      return { activity: undefined, presence: undefined }
+    }
 
-      if (basicPresence?.gameTitleInfoList?.length > 0) {
-        const [activeTitle] = basicPresence.gameTitleInfoList
+    const { basicPresence } = (await response.json()) as BasicPresenceResponse
 
-        return {
-          titleId: activeTitle.npTitleId,
-          titleImage: activeTitle.npTitleIconUrl ?? activeTitle.conceptIconUrl,
-          titleName: activeTitle.titleName,
-          platform: activeTitle.format.toUpperCase() as NormalizedDeviceType,
-          launchPlatform:
-            activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
-        }
-      }
+    return {
+      activity: getActivity(basicPresence),
+      presence: getPresence(basicPresence),
     }
   } catch (e) {
     logError(e)
   }
 
+  return { activity: undefined, presence: undefined }
+}
+
+function getActivity(
+  basicPresence: BasicPresenceResponse["basicPresence"],
+): PsnAccount.AccountActivity | undefined {
+  if (basicPresence?.gameTitleInfoList?.length > 0) {
+    const [activeTitle] = basicPresence.gameTitleInfoList
+
+    return {
+      titleId: activeTitle.npTitleId,
+      titleImage: activeTitle.npTitleIconUrl ?? activeTitle.conceptIconUrl,
+      titleName: activeTitle.titleName,
+      platform: activeTitle.format.toUpperCase() as NormalizedDeviceType,
+      launchPlatform:
+        activeTitle.launchPlatform.toUpperCase() as NormalizedDeviceType,
+    }
+  }
+
   return undefined
+}
+
+function getPresence(
+  basicPresence: BasicPresenceResponse["basicPresence"],
+): PsnAccount.AccountPresence | undefined {
+  if (basicPresence === undefined || basicPresence === null) {
+    return undefined
+  }
+
+  const onlineStatus =
+    basicPresence.primaryPlatformInfo?.onlineStatus ??
+    basicPresence.onlineStatus
+
+  // without an explicit status we cannot tell offline from "not supplied"
+  if (onlineStatus !== "online" && onlineStatus !== "offline") {
+    return undefined
+  }
+
+  const lastOnlineDate =
+    basicPresence.primaryPlatformInfo?.lastOnlineDate ??
+    basicPresence.lastOnlineDate
+  const platform =
+    basicPresence.primaryPlatformInfo?.platform ?? basicPresence.platform
+
+  return {
+    online: onlineStatus === "online",
+    lastOnline:
+      typeof lastOnlineDate === "string" &&
+      !Number.isNaN(Date.parse(lastOnlineDate))
+        ? lastOnlineDate
+        : null,
+    platform:
+      typeof platform === "string" && platform.length > 0
+        ? platform.toUpperCase()
+        : null,
+    polledAt: Date.now(),
+  }
 }
 
 async function getRefreshedAccountAuthInfo({

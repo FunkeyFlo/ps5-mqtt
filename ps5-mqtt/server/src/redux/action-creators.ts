@@ -14,6 +14,8 @@ import type {
   PollPsnPresenceAction,
   UpdateAccountAction,
   PersistProvisionalPsnTokensAction,
+  RegisterPsnAccountAction,
+  PsnPresenceUnavailableAction,
   Account,
 } from "./types"
 import type { PsnAccountAuthenticationInfo } from "../psn-account"
@@ -81,6 +83,18 @@ const updateAccount = (account: Account): UpdateAccountAction => ({
   payload: account,
 })
 
+const registerPsnAccount = (account: Account): RegisterPsnAccountAction => ({
+  type: "REGISTER_PSN_ACCOUNT",
+  payload: account,
+})
+
+const psnPresenceUnavailable = (
+  accountId: string,
+): PsnPresenceUnavailableAction => ({
+  type: "PSN_PRESENCE_UNAVAILABLE",
+  payload: { accountId },
+})
+
 const persistProvisionalPsnTokens = (
   npsso: string,
   authInfo: PsnAccountAuthenticationInfo,
@@ -103,5 +117,7 @@ export {
   checkPsnPresence,
   pollPsnPresence,
   updateAccount,
+  registerPsnAccount,
+  psnPresenceUnavailable,
   persistProvisionalPsnTokens,
 }

@@ -26,6 +26,7 @@ export interface AppConfig {
   psn_accounts: AppConfig.PsnAccountInfo[]
 
   account_check_interval: number
+  account_idle_check_interval?: number
 
   static_devices?: Device[]
 
@@ -105,6 +106,7 @@ function getEnvConfig(): Partial<AppConfig> {
     DEVICE_CHECK_INTERVAL,
     DEVICE_DISCOVERY_INTERVAL,
     ACCOUNT_CHECK_INTERVAL,
+    ACCOUNT_IDLE_CHECK_INTERVAL,
 
     PSN_ACCOUNTS,
 
@@ -128,6 +130,9 @@ function getEnvConfig(): Partial<AppConfig> {
       : undefined,
     account_check_interval: ACCOUNT_CHECK_INTERVAL
       ? parseInt(ACCOUNT_CHECK_INTERVAL, 10)
+      : undefined,
+    account_idle_check_interval: ACCOUNT_IDLE_CHECK_INTERVAL
+      ? parseInt(ACCOUNT_IDLE_CHECK_INTERVAL, 10)
       : undefined,
 
     psn_accounts: PSN_ACCOUNTS ? JSON.parse(PSN_ACCOUNTS) : undefined,

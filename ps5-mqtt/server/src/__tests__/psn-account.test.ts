@@ -13,9 +13,7 @@ const mockedExchangeCodeForAccessToken = jest.mocked(
 const mockedExchangeRefreshTokenForAuthTokens = jest.mocked(
   psnApi.exchangeRefreshTokenForAuthTokens,
 )
-const mockedGetProfileFromUserName = jest.mocked(
-  psnApi.getProfileFromUserName,
-)
+const mockedGetProfileFromUserName = jest.mocked(psnApi.getProfileFromUserName)
 
 const mockedFindByNpsso = jest.mocked(PsnAuthStore.findByNpsso)
 
@@ -155,9 +153,7 @@ describe("PsnAccount", () => {
         },
         updatedAt: "2024-01-01",
       })
-      mockedExchangeNpssoForCode.mockRejectedValue(
-        new Error("NPSSO expired"),
-      )
+      mockedExchangeNpssoForCode.mockRejectedValue(new Error("NPSSO expired"))
 
       await expect(
         PsnAccount.exchangeNpssoForPsnAccount(npsso, undefined, dispatch),
@@ -200,6 +196,203 @@ describe("PsnAccount", () => {
         "current-refresh-token",
       )
       expect(account.authInfo.accessToken).toBe("fresh-access-token")
+    })
+
+    describe("account presence", () => {
+      const mockPresenceResponse = (body: unknown, status = 200) => {
+        global.fetch = jest.fn().mockResolvedValue({
+          status,
+          statusText: "",
+          json: async () => body,
+        }) as unknown as typeof fetch
+      }
+
+      test("reports an online account with its platform and last-online date", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            availability: "availableToPlay",
+            primaryPlatformInfo: {
+              onlineStatus: "online",
+              platform: "PS5",
+              lastOnlineDate: "2024-05-01T10:00:00.000Z",
+            },
+          },
+        })
+
+        const account = await PsnAccount.updateAccount(baseAccount)
+
+        expect(account.presenceAvailable).toBe(true)
+        expect(account.presence).toMatchObject({
+          online: true,
+          platform: "PS5",
+          lastOnline: "2024-05-01T10:00:00.000Z",
+        })
+      })
+
+      test("reports an offline account as offline (not unavailable)", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            availability: "unavailable",
+            primaryPlatformInfo: {
+              onlineStatus: "offline",
+              platform: "ps4",
+              lastOnlineDate: "2024-05-01T10:00:00.000Z",
+            },
+          },
+        })
+
+        const account = await PsnAccount.updateAccount(baseAccount)
+
+        expect(account.presenceAvailable).toBe(true)
+        expect(account.presence).toMatchObject({
+          online: false,
+          platform: "PS4",
+        })
+      })
+
+      test("follows an online -> offline transition across polls", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            primaryPlatformInfo: { onlineStatus: "online", platform: "PS5" },
+          },
+        })
+        const online = await PsnAccount.updateAccount(baseAccount)
+
+        mockPresenceResponse({
+          basicPresence: {
+            primaryPlatformInfo: { onlineStatus: "offline", platform: "PS5" },
+          },
+        })
+        const offline = await PsnAccount.updateAccount(online)
+
+        expect(online.presence?.online).toBe(true)
+        expect(offline.presence?.online).toBe(false)
+        expect(offline.presenceAvailable).toBe(true)
+      })
+
+      test("falls back to the top-level presence fields", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            onlineStatus: "online",
+            platform: "PS5",
+            lastOnlineDate: "2024-05-01T10:00:00.000Z",
+          },
+        })
+
+        const account = await PsnAccount.updateAccount(baseAccount)
+
+        expect(account.presence).toMatchObject({
+          online: true,
+          platform: "PS5",
+          lastOnline: "2024-05-01T10:00:00.000Z",
+        })
+      })
+
+      test("tolerates absent platform and last-online fields", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            primaryPlatformInfo: { onlineStatus: "offline" },
+          },
+        })
+
+        const account = await PsnAccount.updateAccount(baseAccount)
+
+        expect(account.presenceAvailable).toBe(true)
+        expect(account.presence).toMatchObject({
+          online: false,
+          platform: null,
+          lastOnline: null,
+        })
+      })
+
+      test("ignores an unparseable last-online date", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            primaryPlatformInfo: {
+              onlineStatus: "offline",
+              lastOnlineDate: "not a date",
+            },
+          },
+        })
+
+        const account = await PsnAccount.updateAccount(baseAccount)
+
+        expect(account.presence?.lastOnline).toBeNull()
+      })
+
+      test.each([
+        ["an HTTP error", { status: 500, body: {} }],
+        ["a 403 (privacy restriction)", { status: 403, body: {} }],
+        [
+          "an error body without presence",
+          { status: 200, body: { error: {} } },
+        ],
+        [
+          "a presence without an online status",
+          { status: 200, body: { basicPresence: {} } },
+        ],
+      ])(
+        "marks presence unavailable, not offline, for %s",
+        async (_, { status, body }) => {
+          mockPresenceResponse(body, status)
+
+          const account = await PsnAccount.updateAccount(baseAccount)
+
+          expect(account.presenceAvailable).toBe(false)
+          expect(account.presence).toBeUndefined()
+        },
+      )
+
+      test("marks presence unavailable when the request itself fails", async () => {
+        global.fetch = jest
+          .fn()
+          .mockRejectedValue(
+            new Error("network down"),
+          ) as unknown as typeof fetch
+
+        const account = await PsnAccount.updateAccount(baseAccount)
+
+        expect(account.presenceAvailable).toBe(false)
+      })
+
+      test("keeps the last known presence as stale data after a failed poll", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            primaryPlatformInfo: { onlineStatus: "online", platform: "PS5" },
+          },
+        })
+        const online = await PsnAccount.updateAccount(baseAccount)
+
+        mockPresenceResponse({}, 503)
+        const failed = await PsnAccount.updateAccount(online)
+
+        expect(failed.presenceAvailable).toBe(false)
+        expect(failed.presence).toEqual(online.presence)
+      })
+
+      test("still derives console activity from the same response", async () => {
+        mockPresenceResponse({
+          basicPresence: {
+            primaryPlatformInfo: { onlineStatus: "online", platform: "PS5" },
+            gameTitleInfoList: [
+              {
+                npTitleId: "PPSA01521_00",
+                titleName: "Horizon",
+                format: "PS5",
+                launchPlatform: "PS5",
+                conceptIconUrl: "https://example.test/icon.png",
+              },
+            ],
+          },
+        })
+
+        const account = await PsnAccount.updateAccount(baseAccount)
+
+        expect(account.activity).toMatchObject({
+          titleId: "PPSA01521_00",
+          launchPlatform: "PS5",
+        })
+      })
     })
   })
 })

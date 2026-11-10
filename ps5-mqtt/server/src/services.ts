@@ -7,6 +7,8 @@ export interface Settings {
   checkDevicesInterval: number
   discoverDevicesInterval: number
   checkAccountInterval: number
+  // used instead of checkAccountInterval while no console is awake
+  checkAccountIdleInterval: number
 
   credentialStoragePath: string
   allowPs4Devices: boolean
