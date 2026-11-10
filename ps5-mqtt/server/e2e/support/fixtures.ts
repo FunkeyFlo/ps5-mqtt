@@ -17,15 +17,27 @@ export interface Invocation {
 /**
  * Configure the response the fake `playactor` returns for a given subcommand.
  * Written before publishing the MQTT command that triggers the invocation.
+ * Pass an array to script one response per invocation, in call order (the
+ * last entry repeats).
  */
 export function setFixture(
   fixtureDir: string,
   subcommand: PlayactorSubcommand,
-  response: PlayactorResponse,
+  response: PlayactorResponse | PlayactorResponse[],
 ): void {
+  const withDefaults = (entry: PlayactorResponse) => ({
+    exitCode: 0,
+    stdout: "",
+    stderr: "",
+    ...entry,
+  })
   fs.writeFileSync(
     path.join(fixtureDir, `${subcommand}.json`),
-    JSON.stringify({ exitCode: 0, stdout: "", stderr: "", ...response }),
+    JSON.stringify(
+      Array.isArray(response)
+        ? response.map(withDefaults)
+        : withDefaults(response),
+    ),
   )
 }
 
