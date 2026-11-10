@@ -22,19 +22,19 @@ function* pollPsnPresenceSaga() {
 }
 
 function* addDevicesSaga() {
-  yield takeLatest("REGISTER_DEVICE", sagas.registerDevice)
+  yield takeEvery("REGISTER_DEVICE", sagas.registerDevice)
 }
 
 function* turnOnSaga() {
-  yield takeLatest("CHANGE_POWER_MODE", sagas.turnOnDevice)
+  yield takeEvery("CHANGE_POWER_MODE", sagas.turnOnDevice)
 }
 
 function* turnOffSaga() {
-  yield takeLatest("CHANGE_POWER_MODE", sagas.turnOffDevice)
+  yield takeEvery("CHANGE_POWER_MODE", sagas.turnOffDevice)
 }
 
 function* updateHomeAssistantSaga() {
-  yield takeLatest("UPDATE_HOME_ASSISTANT", sagas.updateHomeAssistant)
+  yield takeEvery("UPDATE_HOME_ASSISTANT", sagas.updateHomeAssistant)
 }
 
 function* checkDevicesStateSaga() {
@@ -70,7 +70,7 @@ function* pollPs5StatesSaga() {
 }
 
 function* delayForTransitionSaga() {
-  yield takeLatest("TRANSITIONING", sagas.delayForTransition)
+  yield takeEvery("TRANSITIONING", sagas.delayForTransition)
 }
 
 function* saga() {

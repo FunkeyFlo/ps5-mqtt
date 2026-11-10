@@ -27,7 +27,7 @@ function* checkDevicesState() {
           device.transitioning,
           updatedDevice.status,
         )
-        break
+        continue
       }
 
       // only send updates if ps5 is truly changing states or when ps5 has become available

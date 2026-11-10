@@ -105,8 +105,12 @@ export async function discoverDevices({
   deviceDiscoveryBroadcastAddress,
   timeoutMillis,
 }: DiscoverDevicesConfig): Promise<IDiscoveredDevice[]> {
-  const broadcastAddresses = deviceDiscoveryBroadcastAddress
-    ? [deviceDiscoveryBroadcastAddress]
+  const configuredTargets = deviceDiscoveryBroadcastAddress
+    ?.split(",")
+    .map((addr) => addr.trim())
+    .filter(Boolean)
+  const broadcastAddresses = configuredTargets?.length
+    ? configuredTargets
     : [GLOBAL_BROADCAST_ADDRESS, ...getLocalSubnetBroadcastAddresses()]
 
   const discoveredById = new Map<string, IDiscoveredDevice>()
