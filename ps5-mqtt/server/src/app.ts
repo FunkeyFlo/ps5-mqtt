@@ -14,6 +14,7 @@ import reducer, {
   pollDiscovery,
   pollPsnPresence,
   registerDevice,
+  registerPsnAccount,
   saga,
   setPowerMode,
   updateAccount,
@@ -59,15 +60,15 @@ async function bootstrapPsnAccounts(
         accountInfo.username,
         dispatch,
       )
-      dispatch(
-        updateAccount({
-          ...account,
-          preferredDevices: {
-            ps4: accountInfo.preferred_ps4,
-            ps5: accountInfo.preferred_ps5,
-          },
-        }),
-      )
+      const trackedAccount = {
+        ...account,
+        preferredDevices: {
+          ps4: accountInfo.preferred_ps4,
+          ps5: accountInfo.preferred_ps5,
+        },
+      }
+      dispatch(registerPsnAccount(trackedAccount))
+      dispatch(updateAccount(trackedAccount))
       successCount += 1
     } catch (e) {
       logError(e)
@@ -99,6 +100,7 @@ export async function run() {
     // polling intervals
     checkDevicesInterval: appConfig.device_check_interval || 5000,
     checkAccountInterval: appConfig.account_check_interval || 5000,
+    checkAccountIdleInterval: appConfig.account_idle_check_interval || 60000,
     discoverDevicesInterval: appConfig.device_discovery_interval || 60000,
 
     credentialStoragePath:

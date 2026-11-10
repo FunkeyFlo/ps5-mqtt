@@ -124,4 +124,18 @@ describe("Configuration", () => {
       frontendPort: "62428",
     })
   })
+
+  test("reads the idle account check interval from the environment", () => {
+    process.env["CONFIG_PATH"] = "./dummy-file-path"
+    process.env["ACCOUNT_IDLE_CHECK_INTERVAL"] = "90000"
+
+    mockedExistsSync.mockReturnValue(true)
+    mockedReadFileSync.mockReturnValue(JSON.stringify({}))
+
+    try {
+      expect(getAppConfig().account_idle_check_interval).toBe(90000)
+    } finally {
+      delete process.env["ACCOUNT_IDLE_CHECK_INTERVAL"]
+    }
+  })
 })

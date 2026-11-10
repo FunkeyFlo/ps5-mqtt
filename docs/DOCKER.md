@@ -61,6 +61,7 @@ services:
       - DEVICE_CHECK_INTERVAL=5000
       - DEVICE_DISCOVERY_INTERVAL=60000
       - ACCOUNT_CHECK_INTERVAL=5000
+      - ACCOUNT_IDLE_CHECK_INTERVAL=60000
 
       - 'PSN_ACCOUNTS=[{"username": "MyPsnUser", "npsso":"npsso_value"}]'
       - PSN_AUTH_STORE_DIR=/config # [optional] where persisted PSN OAuth tokens are stored; defaults to ~/.config/ps5-mqtt, which won't survive the container being recreated unless you point it at a mounted volume like this
@@ -125,6 +126,7 @@ services:
   ],
 
   "account_check_interval": 5000,
+  "account_idle_check_interval": 60000,
 
   "credentialsStoragePath": "/config/credentials.json",
   "frontendPort": "8645"

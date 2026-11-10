@@ -60,6 +60,19 @@ function* persistPsnAccountSaga() {
   )
 }
 
+function* registerAccountSaga() {
+  yield takeEvery("REGISTER_PSN_ACCOUNT", sagas.registerAccount)
+}
+
+function* publishAccountPresenceSaga() {
+  // takeEvery: each account's publish is independent and must not cancel
+  // another account's in-flight publish
+  yield takeEvery(
+    ["UPDATE_PSN_ACCOUNT", "PSN_PRESENCE_UNAVAILABLE"],
+    sagas.publishAccountPresence,
+  )
+}
+
 function* pollPs5StatesSaga() {
   yield takeLatest("POLL_DEVICES", function* pollingRace() {
     yield race({
@@ -88,6 +101,8 @@ function* saga() {
       pollDisoverySaga,
       pollPsnPresenceSaga,
       updateAccountSaga,
+      registerAccountSaga,
+      publishAccountPresenceSaga,
       persistPsnAccountSaga,
     ].map((saga) => fork(saga)),
   )

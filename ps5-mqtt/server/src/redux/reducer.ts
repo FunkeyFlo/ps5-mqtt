@@ -39,6 +39,20 @@ const reducer = (state = defaultState, action: AnyAction) => {
         },
       })
     }
+
+    case "PSN_PRESENCE_UNAVAILABLE": {
+      const account = state.accounts[action.payload.accountId]
+      if (account === undefined) {
+        return state
+      }
+      return {
+        ...state,
+        accounts: {
+          ...state.accounts,
+          [account.accountId]: { ...account, presenceAvailable: false },
+        },
+      }
+    }
   }
 
   return state

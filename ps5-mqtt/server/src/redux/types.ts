@@ -105,6 +105,20 @@ export type PersistProvisionalPsnTokensAction = {
   }
 }
 
+// Dispatched once per successfully bootstrapped account so its presence
+// entities are announced to Home Assistant, independent of any console.
+export type RegisterPsnAccountAction = {
+  type: "REGISTER_PSN_ACCOUNT"
+  payload: Account
+}
+
+// Dispatched when the presence check for one account threw (e.g. its tokens
+// could not be refreshed), so its entities read as unavailable, not offline.
+export type PsnPresenceUnavailableAction = {
+  type: "PSN_PRESENCE_UNAVAILABLE"
+  payload: { accountId: string }
+}
+
 export type Dispatch = (action: AnyAction) => void
 
 export type AnyAction =
@@ -122,6 +136,8 @@ export type AnyAction =
   | CheckPsnPresenceAction
   | PollPsnPresenceAction
   | UpdateAccountAction
+  | RegisterPsnAccountAction
+  | PsnPresenceUnavailableAction
   | PersistProvisionalPsnTokensAction
 
 export type State = {

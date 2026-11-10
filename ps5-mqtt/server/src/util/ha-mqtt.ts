@@ -23,6 +23,16 @@ export namespace HaMqtt {
 
     export interface MqttSensorEntity extends MqttEntity {
       device_class?: string
+      value_template?: string
+      expire_after?: number
+    }
+
+    export interface MqttBinarySensorEntity extends MqttEntity {
+      device_class?: string
+      value_template?: string
+      payload_on?: string
+      payload_off?: string
+      expire_after?: number
     }
 
     interface MqttEntity {
@@ -32,9 +42,31 @@ export namespace HaMqtt {
       unique_id?: string
       icon?: string
       availability_topic?: string
+      payload_available?: string
+      payload_not_available?: string
       device?: MqttDevice
       enabled_by_default?: boolean
       json_attributes_topic?: string
+    }
+  }
+
+  export function getAccountStateTopic(accountId: string): string {
+    return `ps5-mqtt/account/${accountId}`
+  }
+
+  export function getAccountAvailabilityTopic(accountId: string): string {
+    return `${getAccountStateTopic(accountId)}/availability`
+  }
+
+  export function getMqttAccountDeviceConfig(account: {
+    accountId: string
+    accountName: string
+  }): Config.MqttDevice {
+    return {
+      manufacturer: "Sony",
+      model: "PlayStation Network account",
+      name: `PSN ${account.accountName}`,
+      identifiers: [`psn_account_${account.accountId}`],
     }
   }
 
