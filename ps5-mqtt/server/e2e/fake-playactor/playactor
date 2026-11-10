@@ -7,7 +7,9 @@
 // build -> child process -> stdout/exit-code parse path without a real PS5.
 //
 // Behavior is driven by files in PLAYACTOR_FIXTURE_DIR:
-//   - <subcommand>.json  -> { exitCode, stdout, stderr } returned for that call
+//   - <subcommand>.json  -> { exitCode, stdout, stderr } returned for that call,
+//                           or an array of them: the Nth invocation of the
+//                           subcommand gets the Nth entry (the last one repeats)
 //   - invocations.log    -> append-only JSON-lines record of every invocation,
 //                           so tests can assert the exact args playactor got.
 //
@@ -21,7 +23,19 @@ const argv = process.argv.slice(2)
 const subcommand = argv[0] || "unknown"
 const fixtureDir = process.env.PLAYACTOR_FIXTURE_DIR
 
+// Number of earlier invocations of this subcommand, read before recording this
+// one, so an array fixture can script a different response per attempt.
+let priorInvocations = 0
 if (fixtureDir) {
+  try {
+    priorInvocations = fs
+      .readFileSync(path.join(fixtureDir, "invocations.log"), "utf-8")
+      .split("\n")
+      .filter((line) => line && JSON.parse(line).subcommand === subcommand)
+      .length
+  } catch {
+    // No log yet -> first invocation.
+  }
   try {
     fs.appendFileSync(
       path.join(fixtureDir, "invocations.log"),
@@ -36,7 +50,11 @@ let response = { exitCode: 0, stdout: "", stderr: "" }
 if (fixtureDir) {
   const fixturePath = path.join(fixtureDir, `${subcommand}.json`)
   try {
-    response = { ...response, ...JSON.parse(fs.readFileSync(fixturePath, "utf-8")) }
+    const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf-8"))
+    const scripted = Array.isArray(fixture)
+      ? fixture[Math.min(priorInvocations, fixture.length - 1)]
+      : fixture
+    response = { ...response, ...scripted }
   } catch {
     // No fixture configured for this subcommand -> default empty success.
   }

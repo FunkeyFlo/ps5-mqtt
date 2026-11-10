@@ -4,6 +4,7 @@ import * as matchers from "redux-saga-test-plan/matchers"
 import type { PutEffect } from "redux-saga/effects"
 
 import type { PlayactorClient } from "../../../playactor/client"
+import { WakeUnconfirmedError } from "../../../playactor/client"
 import { PLAYACTOR_CLIENT } from "../../../services"
 import type { ChangePowerModeAction, Device, SwitchStatus } from "../../types"
 import { turnOnDevice } from "../turn-on-device"
@@ -54,6 +55,58 @@ describe("Turn On Device saga", () => {
     expect(putActions(effects.put).map((a) => a.type)).toEqual([
       "TRANSITIONING",
     ])
+  })
+
+  describe("when the wake exits non-zero without confirmation", () => {
+    const skipDelays = {
+      call(effect: { fn: { name: string } }, next: () => unknown) {
+        return effect.fn.name === "delayP" ? undefined : next()
+      },
+    }
+
+    test("reports AWAKE once a re-check finds the console awake", async () => {
+      const client = makeClient({
+        wake: jest
+          .fn<Promise<void>, [string]>()
+          .mockRejectedValue(new WakeUnconfirmedError(1)),
+        check: jest
+          .fn<Promise<Device>, [string]>()
+          .mockResolvedValueOnce(makeDevice({ status: "STANDBY" }))
+          .mockResolvedValueOnce(makeDevice({ status: "AWAKE" })),
+      })
+
+      const { effects } = await expectSaga(turnOnDevice, action("AWAKE"))
+        .provide([[matchers.getContext(PLAYACTOR_CLIENT), client], skipDelays])
+        .run()
+
+      expect(client.check).toHaveBeenCalledTimes(2)
+      const dispatched = putActions(effects.put)
+      expect(dispatched.map((a) => a.type)).toEqual([
+        "TRANSITIONING",
+        "UPDATE_HOME_ASSISTANT",
+      ])
+      expect(dispatched[1].payload).toMatchObject({ status: "AWAKE" })
+    })
+
+    test("never reports AWAKE when the console stays asleep", async () => {
+      const client = makeClient({
+        wake: jest
+          .fn<Promise<void>, [string]>()
+          .mockRejectedValue(new WakeUnconfirmedError(1)),
+        check: jest
+          .fn<Promise<Device>, [string]>()
+          .mockResolvedValue(makeDevice({ status: "STANDBY" })),
+      })
+
+      const { effects } = await expectSaga(turnOnDevice, action("AWAKE"))
+        .provide([[matchers.getContext(PLAYACTOR_CLIENT), client], skipDelays])
+        .run()
+
+      expect(client.check).toHaveBeenCalledTimes(3)
+      expect(putActions(effects.put).map((a) => a.type)).toEqual([
+        "TRANSITIONING",
+      ])
+    })
   })
 })
 

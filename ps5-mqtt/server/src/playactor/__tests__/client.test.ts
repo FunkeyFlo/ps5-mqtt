@@ -2,7 +2,12 @@ import lodash from "lodash"
 import sh from "shelljs"
 
 import type { Device } from "../../redux/types"
-import { createPlayactorClient } from "../client"
+import {
+  createPlayactorClient,
+  isControlSessionRejection,
+  summarizeFailure,
+  WakeUnconfirmedError,
+} from "../client"
 
 jest.mock("shelljs")
 
@@ -103,6 +108,15 @@ describe("PlayactorClient", () => {
 
       await expect(client.wake(IP)).rejects.toThrow(/exited with code 1/)
     })
+
+    // https://github.com/FunkeyFlo/ps5-mqtt/issues/701
+    // playactor sends WAKEUP before it waits for AWAKE, so a non-zero exit
+    // with no stderr is "not confirmed in time", not "never woken".
+    test("flags a timeout-kill as an unconfirmed wake rather than a failed one", async () => {
+      mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr: "" }))
+
+      await expect(client.wake(IP)).rejects.toBeInstanceOf(WakeUnconfirmedError)
+    })
   })
 
   describe("standby", () => {
@@ -150,6 +164,133 @@ describe("PlayactorClient", () => {
       mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr: "" }))
 
       await expect(client.standby(IP)).rejects.toThrow(/exited with code 1/)
+    })
+  })
+
+  // https://github.com/FunkeyFlo/ps5-mqtt/issues/701
+  // A faithful fake of the reported console: `/sess/init` answers, then
+  // `/sess/ctrl` is rejected with 403 / 80108bff on the first attempt (which
+  // playactor prints as "Registration error: 403: Forbidden: Other Error") and
+  // accepted on the next. The same stderr the user saw is replayed here.
+  describe("standby when the console rejects the control session", () => {
+    const CTRL_REJECTED = execResult({
+      code: 1,
+      stderr: "Registration error: 403: Forbidden: Other Error\n",
+    })
+    const retryingClient = createPlayactorClient({
+      credentialStoragePath: CREDENTIAL_PATH,
+      standbyRetryDelaysMs: [1, 1],
+    })
+
+    test("repeats the whole standby command and succeeds on the retry", async () => {
+      mockExec
+        .mockReturnValueOnce(CTRL_REJECTED)
+        .mockReturnValueOnce(execResult({ code: 0 }))
+
+      await expect(retryingClient.standby(IP)).resolves.toBeUndefined()
+
+      // Same full command each time: playactor re-discovers and opens a
+      // fresh session (fresh nonce) per run.
+      expect(mockExec).toHaveBeenCalledTimes(2)
+      expect(mockExec).toHaveBeenNthCalledWith(
+        1,
+        STANDBY_CMD,
+        execOptions(25000),
+      )
+      expect(mockExec).toHaveBeenNthCalledWith(
+        2,
+        STANDBY_CMD,
+        execOptions(25000),
+      )
+    })
+
+    test("gives up after the bounded number of attempts and surfaces the last error", async () => {
+      mockExec.mockReturnValue(CTRL_REJECTED)
+
+      await expect(retryingClient.standby(IP)).rejects.toBe(
+        "Registration error: 403: Forbidden: Other Error\n",
+      )
+      expect(mockExec).toHaveBeenCalledTimes(3)
+    })
+
+    test.each([
+      [
+        "a different 403 reason",
+        "Registration error: 403: Forbidden: Remote is already in use",
+      ],
+      ["a missing passcode", "PASSCODE_IS_NEEDED"],
+      ["an unreachable console", "Error: Could not find device"],
+    ])("does not retry %s", async (_name, stderr) => {
+      mockExec.mockReturnValue(execResult({ code: 1, stderr }))
+
+      await expect(retryingClient.standby(IP)).rejects.toBe(stderr)
+      expect(mockExec).toHaveBeenCalledTimes(1)
+    })
+
+    test("does not retry a shelljs timeout-kill", async () => {
+      mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr: "" }))
+
+      await expect(retryingClient.standby(IP)).rejects.toThrow(
+        /exited with code 1/,
+      )
+      expect(mockExec).toHaveBeenCalledTimes(1)
+    })
+
+    test("a wake issued while standby is pausing between attempts waits its turn", async () => {
+      mockExec
+        .mockReturnValueOnce(CTRL_REJECTED)
+        .mockReturnValue(execResult({ code: 0 }))
+
+      const standby = retryingClient.standby(IP)
+      const wake = retryingClient.wake(IP)
+      await Promise.all([standby, wake])
+
+      expect(
+        mockExec.mock.calls.map(([command]) => command.split(" ")[1]),
+      ).toEqual(["standby", "standby", "wake"])
+    })
+
+    test("a failed standby does not block the next power command", async () => {
+      mockExec
+        .mockReturnValueOnce(
+          execResult({ code: 1, stderr: "PASSCODE_IS_NEEDED" }),
+        )
+        .mockReturnValue(execResult({ code: 0 }))
+
+      await expect(retryingClient.standby(IP)).rejects.toBe(
+        "PASSCODE_IS_NEEDED",
+      )
+      await expect(retryingClient.wake(IP)).resolves.toBeUndefined()
+    })
+  })
+
+  describe("isControlSessionRejection", () => {
+    test("matches only the generic 403 rejection", () => {
+      expect(
+        isControlSessionRejection(
+          "Registration error: 403: Forbidden: Other Error",
+        ),
+      ).toBe(true)
+      expect(
+        isControlSessionRejection(
+          new Error("Registration error: 403: Forbidden: Other Error"),
+        ),
+      ).toBe(true)
+      expect(
+        isControlSessionRejection("Registration error: 403: Forbidden"),
+      ).toBe(false)
+      expect(isControlSessionRejection(undefined)).toBe(false)
+    })
+  })
+
+  describe("summarizeFailure", () => {
+    test("keeps one line, masks key-shaped hex strings and bounds the length", () => {
+      const key = "0123456789abcdef0123456789abcdef"
+      expect(
+        summarizeFailure(`failed for key ${key}\n    at stack frame`),
+      ).toBe("failed for key <redacted>")
+      expect(summarizeFailure("x".repeat(500))).toHaveLength(200)
+      expect(summarizeFailure("")).toBe("no output")
     })
   })
 

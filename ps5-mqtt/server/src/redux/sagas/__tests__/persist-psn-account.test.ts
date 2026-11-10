@@ -31,9 +31,7 @@ const account: Account = {
   preferredDevices: {},
 }
 
-function run(
-  action: UpdateAccountAction | PersistProvisionalPsnTokensAction,
-) {
+function run(action: UpdateAccountAction | PersistProvisionalPsnTokensAction) {
   return runSaga(
     { dispatch: () => {}, getState: () => undefined },
     persistPsnAccount,
