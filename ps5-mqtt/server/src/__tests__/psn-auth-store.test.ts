@@ -21,8 +21,7 @@ jest.mock("fs", () => ({
   },
 }))
 
-const mockedReadFile = (fs.promises as jest.Mocked<typeof fs.promises>)
-  .readFile
+const mockedReadFile = (fs.promises as jest.Mocked<typeof fs.promises>).readFile
 const mockedWriteFile = (fs.promises as jest.Mocked<typeof fs.promises>)
   .writeFile
 const mockedRename = (fs.promises as jest.Mocked<typeof fs.promises>).rename
@@ -192,9 +191,9 @@ describe("PsnAuthStore", () => {
         }),
       )
 
-      await expect(
-        PsnAuthStore.findByAccountId("account-1"),
-      ).resolves.toEqual(expect.objectContaining({ accountId: "account-1" }))
+      await expect(PsnAuthStore.findByAccountId("account-1")).resolves.toEqual(
+        expect.objectContaining({ accountId: "account-1" }),
+      )
       await expect(
         PsnAuthStore.findByAccountId("unknown"),
       ).resolves.toBeUndefined()

@@ -48,7 +48,9 @@ function* persistPsnAccount(
     // Once the accountId-keyed entry is known, drop the provisional
     // NPSSO-hash-keyed entry from the earlier PERSIST_PROVISIONAL_PSN_TOKENS
     // write, if any (a no-op if there wasn't one).
-    accountId !== undefined ? PsnAuthStore.resolveKey(undefined, npsso) : undefined,
+    accountId !== undefined
+      ? PsnAuthStore.resolveKey(undefined, npsso)
+      : undefined,
   )
 }
 
