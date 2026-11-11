@@ -28,8 +28,31 @@ describe("Check Devices State saga", () => {
     expect(putActions(effects.put)).toHaveLength(0)
   })
 
+  test("resets checkFailures when a device recovers with unchanged status after a transient failure", async () => {
+    const device = makeDevice({
+      status: "AWAKE",
+      available: true,
+      checkFailures: 1,
+    })
+    const client = makeClient({
+      check: jest.fn<Promise<Device>, [string]>().mockResolvedValue(device),
+    })
+
+    const { effects } = await expectSaga(checkDevicesState)
+      .withState(stateWith(device))
+      .provide([[matchers.getContext(PLAYACTOR_CLIENT), client]])
+      .run()
+
+    const dispatched = putActions(effects.put)
+    expect(dispatched.map((a) => a.type)).toEqual(["UPDATE_DEVICE"])
+    expect(dispatched[0].payload).toEqual({
+      id: "mock-id-1",
+      checkFailures: 0,
+    })
+  })
+
   test("updates HA when the device status changes", async () => {
-    const device = makeDevice({ status: "STANDBY" })
+    const device = makeDevice({ status: "STANDBY", checkFailures: 1 })
     const client = makeClient({
       check: jest
         .fn<Promise<Device>, [string]>()
@@ -46,6 +69,7 @@ describe("Check Devices State saga", () => {
     expect(dispatched[0].payload).toMatchObject({
       status: "AWAKE",
       available: true,
+      checkFailures: 0,
     })
   })
 
@@ -61,8 +85,45 @@ describe("Check Devices State saga", () => {
     expect(putActions(effects.put)).toHaveLength(0)
   })
 
-  test("marks the device unavailable when the check fails", async () => {
-    const device = makeDevice()
+  test("skips a transitioning device when check fails without marking it unavailable", async () => {
+    const device = makeDevice({ transitioning: true })
+    const client = makeClient({
+      check: jest
+        .fn<Promise<Device>, [string]>()
+        .mockRejectedValue(new Error("unreachable")),
+    })
+
+    const { effects } = await expectSaga(checkDevicesState)
+      .withState(stateWith(device))
+      .provide([[matchers.getContext(PLAYACTOR_CLIENT), client]])
+      .run()
+
+    expect(putActions(effects.put)).toHaveLength(0)
+  })
+
+  test("debounces the first check failure on an available device without marking HA unavailable", async () => {
+    const device = makeDevice({ available: true })
+    const client = makeClient({
+      check: jest
+        .fn<Promise<Device>, [string]>()
+        .mockRejectedValue(new Error("unreachable")),
+    })
+
+    const { effects } = await expectSaga(checkDevicesState)
+      .withState(stateWith(device))
+      .provide([[matchers.getContext(PLAYACTOR_CLIENT), client]])
+      .run()
+
+    const dispatched = putActions(effects.put)
+    expect(dispatched.map((a) => a.type)).toEqual(["UPDATE_DEVICE"])
+    expect(dispatched[0].payload).toEqual({
+      id: "mock-id-1",
+      checkFailures: 1,
+    })
+  })
+
+  test("marks the device unavailable when consecutive checks fail", async () => {
+    const device = makeDevice({ available: true, checkFailures: 1 })
     const client = makeClient({
       check: jest
         .fn<Promise<Device>, [string]>()
@@ -80,7 +141,28 @@ describe("Check Devices State saga", () => {
       status: "UNKNOWN",
       available: false,
       activity: undefined,
+      checkFailures: 2,
     })
+  })
+
+  test("does not re-dispatch UPDATE_HOME_ASSISTANT when the device is already unavailable", async () => {
+    const device = makeDevice({
+      status: "UNKNOWN",
+      available: false,
+      checkFailures: 2,
+    })
+    const client = makeClient({
+      check: jest
+        .fn<Promise<Device>, [string]>()
+        .mockRejectedValue(new Error("unreachable")),
+    })
+
+    const { effects } = await expectSaga(checkDevicesState)
+      .withState(stateWith(device))
+      .provide([[matchers.getContext(PLAYACTOR_CLIENT), client]])
+      .run()
+
+    expect(putActions(effects.put)).toHaveLength(0)
   })
 })
 

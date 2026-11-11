@@ -16,9 +16,26 @@ const reducer = (state = defaultState, action: AnyAction) => {
       })
     }
 
+    case "UPDATE_DEVICE": {
+      const device = state.devices[action.payload.id]
+      if (device === undefined) {
+        return state
+      }
+      return {
+        ...state,
+        devices: {
+          ...state.devices,
+          [action.payload.id]: { ...device, ...action.payload },
+        },
+      }
+    }
+
     case "UPDATE_HOME_ASSISTANT": {
       const newState = _.merge({}, state)
-      newState.devices[action.payload.id] = action.payload
+      newState.devices[action.payload.id] = {
+        ...action.payload,
+        transitioning: false,
+      }
       return newState
     }
 
