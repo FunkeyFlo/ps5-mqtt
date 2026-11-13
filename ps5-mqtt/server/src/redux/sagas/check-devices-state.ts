@@ -10,10 +10,11 @@ import type { Device } from "../types"
 const debug = createDebugger("@ha:ps5:checkDevicesState")
 const errorLogger = createErrorLogger()
 
-// A console waking out-of-band (e.g. via DualSense controller or HDMI-CEC) or
-// transitioning its network stack can drop a single UDP discovery probe for a
-// few seconds. Require two consecutive failed polls before marking a previously
-// available console offline in Home Assistant.
+// playactor re-pings every 5 seconds inside its 15-second check window, so
+// individual dropped packets are absorbed. However, brief Wi-Fi roams or
+// SoC/NIC transitions during power-state changes can cause the console to be
+// silent across a check window. Require two consecutive failed poll cycles
+// before marking a previously available console offline in Home Assistant.
 const MAX_TRANSIENT_CHECK_FAILURES = 1
 
 function* checkDevicesState() {
@@ -33,6 +34,9 @@ function* checkDevicesState() {
           device.transitioning,
           updatedDevice.status,
         )
+        if ((device.checkFailures ?? 0) > 0) {
+          yield put(updateDevice({ id: device.id, checkFailures: 0 }))
+        }
         continue
       }
 

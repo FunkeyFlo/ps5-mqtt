@@ -4,7 +4,6 @@ import {
   setTransitioning,
   updateAccount,
   updateDevice,
-  updateHomeAssistant,
 } from "../action-creators"
 import reducer from "../reducer"
 import type { Account, Device } from "../types"
@@ -49,22 +48,16 @@ describe("reducer: devices", () => {
     expect(state.devices["unknown-id"]).toBeUndefined()
   })
 
-  test("UPDATE_HOME_ASSISTANT clears transitioning flag on the updated device", () => {
-    let state = reducer(undefined, addDevice(makeDevice()))
+  test("TRANSITIONING action resets checkFailures to 0", () => {
+    let state = reducer(undefined, addDevice(makeDevice({ checkFailures: 1 })))
+    expect(state.devices["mock-id-1"].checkFailures).toBe(1)
+
     state = reducer(
       state,
       setTransitioning({ id: "mock-id-1", transitioning: true }),
     )
     expect(state.devices["mock-id-1"].transitioning).toBe(true)
-
-    state = reducer(
-      state,
-      updateHomeAssistant(
-        makeDevice({ status: "STANDBY", transitioning: true }),
-      ),
-    )
-    expect(state.devices["mock-id-1"].status).toBe("STANDBY")
-    expect(state.devices["mock-id-1"].transitioning).toBe(false)
+    expect(state.devices["mock-id-1"].checkFailures).toBe(0)
   })
 })
 
