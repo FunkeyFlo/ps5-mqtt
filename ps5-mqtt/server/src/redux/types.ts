@@ -16,6 +16,7 @@ export type Account = PsnAccount & {
 export type DeviceState = {
   status: SwitchStatus
   available: boolean
+  checkFailures?: number
 
   activity?: PsnAccount.AccountActivity & {
     activePlayers: string[]

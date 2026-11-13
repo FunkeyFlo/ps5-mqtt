@@ -10,6 +10,7 @@ import type {
   PollDiscoveryAction,
   AddDeviceAction,
   SetTransitioningAction,
+  UpdateDeviceAction,
   CheckPsnPresenceAction,
   PollPsnPresenceAction,
   UpdateAccountAction,
@@ -73,6 +74,13 @@ const pollPsnPresence = (): PollPsnPresenceAction => ({
   type: "POLL_PSN_PRESENCE",
 })
 
+const updateDevice = (
+  device: Partial<Device> & { id: string },
+): UpdateDeviceAction => ({
+  type: "UPDATE_DEVICE",
+  payload: device,
+})
+
 const updateHomeAssistant = (device: Device): UpdateHomeAssistantAction => ({
   type: "UPDATE_HOME_ASSISTANT",
   payload: device,
@@ -113,6 +121,7 @@ export {
   discoverDevices,
   pollDevices,
   pollDiscovery,
+  updateDevice,
   updateHomeAssistant,
   checkPsnPresence,
   pollPsnPresence,
