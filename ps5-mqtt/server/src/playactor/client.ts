@@ -30,6 +30,15 @@ const STANDBY_SHELLJS_TIMEOUT_MS = 25000
 
 const WAKE_SHELLJS_TIMEOUT_MS = 5000
 
+// `playactor check` gives up on its own after its discovery timeout. The
+// shelljs timeout must exceed it (plus node start-up of the shelljs helper
+// and of playactor): when shelljs fires first it kills only its helper, and
+// the still-running playactor is orphaned to PID 1 and never reaped. With an
+// unreachable console that was one zombie per poll (15s check + 5s interval).
+// https://github.com/FunkeyFlo/ps5-mqtt/issues/420
+const CHECK_DISCOVERY_TIMEOUT_MS = 15000
+const CHECK_SHELLJS_TIMEOUT_MS = CHECK_DISCOVERY_TIMEOUT_MS + 5000
+
 // https://github.com/FunkeyFlo/ps5-mqtt/issues/701
 // The console intermittently answers `/sie/ps5/rp/sess/init` and then rejects
 // `/sie/ps5/rp/sess/ctrl` with `403` and `rp-application-reason: 80108bff`
@@ -146,7 +155,8 @@ export function createPlayactorClient({
 
   const buildCheckCommand = (ip: string): string =>
     `playactor check --ip ${ip} --machine-friendly` +
-    ` --timeout 15000 --connect-timeout 10000 --no-open-urls --no-auth` +
+    ` --timeout ${CHECK_DISCOVERY_TIMEOUT_MS}` +
+    ` --connect-timeout 10000 --no-open-urls --no-auth` +
     ` -c ${credentialStoragePath}`
 
   // wake/standby share identical exec + error handling; only the sub-command
@@ -255,7 +265,7 @@ export function createPlayactorClient({
     async check(ip: string): Promise<Device> {
       const { code, stdout, stderr } = sh.exec(buildCheckCommand(ip), {
         silent: true,
-        timeout: 15000,
+        timeout: CHECK_SHELLJS_TIMEOUT_MS,
         env: PLAYACTOR_ENV,
       })
 

@@ -11,7 +11,10 @@ FROM alpine:3.21
 
 ENV LANG=C.UTF-8
 
-RUN apk add --no-cache "nodejs>=22.23.4" npm
+# tini runs as PID 1 so playactor processes orphaned by a shelljs timeout-kill
+# are reaped instead of piling up as zombies until pid_max is exhausted.
+# https://github.com/FunkeyFlo/ps5-mqtt/issues/420
+RUN apk add --no-cache "nodejs>=22.23.4" npm tini
 
 RUN mkdir -p ~/.config/playactor
 
@@ -30,4 +33,4 @@ RUN chmod a+x /app/ps5-mqtt/run.sh
 
 EXPOSE 8645
 
-ENTRYPOINT ["/app/ps5-mqtt/run.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/app/ps5-mqtt/run.sh"]

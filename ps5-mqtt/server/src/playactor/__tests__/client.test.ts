@@ -301,7 +301,7 @@ describe("PlayactorClient", () => {
       )
 
       await expect(client.check(IP)).resolves.toEqual(makeDevice())
-      expect(mockExec).toHaveBeenCalledWith(CHECK_CMD, execOptions(15000))
+      expect(mockExec).toHaveBeenCalledWith(CHECK_CMD, execOptions(20000))
     })
 
     test("throws an Error when exit code > 1 and stderr is present", async () => {
