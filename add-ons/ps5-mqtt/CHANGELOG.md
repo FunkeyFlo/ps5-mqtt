@@ -1,3 +1,8 @@
+## 1.9.2 - 2026-11-15
+
+## What’s changed
+- fix(server): reap orphaned playactor checks in the standalone image @piotr-dziubecki (#710)
+
 ## 1.9.0 - 2026-11-10
 
 ## What’s changed
