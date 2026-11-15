@@ -28,7 +28,17 @@ const STANDBY_DISCOVERY_TIMEOUT_MS = 10000
 const STANDBY_CONNECT_TIMEOUT_MS = 10000
 const STANDBY_SHELLJS_TIMEOUT_MS = 25000
 
-const WAKE_SHELLJS_TIMEOUT_MS = 5000
+// Same reasoning as for `check` below: the shelljs timeout must exceed
+// playactor's own, or shelljs kills only its helper and orphans playactor.
+// Within its budget playactor finds the console, sends WAKEUP and waits for
+// AWAKE; when that wait runs out it reports `Device didn't wake in time`
+// itself (see WakeUnconfirmedError).
+const WAKE_DISCOVERY_TIMEOUT_MS = 5000
+const WAKE_SHELLJS_TIMEOUT_MS = WAKE_DISCOVERY_TIMEOUT_MS + 5000
+
+// playactor's message when the WAKEUP packet went out but the console did not
+// report AWAKE within --timeout (Waker.deviceAwakened in playactor).
+const WAKE_NOT_CONFIRMED_STDERR = "Device didn't wake in time"
 
 // `playactor check` gives up on its own after its discovery timeout. The
 // shelljs timeout must exceed it (plus node start-up of the shelljs helper
@@ -95,10 +105,11 @@ export const summarizeFailure = (error: unknown): string => {
 }
 
 /**
- * Thrown by `wake` when playactor exits non-zero without writing to stderr.
- * `playactor wake` sends the WAKEUP packet first and only then waits for the
- * console to report AWAKE, bounded by the same 5s budget as the shelljs kill.
- * A console that takes longer than that to come up therefore looks like a
+ * Thrown by `wake` when the WAKEUP packet was sent but AWAKE was not seen in
+ * time: playactor either reported `Device didn't wake in time` itself or was
+ * killed by the shelljs timeout (non-zero exit, no stderr). `playactor wake`
+ * sends the WAKEUP packet first and only then waits for the console to report
+ * AWAKE, so a console that takes longer than that to come up looks like a
  * failure although it is waking. https://github.com/FunkeyFlo/ps5-mqtt/issues/701
  */
 export class WakeUnconfirmedError extends Error {
@@ -140,7 +151,8 @@ export function createPlayactorClient({
 
   const buildWakeCommand = (ip: string): string =>
     `playactor wake --ip ${ip}` +
-    ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
+    ` --timeout ${WAKE_DISCOVERY_TIMEOUT_MS}` +
+    ` --connect-timeout 5000 --no-open-urls --no-auth` +
     buildPassCodeArg(loginPasscode) +
     devicePs5Arg +
     ` -c ${credentialStoragePath}`
@@ -164,7 +176,7 @@ export function createPlayactorClient({
   const runPowerCommand = async (
     command: string,
     shelljsTimeoutMillis: number,
-    onNonZeroExit?: (code: number) => Error,
+    onNonZeroExit?: (code: number, stderr: string) => Error | undefined,
   ): Promise<void> => {
     const { code, stdout, stderr } = sh.exec(command, {
       silent: true,
@@ -173,7 +185,7 @@ export function createPlayactorClient({
     })
 
     if (stderr) {
-      throw stderr
+      throw (code !== 0 && onNonZeroExit?.(code, stderr)) || stderr
     }
 
     // A shelljs timeout-kill produces no stderr, so `code` is the only
@@ -183,7 +195,7 @@ export function createPlayactorClient({
     // https://github.com/FunkeyFlo/ps5-mqtt/issues/675
     if (code !== 0) {
       throw (
-        onNonZeroExit?.(code) ??
+        onNonZeroExit?.(code, stderr) ??
         new Error(
           `playactor exited with code ${code} without completing (it may ` +
             "have been killed after exceeding the timeout)",
@@ -253,7 +265,10 @@ export function createPlayactorClient({
         await runPowerCommand(
           buildWakeCommand(ip),
           WAKE_SHELLJS_TIMEOUT_MS,
-          (code) => new WakeUnconfirmedError(code),
+          (code, stderr) =>
+            !stderr || stderr.includes(WAKE_NOT_CONFIRMED_STDERR)
+              ? new WakeUnconfirmedError(code)
+              : undefined,
         )
       })
     },
