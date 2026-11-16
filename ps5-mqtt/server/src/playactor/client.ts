@@ -13,8 +13,9 @@ export interface PlayactorClientSettings {
   allowPs4Devices?: boolean
   /**
    * Pauses between standby attempts when the console rejects the Remote Play
-   * control session (see `isControlSessionRejection`). One entry per retry, so
-   * the default allows three attempts in total. Overridable for tests.
+   * control session (see `isControlSessionRejection`) or playactor is killed
+   * by the shelljs timeout (see `PlayactorKilledError`). One entry per retry,
+   * so the default allows three attempts in total. Overridable for tests.
    */
   standbyRetryDelaysMs?: readonly number[]
 }
@@ -26,7 +27,10 @@ export interface PlayactorClientSettings {
 // isn't killed mid-flight. https://github.com/FunkeyFlo/ps5-mqtt/issues/675
 const STANDBY_DISCOVERY_TIMEOUT_MS = 10000
 const STANDBY_CONNECT_TIMEOUT_MS = 10000
-const STANDBY_SHELLJS_TIMEOUT_MS = 25000
+// playactor's own budget is discovery plus connect; shelljs gets 5 s more, the
+// same margin as for check and wake below, so playactor normally ends by itself.
+const STANDBY_SHELLJS_TIMEOUT_MS =
+  STANDBY_DISCOVERY_TIMEOUT_MS + STANDBY_CONNECT_TIMEOUT_MS + 5000
 
 // Same reasoning as for `check` below: the shelljs timeout must exceed
 // playactor's own, or shelljs kills only its helper and orphans playactor.
@@ -59,6 +63,11 @@ const CHECK_SHELLJS_TIMEOUT_MS = CHECK_DISCOVERY_TIMEOUT_MS + 5000
 // ctrl request) is repeated a bounded number of times with a growing pause.
 // Why the console rejects the session is not established; the pauses are a
 // guess at "long enough for a console that has just woken to settle".
+//
+// https://github.com/FunkeyFlo/ps5-mqtt/issues/712
+// The first standby after a wake also often stalls until the shelljs timeout
+// kills it, while sending the same command again straight away succeeds. That
+// kill is retried with the same pauses.
 const DEFAULT_STANDBY_RETRY_DELAYS_MS: readonly number[] = [10000, 30000]
 
 // Every playactor child gets the shim from ./preload.ts (built next to
@@ -120,6 +129,21 @@ export class WakeUnconfirmedError extends Error {
         "be waking; its state is reconciled by the next device check.",
     )
     this.name = "WakeUnconfirmedError"
+  }
+}
+
+/**
+ * Thrown when playactor exits non-zero without writing to stderr, which is how
+ * a shelljs timeout-kill shows up. Nothing is known about how far the command
+ * got, so only idempotent commands (standby) may be repeated on it.
+ */
+export class PlayactorKilledError extends Error {
+  constructor(code: number) {
+    super(
+      `playactor exited with code ${code} without completing (it may ` +
+        "have been killed after exceeding the timeout)",
+    )
+    this.name = "PlayactorKilledError"
   }
 }
 
@@ -194,13 +218,7 @@ export function createPlayactorClient({
     // successful one and gets optimistically reported to Home Assistant.
     // https://github.com/FunkeyFlo/ps5-mqtt/issues/675
     if (code !== 0) {
-      throw (
-        onNonZeroExit?.(code, stderr) ??
-        new Error(
-          `playactor exited with code ${code} without completing (it may ` +
-            "have been killed after exceeding the timeout)",
-        )
-      )
+      throw onNonZeroExit?.(code, stderr) ?? new PlayactorKilledError(code)
     }
 
     debug(stdout)
@@ -240,17 +258,19 @@ export function createPlayactorClient({
         return
       } catch (error) {
         const retryDelay = standbyRetryDelaysMs[attempt - 1]
-        const retryable =
-          isControlSessionRejection(error) && retryDelay !== undefined
+        const retryReason = isControlSessionRejection(error)
+          ? "The console rejected the control session"
+          : error instanceof PlayactorKilledError
+            ? "playactor was killed by the timeout"
+            : undefined
+        const willRetry = retryReason !== undefined && retryDelay !== undefined
         debug(
           `standby for ${ip} failed (attempt ${attempt}/${maxAttempts}, ` +
             `${Date.now() - startedAt}ms, ${describeWakeAge(ip)}): ` +
             summarizeFailure(error) +
-            (retryable
-              ? `. The console rejected the control session; retrying in ${retryDelay}ms`
-              : ""),
+            (willRetry ? `. ${retryReason}; retrying in ${retryDelay}ms` : ""),
         )
-        if (!retryable) {
+        if (!willRetry) {
           throw error
         }
         await delayMillis(retryDelay)
