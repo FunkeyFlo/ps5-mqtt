@@ -1,3 +1,9 @@
+## 1.9.3 - 2026-11-16
+
+## What’s changed
+- fix(server): let playactor wake time out on its own @piotr-dziubecki (#711)
+- fix(server): retry standby when playactor is killed by the timeout @andrew-codes (#713)
+
 ## 1.9.2 - 2026-11-15
 
 ## What’s changed
