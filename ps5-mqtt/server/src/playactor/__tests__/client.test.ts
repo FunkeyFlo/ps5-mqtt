@@ -58,7 +58,7 @@ describe("PlayactorClient", () => {
       mockExec.mockReturnValue(execResult({ code: 0, stdout: "ok" }))
 
       await expect(client.wake(IP)).resolves.toBeUndefined()
-      expect(mockExec).toHaveBeenCalledWith(WAKE_CMD, execOptions(5000))
+      expect(mockExec).toHaveBeenCalledWith(WAKE_CMD, execOptions(10000))
     })
 
     test("includes the --pass-code fragment when a passcode is configured", async () => {
@@ -75,7 +75,7 @@ describe("PlayactorClient", () => {
           ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
           ` --pass-code '1234'` +
           ` -c ${CREDENTIAL_PATH}`,
-        execOptions(5000),
+        execOptions(10000),
       )
     })
 
@@ -98,7 +98,7 @@ describe("PlayactorClient", () => {
         `playactor wake --ip ${IP}` +
           ` --timeout 5000 --connect-timeout 5000 --no-open-urls --no-auth` +
           ` --ps5 -c ${CREDENTIAL_PATH}`,
-        execOptions(5000),
+        execOptions(10000),
       )
     })
 
@@ -116,6 +116,30 @@ describe("PlayactorClient", () => {
       mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr: "" }))
 
       await expect(client.wake(IP)).rejects.toBeInstanceOf(WakeUnconfirmedError)
+    })
+
+    // The shelljs timeout now outlasts playactor's own, so a console that is
+    // slow to come up usually ends with playactor's own message, not a kill.
+    test("flags playactor's own wait timeout as an unconfirmed wake", async () => {
+      mockExec.mockReturnValue(
+        execResult({
+          code: 1,
+          stdout: "",
+          stderr:
+            "Error: Device didn't wake in time\n    at Waker.deviceAwakened",
+        }),
+      )
+
+      await expect(client.wake(IP)).rejects.toBeInstanceOf(WakeUnconfirmedError)
+    })
+
+    // No WAKEUP was sent when the console could not be found, so this stays
+    // a plain failure (message as printed by playactor 0.4.1).
+    test("throws the raw stderr for any other non-zero exit with stderr", async () => {
+      const stderr = `Error: Unable to locate device: device at ${IP}`
+      mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr }))
+
+      await expect(client.wake(IP)).rejects.toBe(stderr)
     })
   })
 
