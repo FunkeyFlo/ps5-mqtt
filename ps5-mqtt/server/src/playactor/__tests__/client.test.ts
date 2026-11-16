@@ -5,6 +5,7 @@ import type { Device } from "../../redux/types"
 import {
   createPlayactorClient,
   isControlSessionRejection,
+  PlayactorKilledError,
   summarizeFailure,
   WakeUnconfirmedError,
 } from "../client"
@@ -186,8 +187,14 @@ describe("PlayactorClient", () => {
     // it could not be reproduced against real PS5 hardware.
     test("rejects when killed by the shelljs timeout (no stderr, non-zero exit code)", async () => {
       mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr: "" }))
+      const fastClient = createPlayactorClient({
+        credentialStoragePath: CREDENTIAL_PATH,
+        standbyRetryDelaysMs: [],
+      })
 
-      await expect(client.standby(IP)).rejects.toThrow(/exited with code 1/)
+      await expect(fastClient.standby(IP)).rejects.toBeInstanceOf(
+        PlayactorKilledError,
+      )
     })
   })
 
@@ -251,13 +258,41 @@ describe("PlayactorClient", () => {
       expect(mockExec).toHaveBeenCalledTimes(1)
     })
 
-    test("does not retry a shelljs timeout-kill", async () => {
+    // https://github.com/FunkeyFlo/ps5-mqtt/issues/712
+    // The first standby after a wake stalls until shelljs kills it (non-zero
+    // exit, no stderr); sending the same command again succeeds.
+    test("repeats the whole standby command after a shelljs timeout-kill", async () => {
+      mockExec
+        .mockReturnValueOnce(execResult({ code: 1, stdout: "", stderr: "" }))
+        .mockReturnValueOnce(execResult({ code: 0 }))
+
+      await expect(retryingClient.standby(IP)).resolves.toBeUndefined()
+
+      expect(mockExec).toHaveBeenCalledTimes(2)
+      expect(mockExec).toHaveBeenNthCalledWith(
+        2,
+        STANDBY_CMD,
+        execOptions(25000),
+      )
+    })
+
+    test("gives up after repeated timeout-kills and surfaces the kill error", async () => {
       mockExec.mockReturnValue(execResult({ code: 1, stdout: "", stderr: "" }))
 
-      await expect(retryingClient.standby(IP)).rejects.toThrow(
-        /exited with code 1/,
+      await expect(retryingClient.standby(IP)).rejects.toBeInstanceOf(
+        PlayactorKilledError,
       )
-      expect(mockExec).toHaveBeenCalledTimes(1)
+      expect(mockExec).toHaveBeenCalledTimes(3)
+    })
+
+    test("retries a timeout-kill and a control session rejection in one run", async () => {
+      mockExec
+        .mockReturnValueOnce(execResult({ code: 1, stdout: "", stderr: "" }))
+        .mockReturnValueOnce(CTRL_REJECTED)
+        .mockReturnValueOnce(execResult({ code: 0 }))
+
+      await expect(retryingClient.standby(IP)).resolves.toBeUndefined()
+      expect(mockExec).toHaveBeenCalledTimes(3)
     })
 
     test("a wake issued while standby is pausing between attempts waits its turn", async () => {
