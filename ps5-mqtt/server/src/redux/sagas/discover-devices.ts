@@ -5,6 +5,13 @@ import { registerDevice } from "../action-creators"
 import { getDeviceRegistry } from "../selectors"
 import { Device } from "../types"
 
+function toNormalizedName(name: string): string {
+  return name
+    .replace(/[^a-zA-Z\d\s-_:]/g, "")
+    .replace(/[\s-]/g, "_")
+    .toLowerCase()
+}
+
 function* discoverDevices() {
   const { allowPs4Devices, deviceDiscoveryBroadcastAddress }: Settings =
     yield getContext(SETTINGS)
@@ -17,16 +24,31 @@ function* discoverDevices() {
 
   const trackedDevices = yield select(getDeviceRegistry)
   for (const device of discoveredDevices) {
-    if (trackedDevices[device.id] === undefined) {
+    const trackedDevice = trackedDevices[device.id]
+    if (trackedDevice === undefined) {
       yield put(
         registerDevice({
           ...device,
           available: true,
-          normalizedName: device.name
-            .replace(/[^a-zA-Z\d\s-_:]/g, "")
-            .replace(/[\s-]/g, "_")
-            .toLowerCase(),
+          normalizedName: toNormalizedName(device.name),
           activity: undefined,
+        }),
+      )
+      continue
+    }
+
+    // A console that was off can come back on a new address (new DHCP lease).
+    // Re-register so checks and power commands follow it; otherwise they keep
+    // dialling the stale IP and the device stays unavailable until a restart.
+    if (trackedDevice.address.address !== device.address.address) {
+      yield put(
+        registerDevice({
+          ...trackedDevice,
+          address: device.address,
+          name: device.name,
+          normalizedName: toNormalizedName(device.name),
+          systemVersion: device.systemVersion,
+          type: device.type,
         }),
       )
     }
