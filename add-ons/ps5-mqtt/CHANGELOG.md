@@ -1,3 +1,8 @@
+## 1.9.4 - 2026-11-27
+
+## What’s changed
+- fix(server): refresh a console's address when rediscovery finds it moved @cstosgale (#714)
+
 ## 1.9.3 - 2026-11-16
 
 ## What’s changed
